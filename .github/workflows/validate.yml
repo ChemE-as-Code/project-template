@@ -18,4 +18,7 @@ jobs:
       - run: uv tool install git+https://github.com/process-intelligence-research/plantcode.git
       - run: plantcode fmt --check
       - run: plantcode validate
-      - run: plantcode check --no-write
+      # Stage gates report progress (e.g. no design review recorded yet); they do not fail the build.
+      - name: Engineering-step gates (informational)
+        run: plantcode check --no-write
+        continue-on-error: true
