@@ -1,0 +1,14 @@
+name: validate
+on: [pull_request, push]
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      # While plantcode and pyDEXPI are private, the token needs read access to both.
+      - run: git config --global url."https://x-access-token:${{ secrets.PLANTCODE_TOKEN }}@github.com/".insteadOf "https://github.com/"
+      - run: uv tool install git+https://github.com/process-intelligence-research/plantcode.git
+      - run: plantcode fmt --check
+      - run: plantcode validate
+      - run: plantcode check --no-write
