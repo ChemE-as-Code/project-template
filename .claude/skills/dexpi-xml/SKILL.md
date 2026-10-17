@@ -113,7 +113,10 @@ of the reference P&ID and follow them.
   joined by a pipe have the same DN unless one item is a reducer (`plantcode.dn-mismatch`).
 - **Labels cache their text.** A `Core/Diagram.Text` holds a `TextTemplate` (fragments that name
   attributes) and the rendered `Text` string. When you change an attribute a label shows, update
-  the cached `Text` too (`plantcode.label-stale` finds the ones you missed).
+  the cached `Text` too (`plantcode.label-stale` finds the ones you missed). A label made of
+  literal text only (`DN = 25/50` on the reference's safety valve, the nozzle DN labels) follows
+  nothing: `plantcode.label-literal` reports it as info while it repeats the object's DN, a
+  physical quantity or a string, and warns once it contradicts them.
 
 ## Drawing an object
 
@@ -131,6 +134,50 @@ A pipe is drawn by a group representing the `Pipe` with a `Static` holding one
 `Core/Diagram.ConnectorLine`: `Source` and `Target` reference the two **PipingNodePosition**
 objects (not the nodes), `InnerPoints` lists the bends, `Stroke` the line style.
 
+## Writing the verbose parts: `plantcode copy` and `plantcode fragment`
+
+Most of a sheet's XML is drawing: a valve is ~60 lines of nodes, node positions and symbol.
+Do not type it, and do not write a templating script for it:
+
+- `plantcode copy ID --prefix NEWID [--tag T] [--offset DX,DY] [--into PARENT] [--print]`
+  duplicates an object with its parts and **everything that draws it** (symbol, nozzles, node
+  positions, labels, data table), renames every id (`CentrifugalPump1` -> `NEWID`,
+  `CentrifugalPump1_Drawing1` -> `NEWID_Drawing1`, `Nozzle1` -> `NEWID_Nozzle1`), sets the tag
+  (and `TagNamePrefix`/`SequenceNumber`/`Suffix`; for an instrument `--tag PICSA-4713.02` sets
+  category, letters and number, and the number in its sensor and actuator functions) and the
+  label texts that showed it, and moves
+  the drawing by the offset (sheet mm, Y down). An `EquipmentBarLabel` data table goes to a free
+  slot of the table band instead. It inserts the copy next to the original and prints the new
+  ids, the line ranges written and what was **not copied**: the pipes and segments at the
+  original's nozzles, an actuating system's valve reference. Connect those by hand.
+  `--print` shows the XML without writing. `--into` puts a copy into another parent (a valve
+  into another segment's `Items`, its drawing into that segment's drawing).
+- `plantcode fragment KIND --id ID [--sheet pid/<sheet>.xml] ...` prints a fragment with a
+  `CONCEPTUAL` and a `DRAWING` part, each after a comment saying where to paste it (and a
+  `SHAPE` part when the symbol is not in the catalogue yet). Pass `--sheet`: shape ids are then
+  looked up in the sheet's catalogue, pipe ends in its node positions, label texts in its data.
+
+  | kind | options | ids it writes |
+  |---|---|---|
+  | `valve` | `--class GlobeValve\|BallValve\|GateValve\|SwingCheckValve\|ButterflyValve --dn 80 --at X,Y [--rotation R] [--tag C3]` | `ID`, nodes `ID_N1` (inlet) `ID_N2` (outlet), positions `ID_N1_Position`, `ID_N2_Position` 2 mm either side |
+  | `tee` | `--dn 80 [--branch-dn 50] --at X,Y [--rotation R] [--branch up\|down\|left\|right]` | `ID`, `ID_N1` run in, `ID_N2` run out, `ID_N3` branch, positions 0.001 mm apart |
+  | `pipe` | `--from ITEM:NODE --to ITEM:NODE [--points x,y;x,y]` (the bends) | `ID`, its ConnectorLine between the two nodes' positions |
+  | `segment` | `--from ITEM:NODE --to ITEM:NODE [--like SEGMENT] [--number S2] [--dn 80]` | `ID` with empty `Connections`/`Items` to fill, `ID_Drawing` |
+  | `node` | `--dn 80 [--standard Din2448\|Iso6708\|none] [--at X,Y]` | `ID`, with `--at` `ID_Position` |
+  | `label` | `--for ID --attribute TagName [--at X,Y]` | `ID` (label class from the object: `ValveLabel`, `EquipmentTagNameLabel`, ...) |
+
+  `--rotation` is the flow direction: 0 left to right, 90 downwards, 180 right to left, 270
+  upwards (Y down). A tee's `--branch` is absolute (up, down, left, right on the sheet); it must
+  leave the run sideways, and without it the branch leaves on the left of the flow. Node
+  positions a fragment draws are named `<node id>_Position`; nodes already on the sheet have
+  other position ids (`PipingNodePosition8`), which only `--sheet` finds. Without `--sheet`,
+  `fragment` uses the one sheet holding the ids it refers to, and says so; still pass `--sheet`
+  in commands you write down.
+
+Hand edits remain for what is short: re-pointing a `References` (a pipe's `TargetNode`, a
+segment's ends, a ConnectorLine's `Target`), moving an existing `<Object>` block into another
+segment, deleting blocks, changing data. After pasting: `plantcode fmt` re-indents everything.
+
 ## Recipes
 
 Start every recipe with `plantcode show <id or tag>`: it prints the `file:start-end` of the
@@ -140,6 +187,9 @@ After every recipe: fmt, validate, `plantcode render --png --crop ...` around th
 `plantcode diff HEAD --list` to check the change list is what you meant (see Loop).
 
 ### Insert a valve into an existing pipe
+
+`plantcode fragment valve --id ... --class ... --dn ... --at X,Y --rotation R --sheet ...` gives
+the valve and its drawing; `plantcode fragment pipe` the new pipe.
 
 1. conceptual: add the valve with two `PipingNode`s to the segment's `Items`; split the pipe into
    two (old pipe now ends at valve node 1, a new pipe starts at valve node 2). If the old pipe was
@@ -151,7 +201,8 @@ After every recipe: fmt, validate, `plantcode render --png --crop ...` around th
 
 ### Insert a tee and a branch (split a segment)
 
-Copy from `snippets/tee-branch.xml` and `tee-branch-drawing.xml`.
+`plantcode fragment tee`, `segment` and `pipe` write the new objects and their drawings;
+`snippets/tee-branch.xml` and `tee-branch-drawing.xml` show the same in the reference.
 
 1. `plantcode show <segment id>` and pick the pipe to split and the point on its line.
 2. Split the segment at that pipe into **A** (from the old source to the tee) and **B** (from the
@@ -172,9 +223,81 @@ Copy from `snippets/tee-branch.xml` and `tee-branch-drawing.xml`.
    new one starts at the run-out position.
 5. `plantcode validate`: `plantcode.segment-ends` catches ends that disagree with their pipes.
 
+### Parallel / spare equipment (a standby pump)
+
+Example: a spare P4711B beside P4711 (suction line 47121, discharge 47122, both DN 80, flowing
+left to right at y 154).
+
+1. `plantcode render pid/P-01.xml --png --crop ...` and pick free space: here 30 mm below.
+   `plantcode copy P4711 --prefix Pump_P4711B --tag P4711B --offset 0,30`. Note what it says is
+   not copied: `Pipe1`/`PipingNetworkSegment1` at `Nozzle1` (suction) and `Pipe2`/
+   `PipingNetworkSegment2` at `Nozzle2` (discharge). The copy's nozzle nodes are
+   `Pump_P4711B_PipingNode2` (N1) and `Pump_P4711B_PipingNode3` (N2).
+2. **Suction tee** on the duty pump's suction pipe (the tee recipe below, with fragments):
+   `plantcode fragment tee --id Tee_47121_P4711B --dn 80 --at 66,154 --branch down --sheet pid/P-01.xml`.
+   CONCEPTUAL into `PipingNetworkSegment1`'s `Items` (it now ends at the tee); point `Pipe1`'s
+   and the segment's `TargetItem`/`TargetNode` at `Tee_47121_P4711B`/`Tee_47121_P4711B_N1`, and
+   `Pipe1`'s ConnectorLine `Target` at `#Tee_47121_P4711B_N1_Position`. DRAWING into
+   `PipingNetworkSegment1`'s drawing group.
+3. **Run on to the duty pump**: `fragment segment --id Seg_47121_S2 --from Tee_47121_P4711B:Tee_47121_P4711B_N2 --to Nozzle1:PipingNode2 --like PipingNetworkSegment1 --number S2 --sheet pid/P-01.xml`
+   into the system's `Segments` (drawing into the system's drawing group), and
+   `fragment pipe --id Pipe_47121_S2 --from Tee_47121_P4711B:Tee_47121_P4711B_N2 --to Nozzle1:PipingNode2 --sheet pid/P-01.xml`
+   into its `Connections` (drawing into its drawing group).
+4. **Branch to the spare**: `fragment segment` from the tee's `_N3` to
+   `Pump_P4711B_Nozzle1:Pump_P4711B_PipingNode2`, an isolation valve
+   `fragment valve --id Valve_P4711B_in --class GateValve --dn 80 --at 70,184 --sheet pid/P-01.xml` in its `Items`,
+   and two pipes: tee `_N3` -> valve `_N1` with `--points 66,184` (the bend), valve `_N2` ->
+   the nozzle node. Pass `--sheet pid/P-01.xml` to each: after pasting step 3, the tee and the
+   copied pump are on the sheet and their node positions are looked up there.
+5. **Discharge tee** on the duty pump's discharge pipe the same way (`--at 100,154 --branch down`
+   on `PipingNetworkSegment2`, a run segment on to the old target). The spare's branch flows
+   **into** the tee: a segment from `Pump_P4711B_Nozzle2:Pump_P4711B_PipingNode3` to the tee's
+   `_N3`, with a check valve (`--class SwingCheckValve`) and an isolation valve. It ends at the
+   tee's branch node and does not own the tee: only the segment that ends at its run-in node
+   does.
+6. Labels: `fragment label --id Label_C9 --for Valve_P4711B_check --attribute PipingComponentNumber --sheet pid/P-01.xml`.
+7. Remove an `Items` left empty, then the Loop. Expected: `plantcode.equipment-not-listed` for
+   P4711B until `lists-sync` adds it; the new segments go into the line list's `segments` if
+   their DN differs.
+
+### Bypass around a valve
+
+Two tees, four segments. Example: control valve C1 (`GlobeValve2`) on line 47123, which runs
+upwards at x 160 (`Pipe3` from `Nozzle4` to C1's inlet at y 121, `Pipe4` from C1's outlet at
+y 117 up to `Nozzle5`), all in `PipingNetworkSegment3`.
+
+1. `fragment tee --id Tee_C1_in --dn 80 --at 160,127 --rotation 270 --branch right --sheet pid/P-01.xml`
+   (upstream) and `--id Tee_C1_out ... --at 160,111` (downstream).
+2. The four segments, each tee owned by the segment that **ends** at its run-in node:
+
+   | segment | from | through | to | owns |
+   |---|---|---|---|---|
+   | S1 (`PipingNetworkSegment3`, kept) | old source | `Pipe3` | `Tee_C1_in_N1` | `Tee_C1_in` |
+   | S2 (`fragment segment --number S2 --like PipingNetworkSegment3 --sheet pid/P-01.xml`) | `Tee_C1_in_N2` | new pipe, C1, `Pipe4` | `Tee_C1_out_N1` | `Tee_C1_out`, C1 |
+   | S3 (new) | `Tee_C1_out_N2` | new pipe with `Pipe4`'s old bends | old target `Nozzle5` | |
+   | S4, the bypass (new) | `Tee_C1_in_N3` | pipe, bypass valve (`fragment valve --class GlobeValve --at 170,119 --rotation 270 --tag C3 --sheet pid/P-01.xml`), pipe | `Tee_C1_out_N3` | the bypass valve |
+
+3. Move C1's `<Object>` block and `Pipe4` into S2 (and C1's and `Pipe4`'s drawing groups into
+   S2's drawing); re-point `Pipe3`'s and S1's targets and `Pipe4`'s target at the tees, and their
+   ConnectorLines' `Target` at the tees' `_N1_Position`s; drop `Pipe4`'s `InnerPoints` (S3's
+   pipe takes the bends:
+   `fragment pipe --id Pipe_47123_S3 --from Tee_C1_out:Tee_C1_out_N2 --to Nozzle5:PipingNode8 --points '160,61;181,61' --sheet pid/P-01.xml`,
+   which takes `Nozzle5`'s real node position from the sheet). The bypass pipes bend at the
+   tees' height: `--points 170,127` and `--points 170,111`.
+4. Keep the ids of what you move: a moved object shows as `moved`/`modified` in
+   `plantcode diff --list`, a renamed one as removed plus added.
+5. The Loop. Isolation valves either side of C1 and an `NC` note on the bypass valve are
+   engineering decisions: add them or record why not in `DESIGN.md`.
+
 ### Remove an item cleanly
 
 1. `plantcode show <id or tag>`: note its block, its drawing(s) and **every incoming reference**.
+   For equipment it also prints `connections:` (the segment and line at each nozzle, and what is
+   at the other end) and `only for <tag>:` -- the segments, whole lines and branch tees that
+   exist only for it and dangle once it is gone, with the instrument chains of their items. For
+   a valve or instrument, `instrumentation:` follows the chain: loop, sensing location,
+   measuring line, signal line, actuating function, actuating system, actuator and valve, each
+   with its block and drawing.
 2. Conceptual: delete the item's `<Object>` block (with its nodes). Reconnect or delete the pipes
    that referenced its nodes: for an inline valve, delete one of its two pipes and point the
    other at the far node (`SourceItem`/`SourceNode` or `TargetItem`/`TargetNode`); for
@@ -232,13 +355,19 @@ and `instrument-function-drawing.xml`.
    `plantcode show <LineNumber>` output again afterwards, segment by segment.
 4. Update the cached `Text` of every label that shows the DN: the system label
    (`PipingNetworkSystemLabel`, e.g. `MNc 47126 75HB13 50`), segment labels, nozzle labels.
-   `grep -n '<String>[^<]*\b50\b' pid/<sheet>.xml` inside the line's drawing groups finds them.
+   `grep -n '<String>[^<]*\b50\b' pid/<sheet>.xml` inside the line's drawing groups finds them;
+   `plantcode.label-literal` (validate) warns about a literal label such as `DN = 25/50` that no
+   longer matches its object's nodes.
 5. Change `nominal_diameter` in `piping/line-list.yaml`, and list every segment whose DN differs
    from it under `segments` (all of them, so `plantcode.line-dn-mismatch` compares each).
-6. `plantcode validate` must not report `plantcode.dn-mismatch`, `plantcode.label-stale` or
-   `plantcode.line-dn-mismatch`.
+6. `plantcode validate` must not report `plantcode.dn-mismatch`, `plantcode.label-stale`,
+   `plantcode.label-literal` warnings or `plantcode.line-dn-mismatch`.
 
 ## Snippets (copy, then rename every id)
+
+To read how the reference does something. To write, prefer `plantcode copy` and
+`plantcode fragment` (above): they name every id for you.
+
 
 | file | what |
 |---|---|
@@ -260,15 +389,23 @@ After every change:
 
 ```sh
 plantcode fmt pid/<sheet>.xml && plantcode validate
-plantcode render pid/<sheet>.xml --png --crop 240,120,320,180   # build/<sheet>.png of the changed region
-plantcode diff HEAD --list                                       # one line per change
+plantcode render pid/<sheet>.xml --png --crop 240,120,320,180   # build/<sheet>_crop-240-120-320-180.png
+plantcode diff HEAD --list                                       # one line per changed plant item
 ```
 
 Fix `error`s before anything else; each finding gives `file:line`, the rule and a hint. Look at
 the PNG (crop with a margin of 20 mm around what you changed; `--scale` sets the pixels per mm).
-`plantcode diff --list` prints a `<sheet>:` line, then per change `<kind> <class> <id> [tag] (<domain>) <attrs> -> drawn as <owner>`:
+A crop is written next to the full sheet under its own name, so `render --png` and
+`render --png --crop ...` (or `--rev HEAD --crop ...`, `build/<sheet>@HEAD_crop-...png`, for the
+before picture) never overwrite each other.
+`plantcode diff --list` prints a `<sheet>:` line, then one line per plant item a change belongs
+to: `<kind> <class> <id> [tag]: N added, M removed, K modified`, where `<kind>` is what happened
+to the item itself (`added`, `removed`, `modified`, or `changed` when only its parts or drawing
+did). Nozzles, nodes, labels and drawing elements count under their item, pipes and segments
+under their line. `--list --verbose` adds each change under its item, `--list --flat` prints one
+line per object instead (`<kind> <class> <id> [tag] (<domain>) <attrs> -> drawn as <owner>`):
 every line should be a change you meant, and every changed plant item should be drawn.
-`plantcode diff --json` gives the same as data.
+`plantcode diff --json` gives the same as data (each change's `item`, and `items`).
 
 | finding | usual cause | fix |
 |---|---|---|
@@ -280,6 +417,7 @@ every line should be a change you meant, and every changed plant item should be 
 | `plantcode.segment-ends` | segment Source/Target Item/Node is not where its pipes start/end (pyDEXPI's `pydexpi_segment_connectivity`, `..._reference_nodes_and_items_match`) | point the segment's SourceItem/SourceNode at where its pipes start, TargetItem/TargetNode at where they end (or, for an end item the segment owns, its other node; see Conventions) |
 | `plantcode.dn-mismatch` | a pipe joins nodes of different DN (also at a reducer port) | give both nodes the DN of the pipe; a reducer's own two nodes carry the two DNs |
 | `plantcode.label-stale` | label text no longer what its template shows, or AttributeName misspelt | update the cached `Text`, or fix the AttributeName |
+| `plantcode.label-literal` warning | a literal-only label (`DN = 25/50`) contradicts its object's DN, a quantity or a string | correct the text, or show the attribute with an `AttributeRepresentation`; as info it only says the label repeats the data and must be changed with it |
 | `pydexpi_piping_node_single_connection` | two pipes on one node | give the item another node, or reroute |
 | `plantcode.dn-mismatch` | DN changed on one side of a pipe only | change all three DN properties on both nodes, or add a reducer |
 | `plantcode.label-stale` | data changed, cached label `Text` not | set the `Text` to what the template renders |

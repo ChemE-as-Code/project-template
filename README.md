@@ -23,8 +23,8 @@ uv tool install plantcode           # once (see the plantcode README while it is
 plantcode git-setup                 # once per clone: readable P&ID diffs + pre-commit hook
 plantcode validate                  # after every change
 plantcode fmt                       # canonical XML, stable ids
-plantcode render [--png]            # build/<sheet>.svg (or .png)
+plantcode render [--png] [--crop]   # build/<sheet>[_crop-X0-Y0-X1-Y1].svg (or .png)
 plantcode show <id or tag>          # where an object and its drawing are in the file
-plantcode diff main [--list]        # build/diff.html, or one line per change
+plantcode diff main [--list]        # build/diff.html, or one line per changed plant item
 plantcode check                     # engineering-step gates (--write only at sign-off)
 ```

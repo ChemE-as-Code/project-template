@@ -17,7 +17,10 @@ Inputs: `process/design-basis.yaml`, `equipment/equipment-list.yaml`, `piping/li
    Add the sheet to `plant.yaml` under `sheets`.
 3. **Fill it**, one of two ways:
    - **Small sheet (up to ~10 items)**: write the XML directly, one item at a time, following
-     the `dexpi-xml` skill (Conventions; Recipes for tees, branches and instruments). Run
+     the `dexpi-xml` skill (Conventions; Recipes for tees, branches and instruments). Take
+     equipment from a snippet (or `plantcode copy` an item already on a sheet, with `--prefix`,
+     `--tag` and `--offset`), and let `plantcode fragment` write valves, tees, segments, pipes,
+     nodes and labels (`--sheet pid/<sheet>.xml` so shapes and node positions are found). Run
      `plantcode fmt` and `plantcode validate` after each item, and
      `plantcode render pid/<sheet>.xml --png --crop X0,Y0,X1,Y1` around it to see it placed.
      `plantcode show <id>` finds what you wrote earlier by id or tag.
