@@ -10,7 +10,7 @@ checked by [`plantcode`](https://github.com/process-intelligence-research/plantc
 | `pid/` | P&ID sheets (DEXPI 2.0.1 XML) |
 | `process/design-basis.yaml` | capacity, feeds, products, utilities, site |
 | `equipment/equipment-list.yaml`, `piping/line-list.yaml`, `control/instrument-list.yaml` | lists, consistent with the P&IDs |
-| `checks/checks.yaml` | engineering-step gates; `checks/status.json` their last result |
+| `checks/checks.yaml` | engineering-step gates; `checks/status.json` their result at the last stage sign-off |
 | `reviews/` | review records |
 | `DESIGN.md`, `PROGRESS.md`, `STAGES.md` | decisions, change log, stage definitions |
 | `scripts/` | generator scripts kept for provenance |
@@ -23,7 +23,8 @@ uv tool install plantcode           # once (see the plantcode README while it is
 plantcode git-setup                 # once per clone: readable P&ID diffs + pre-commit hook
 plantcode validate                  # after every change
 plantcode fmt                       # canonical XML, stable ids
-plantcode render                    # build/<sheet>.svg
-plantcode diff main                 # build/diff.html: what this branch changed
-plantcode check                     # engineering-step gates
+plantcode render [--png]            # build/<sheet>.svg (or .png)
+plantcode show <id or tag>          # where an object and its drawing are in the file
+plantcode diff main [--list]        # build/diff.html, or one line per change
+plantcode check                     # engineering-step gates (--write only at sign-off)
 ```

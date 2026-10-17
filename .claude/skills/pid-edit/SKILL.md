@@ -5,29 +5,41 @@ description: Change an existing P&ID sheet in pid/ - add, remove or modify equip
 
 # Editing a P&ID sheet
 
-Read the `dexpi-xml` skill first if you have not in this session.
+Read the `dexpi-xml` skill first if you have not in this session; its Conventions and Recipes
+(insert a valve or a tee, remove an item, add an instrument, change a DN) cover most edits.
 
-1. **Find the place.** `grep -n` for the tag or id (`grep -n 'T4750\|Tank1' pid/P-01.xml`),
-   then read that line range. Find both the conceptual object and its drawing
-   (`grep -n '#Tank1" property="Represents"' pid/P-01.xml`).
-2. **Plan the change in both trees**: what objects are added, removed or changed in the
-   conceptual model, and which groups, symbols, node positions and lines in the drawing follow.
-   Look at nearby coordinates so new symbols sit on the line and off other symbols.
-3. **Edit the file in place.** Copy structure from `dexpi-xml/snippets/` and rename every id.
+1. **Find the place.** `plantcode show <id or tag>` (an XML id, `TagName`, printed instrument
+   tag, `LineNumber` or `PipingComponentNumber`) prints the `file:start-end` of the object's
+   block and of its drawing, its owner chain, what it references and what references it, each
+   with a line number. Read those line ranges, not the whole file. `grep -n` is the fallback for
+   text that is not an object (`grep -n 'T4750' pid/P-01.xml`).
+2. **Look at the region** before you change it:
+   `plantcode render pid/P-01.xml --png --crop X0,Y0,X1,Y1` (sheet mm, Y down; take the
+   `at X0,Y0,X1,Y1 mm` region `plantcode show` prints for the drawing, plus a 20 mm margin).
+   Note free space and nearby coordinates so new symbols sit on the line and off other symbols.
+3. **Plan the change in both trees**: what objects are added, removed or changed in the
+   conceptual model, and which groups, symbols, node positions, lines and label texts in the
+   drawing follow. Removing something: every incoming reference `plantcode show` listed must be
+   deleted or re-pointed.
+4. **Edit the file in place.** Copy structure from `dexpi-xml/snippets/` and rename every id.
    Use readable ids that say what the object is (`GlobeValve_FV101_bypass`).
-4. **Format, validate, render**:
+5. **Format, validate, render**:
    ```sh
-   plantcode fmt pid/P-01.xml && plantcode validate && plantcode render pid/P-01.xml
+   plantcode fmt pid/P-01.xml && plantcode validate
+   plantcode render pid/P-01.xml --png --crop X0,Y0,X1,Y1
    ```
-   Fix every `error`, then every new `warning`. Repeat until clean. Look at `build/P-01.svg`
-   (read the SVG or open it) to check the drawing makes sense.
-5. **Review the change** before committing: `plantcode diff HEAD` writes `build/diff.html`
-   (added green, removed red, modified orange) and prints counts. The counts should match what
-   you meant to change; anything else is an accident.
-6. **Keep the lists in step** (`lists-sync` skill): a new tagged item goes into the equipment,
-   line or instrument list.
-7. **Commit** one logical change per commit, message saying what changed on which sheet and why.
-   Log the change in `PROGRESS.md` (date, sheet, what, why).
+   Fix every `error`, then every new `warning`. Repeat until clean. Look at the PNG: symbols on
+   their lines, lines meeting at node positions, labels readable and saying the right thing.
+6. **Review the change** before committing: `plantcode diff HEAD --list` prints one line per
+   change (`<kind> <class> <id> [tag] (<domain>) <attrs> -> drawn as <owner|not drawn>`). Every
+   line should be something you meant to change, and no changed plant item should be `not
+   drawn`. `plantcode diff HEAD` writes `build/diff.html` for a person to look at; `--json` is
+   the same data for a script.
+7. **Keep the lists in step** (`lists-sync` skill): a new or removed tag, line or instrument,
+   and a changed DN, go into the equipment, line or instrument list.
+8. **Commit** one logical change per commit, message saying what changed on which sheet and why.
+   Log the change in `PROGRESS.md` (date, sheet, what, why). `git diff` shows sheets as review
+   text with the XML ids as written (after `plantcode git-setup`).
 
 Large restructures (many items, a whole new section) are often easier with a throwaway
 generator script: see `pid-draft`.

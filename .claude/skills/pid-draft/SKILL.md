@@ -17,7 +17,10 @@ Inputs: `process/design-basis.yaml`, `equipment/equipment-list.yaml`, `piping/li
    Add the sheet to `plant.yaml` under `sheets`.
 3. **Fill it**, one of two ways:
    - **Small sheet (up to ~10 items)**: write the XML directly, one item at a time, following
-     the `dexpi-xml` skill. Run `plantcode fmt` and `plantcode validate` after each item.
+     the `dexpi-xml` skill (Conventions; Recipes for tees, branches and instruments). Run
+     `plantcode fmt` and `plantcode validate` after each item, and
+     `plantcode render pid/<sheet>.xml --png --crop X0,Y0,X1,Y1` around it to see it placed.
+     `plantcode show <id>` finds what you wrote earlier by id or tag.
    - **Large sheet**: write `scripts/draft_<sheet>.py`, which builds the model with the pyDEXPI
      classes and writes the XML:
      ```python
@@ -35,6 +38,14 @@ Inputs: `process/design-basis.yaml`, `equipment/equipment-list.yaml`, `piping/li
      Use the pyDEXPI model classes and serializers only. Keep the script in `scripts/` for
      provenance, and run `plantcode fmt` on its output. After that the XML is the source of
      truth; later changes are edits to the XML (`pid-edit`), not to the script.
-4. **Validate, render, review** as in `pid-edit`, and check every listed item is on the sheet
-   (`plantcode validate` warns `equipment-not-on-pid`).
-5. **Commit** the sheet, the plant.yaml entry and the script together.
+   A generator script must follow the `dexpi-xml` Conventions too: segment ends equal the first
+   pipe's source and last pipe's target, tees owned by the segment that ends at them, DN in all
+   three properties, label `Text` matching its template.
+4. **Validate, render, review** as in `pid-edit`: `plantcode validate` until clean (it ends with
+   the line naming what it compared), `plantcode render pid/<sheet>.xml --png` for the whole
+   sheet and `--crop` for details, and check every listed equipment item, line and instrument is
+   on the sheet (`equipment-not-on-pid`, `line-not-on-pid`, `instrument-not-on-pid`).
+   `plantcode diff HEAD --list` before the commit lists every object the sheet adds.
+5. **Fill the lists** (`lists-sync`): line list with DN per line (and `segments` where the DN
+   changes along a line), instrument list with the printed tags.
+6. **Commit** the sheet, the plant.yaml entry, the lists and the script together.
