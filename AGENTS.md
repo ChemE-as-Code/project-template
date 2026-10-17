@@ -15,7 +15,8 @@ This repository is a process plant design. The files are the design; there is no
   commit with errors; the pre-commit hook and CI refuse it anyway.
 - One logical change per commit. Say what changed on which sheet and why. Append the change to
   `PROGRESS.md`.
-- Keep the lists in step with the P&IDs (skill `lists-sync`).
+- Keep the lists in step with the P&IDs (skill `lists-sync`), and the 3D layout in `layout/`
+  in step with the equipment list (skill `layout-yaml`).
 - Record decisions and assumptions in `DESIGN.md`, with the reason. Mark assumed values
   `ASSUMED` in the YAML or the decision text, never present a guess as data.
 - Work on a branch for anything larger than one fix; review with `plantcode diff main --list`.
@@ -50,5 +51,8 @@ This repository is a process plant design. The files are the design; there is no
 | `piping/line-list.yaml` | `lines` (number, from, to, nominal_diameter, ..., notes, `segments` with a DN each) |
 | `control/instrument-list.yaml` | `instruments` (tag as printed, service, sheet, notes) |
 | `checks/checks.yaml` | `checks` |
+| `layout/site-plan.yaml` | `site_plan` (site box, areas, roads, pipe racks) |
+| `layout/building.yaml` | `building` (buildings, levels, column grid) |
+| `layout/equipment-placement.yaml` | `placement` (tag, position, shape, size, building, level) |
 
 `plantcode schema <kind>` prints the full JSON Schema.
