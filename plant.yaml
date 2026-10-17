@@ -1,5 +1,5 @@
 # The root of this plant repository. Schema: `plantcode schema plant`.
-name: "{{plant_name}}"
+name: "My plant"
 description: ""
 units: SI
 stage: concept
