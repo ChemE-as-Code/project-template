@@ -53,8 +53,9 @@ Pressures are gauge or absolute: `PressureGaugeUnit.Bar` (barg) vs `PressureAbso
 1. **Every `<Object>` has an id, unique in the document**, matching `[A-Za-z_][A-Za-z0-9_]*`
    (no hyphens, no dots). Use readable ids: `Pump_P101B`, `Pipe_P101B_suction`.
    `plantcode fmt` names any object you leave without one.
-2. **References point at ids that exist.** Renaming an id means renaming every `#id` that names
-   it (`grep -n '#OldId' pid/*.xml`).
+2. **References point at ids that exist.** Rename an id with
+   `plantcode rename OLD NEW [--children]`: it renames every `#OLD` too (`--children` also the
+   ids derived from it, `OLD_Drawing`, `OLD_Pos`, ...) and refuses a name that is taken.
 3. **A pipe connects two nodes.** Each `Plant/Piping.Pipe` has `SourceItem` + `SourceNode` and
    `TargetItem` + `TargetNode`. Nodes belong to items: a nozzle owns one `PipingNode`, an inline
    valve owns two. Convention: **node 1 (first) is the inlet, node 2 (second) the outlet**; flow
@@ -137,7 +138,8 @@ objects (not the nodes), `InnerPoints` lists the bends, `Stroke` the line style.
 ## Writing the verbose parts: `plantcode copy` and `plantcode fragment`
 
 Most of a sheet's XML is drawing: a valve is ~60 lines of nodes, node positions and symbol.
-Do not type it, and do not write a templating script for it:
+Do not type it, and do not write a templating script for it (a generator script uses the
+`plantcode.authoring` API with the same builders, run by `plantcode run`; skill `pid-draft`):
 
 - `plantcode copy ID --prefix NEWID [--tag T] [--offset DX,DY] [--into PARENT] [--print]`
   duplicates an object with its parts and **everything that draws it** (symbol, nozzles, node
@@ -151,7 +153,21 @@ Do not type it, and do not write a templating script for it:
   ids, the line ranges written and what was **not copied**: the pipes and segments at the
   original's nozzles, an actuating system's valve reference. Connect those by hand.
   `--print` shows the XML without writing. `--into` puts a copy into another parent (a valve
-  into another segment's `Items`, its drawing into that segment's drawing).
+  into another segment's `Items`, its drawing into that segment's drawing). An instrument copied
+  with another measured variable (`--tag FI-4148` from `AI-3104`) gets the sensor `FT4148` (and
+  actuator `FV...`), not `AT4148`. Options that adapt the copy in the same command (repeat each
+  as needed):
+
+  | option | does |
+  |---|---|
+  | `--rename HV-4146=HV-4147` | an inner tag: in the copied data, the label texts and the ids that spell it (`Line_LIN4004_HV4147`) |
+  | `--renumber 4144:4145` | a number in the inner tags, label texts and ids (`TSV-4144` -> `TSV-4145`) |
+  | `--set 'FluidCode=Liquid nitrogen'` | a data value on every copied object that has it (line and segments), and the labels showing it |
+  | `--connect PIPE=ITEM:NODE` (`PIPE.target=...`) | a copied pipe's open end (old or new id), with its segment's end and the ConnectorLine's `Source`/`Target` |
+  | `--sense-at ID[:X,Y]` | an instrument's `SensingLocation`; with X,Y a new `InstrumentationNodePosition` there in ID's drawing, where the measuring line starts |
+
+  Its report ends with `duplicate tags:` -- inner tags the copy shares with objects on the
+  P&IDs. `plantcode validate` fails on them (`plantcode.duplicate-tag`).
 - `plantcode fragment KIND --id ID [--sheet pid/<sheet>.xml] ...` prints a fragment with a
   `CONCEPTUAL` and a `DRAWING` part, each after a comment saying where to paste it (and a
   `SHAPE` part when the symbol is not in the catalogue yet). Pass `--sheet`: shape ids are then
@@ -165,6 +181,14 @@ Do not type it, and do not write a templating script for it:
   | `segment` | `--from ITEM:NODE --to ITEM:NODE [--like SEGMENT] [--number S2] [--dn 80]` | `ID` with empty `Connections`/`Items` to fill, `ID_Drawing` |
   | `node` | `--dn 80 [--standard Din2448\|Iso6708\|none] [--at X,Y]` | `ID`, with `--at` `ID_Position` |
   | `label` | `--for ID --attribute TagName [--at X,Y]` | `ID` (label class from the object: `ValveLabel`, `EquipmentTagNameLabel`, ...) |
+  | `equipment` | `--class CentrifugalCompressor --tag K-1101 --at X,Y [--shape NAME] [--rotation R] [--scale S\|SX,SY] [--label-at X,Y] [--marker NAME:dy[:SY][:m] ...] --nozzle N1:dx,dy[:DN] ...` | `ID` with nozzles `ID_N1` (node `ID_N1_Node`), symbol, tag label; pipes attach at `ID_N1_Node_Position` |
+  | `nozzle` | `--on EQUIP --at dx,dy [--dn 50] [--tag N7]` (needs the sheet) | `ID` with node `ID_Node`, into the equipment and its drawing |
+  | `instrument` | `--tag PIC-4101 --at X,Y --sense ITEM[:x,y] [--field]` | `ID` with sensor `ID_Sensor`, measuring line `ID_MeasuringLine`, bubble nodes `ID_Top`/`_Bottom`/`_Left`/`_Right` |
+  | `signal` | `--from INST --to VALVE\|INST[,VALVE...] [--fail-action FC\|FO\|FL] [--number PV-4111] [--points x,y;...]` (needs the sheet) | `ID` (SignalLineFunction, dashed line); to a valve also `ID_Actuating` and, if the valve has none, `<valve>_ActuatingSystem` |
+  | `offpage` | `--in\|--out --at X,Y [--rotation R] [--dn 80] [--note TEXT] [--note-at X,Y]` | `ID` (Flow In/Out PipeOffPageConnector) with node `ID_N`, position `ID_N_Position` |
+  | `line` | `--number LOX-4101 --dn 100 [--fluid LOX] [--at X,Y]` (the label) | `ID` (PipingNetworkSystem) with empty `Segments`, `ID_Drawing` |
+  | `note` | `--text TEXT --at X,Y` | `ID`, a Static text at the top of the diagram, owned by no object |
+  | `shape` | `NAME` (e.g. `COLUMN_SHAPE`, `compressor`) | the catalogue Shape to paste, or "already as #ShapeN" |
 
   `--rotation` is the flow direction: 0 left to right, 90 downwards, 180 right to left, 270
   upwards (Y down). A tee's `--branch` is absolute (up, down, left, right on the sheet); it must
@@ -174,9 +198,89 @@ Do not type it, and do not write a templating script for it:
   `fragment` uses the one sheet holding the ids it refers to, and says so; still pass `--sheet`
   in commands you write down.
 
+  Drafting a sheet takes no generator script: `equipment` (with its nozzles), `line` + `segment`
+  + `valve`/`tee` + `pipe`, `offpage` at the sheet edges, `instrument` on a nozzle or segment,
+  `signal` from a controller or switch to its valves, `note` for free text. With `--sheet`, the
+  comments name the holder's id and line (`into <Components property="Nozzles"> of T4101
+  (pid/P-04.xml:9229)`); paste each part there.
+
+  - `equipment`/`nozzle` offsets are from the symbol's centre along the sheet axes and name a
+    point on its outline; a nozzle with a DN gets a 4 mm stub outwards (along the axis the
+    offset points) and its pipe attaches at the stub's end. A nozzle without a DN is an
+    instrument connection: its `InstrumentationNodePosition` is where an `instrument --sense`
+    measuring line starts. A pipe's `--from`/`--to` ITEM is the **nozzle** (`T4101_N1`), not the
+    equipment.
+  - `--class` is the DEXPI class; the symbol defaults by class (`shapes.md`, "default for").
+    Beds and trays inside a column or adsorber are `--marker` symbols in the same drawing:
+    `--marker COLUMN_PACKED_BED_SHAPE:-20:1.5` (a 30 mm bed centred 20 mm above the symbol
+    centre; ScaleX is the column's), `--marker COLUMN_TRAY_SHAPE:10:1:m` (a tray, mirrored for
+    the downcomer on the left). Repeat it, one per bed or tray shown.
+  - `signal` to a valve models what a dashed line only shows: an `ActuatingFunction` in the
+    instrument referencing the valve's `ActuatingSystem` (made with its `ControlledActuator`
+    and `OperatedValveReference` when the valve has none) and a `SignalLineFunction` from the
+    instrument to it. A trip is one `signal` with several targets (`--to XV4136,PV4111`); a
+    second signal to the same valve joins its actuating system. When several parts go into a
+    block the holder lacks, only the first says "create it"; the others say "the ... part above
+    creates": paste them into that one block (two blocks of one property lose objects). Signal
+    and measuring lines are routed orthogonally out of the node, clear of the bubbles and of the
+    equipment the nozzle is on; check the render and pass `--points` where a line still crosses
+    something. A signal that repeats an existing instrument-to-valve relation gets a WARNING. `plantcode show <valve>` then
+    lists the instruments acting on it. If the valve's drawing has an actuator symbol already,
+    only the attach point is added; remove a dashed PolyLine that drew the signal before.
+  - Trip and interlock text goes in a `note` (or a signal line), not into an instrument's or
+    valve's drawing: there `plantcode.label-literal` reads it as a label of that object.
+
+## Changing what is on a sheet: `plantcode move`, `rename` and `set`
+
+Use these before a hand edit: they find every coordinate, reference and label text for you, run
+`plantcode fmt` afterwards, and `--print` shows the change as a diff without writing.
+
+- `plantcode move ID --offset DX,DY`: moves everything that draws ID (symbol, node positions,
+  labels, bends of lines inside its group) and prints each coordinate it changed. Lines attached
+  to its node positions follow by reference; their bends stay put and are listed as
+  `stretched`, a straight line that is no longer horizontal or vertical as `now slanted`. An
+  equipment data table stays in its band (move it by its own id). ID may also be a drawing
+  element (a label `Text`, to nudge only it).
+- `plantcode rename OLD NEW [--children]`: an id and every `#OLD`; `--children` also renames
+  `OLD_*`. Given a tag (`plantcode rename HV-4146 HV-4147 [--ids]`): the tag data
+  (`TagNamePrefix`/`SequenceNumber`/`Suffix` too; for an instrument category, letters, number
+  and its sensor/actuator numbers) and the labels showing it; `--ids` also the ids that spell
+  it. A tag (`PipingComponentNumber`, a safety valve's `PositionNumber`, ...) addresses the
+  object like its id. When two objects share the tag, give the one to retag by its id with
+  `--tag`: `plantcode rename Inst_Y FI-4150 --tag` (the sensor becomes `FT4150`). Unknown ids,
+  taken names and tags another valve or instrument already has exit 2.
+- `plantcode set ID PROP=VALUE...`: data values by their DEXPI name, in the type DEXPI gives
+  them: `FluidCode=Nitrogen`, `OnHold=OnHold` (enumeration member),
+  `InsulationThickness='50 mm'` and `UpperLimitDesignPressure='16 barg'` (value and unit),
+  `Stroke.Width=0.5` (a value inside an aggregate, on a drawing element),
+  `Text='to flare'` on a note's `Text`. `PROP=` removes the value. Every label whose template
+  shows the attribute gets its cached text updated, so `plantcode.label-stale` stays clean.
+
 Hand edits remain for what is short: re-pointing a `References` (a pipe's `TargetNode`, a
 segment's ends, a ConnectorLine's `Target`), moving an existing `<Object>` block into another
-segment, deleting blocks, changing data. After pasting: `plantcode fmt` re-indents everything.
+segment, deleting blocks. After pasting: `plantcode fmt` re-indents everything.
+
+## Symbols: scales and missing shapes
+
+The catalogue (`shapes.md`) holds the reference's shapes and the ones plantcode adds:
+compressors (centrifugal, axial), turbine/expander, blower, column body with packed-bed and tray
+markers (`fragment equipment --marker`), gas filter, silencer (inline: `fragment valve --class Silencer`), air cooler, general
+and shell-and-tube exchangers, electric heater, ambient vaporizer, flat-bottom tank, plate-fin
+exchanger and gate valve. `empty-sheet.xml` has them all; for an older sheet,
+`plantcode fragment shape NAME --sheet pid/<sheet>.xml` prints the one to paste (or says it is
+there), and `fragment equipment` adds a SHAPE part by itself.
+
+Scales that stay legible on A3: equipment 1.0 (pumps 15 mm, vessels 20 x 25 mm; columns ScaleX
+1.0, ScaleY for the height), valves 0.4 (`--scale 0.5` for check valves and crowded areas, never
+below 0.4), actuators 0.4-0.45, nozzles 0.8 x 0.4, instrument bubbles 1.0, off-page arrows 0.7,
+tees 0.0001 (invisible). `shapes.md` gives each added shape's scale.
+
+When a symbol is truly missing: use the nearest catalogue shape that means the same thing
+(ISO 10628-2 meaning, not looks: a cooler is an exchanger shape, not a pump), and say what it
+stands for in a `note` or the review. Only if none fits, add a Shape named after its ISO
+meaning (`STEAM_TRAP_SHAPE`), with the name as its `SymbolRegistrationNumber` as the reference
+does: never invent a registration number, and never use one shape for things of different
+meaning.
 
 ## Recipes
 
@@ -256,7 +360,15 @@ left to right at y 154).
    tee's branch node and does not own the tee: only the segment that ends at its run-in node
    does.
 6. Labels: `fragment label --id Label_C9 --for Valve_P4711B_check --attribute PipingComponentNumber --sheet pid/P-01.xml`.
-7. Remove an `Items` left empty, then the Loop. Expected: `plantcode.equipment-not-listed` for
+7. **A copy of a line with its valves** (a second fill line beside LOX-4004) is one command:
+   `plantcode copy Line_LOX4004 --prefix Line_LIN4004 --tag LIN-4004 --offset 0,40 --rename HV-4146=HV-4147 --renumber 4144:4145 --set 'FluidCode=Liquid nitrogen' --connect Line_LOX4004_S2_P2=T4102_N7:T4102_N7_Node`
+   (`T4102_N7` a free nozzle added for the new line: `--connect` refuses a node another pipe
+   already ends at).
+   An instrument beside another: `plantcode copy Inst_AI3104 --prefix Inst_FI4148 --tag FI-4148 --offset 14,0 --sense-at Line_GOX4001_S1:318,45`
+   (the sensor becomes `FT4148`, its measuring line starts at a new node on the segment). Check
+   the `duplicate tags:` line of the report is `none`; nudge the result with
+   `plantcode move Inst_FI4148 --offset DX,DY` after the render.
+8. Remove an `Items` left empty, then the Loop. Expected: `plantcode.equipment-not-listed` for
    P4711B until `lists-sync` adds it; the new segments go into the line list's `segments` if
    their DN differs.
 
@@ -371,13 +483,16 @@ To read how the reference does something. To write, prefer `plantcode copy` and
 
 | file | what |
 |---|---|
-| `snippets/empty-sheet.xml` | a new sheet: metadata, border, title block, full shape catalogue |
+| `snippets/empty-sheet.xml` | the frame `plantcode sheet new` starts from: metadata (empty, status "for review"), border, title block, full shape catalogue; use `sheet new` rather than copying it |
 | `snippets/equipment-tank.xml`, `...-drawing.xml` | Tank with chambers and nozzles, and its drawing |
 | `snippets/equipment-pump.xml`, `...-drawing.xml` | centrifugal pump with two nozzles, and its drawing |
 | `snippets/piping-system-with-valve.xml`, `...-drawing.xml` | a line: nozzle -> globe valve -> nozzle, and its drawing |
 | `snippets/tee-branch.xml`, `...-drawing.xml` | a run segment ending at a tee, the run continuing, and a branch segment |
 | `snippets/instrument-function.xml`, `...-drawing.xml` | a field instrument, and its bubble and measuring line |
 | `snippets/instrument-nozzle.xml`, `...-drawing.xml` | the measured point: branch, isolation valve, blind flange with the `InstrumentationNodePosition` the measuring line starts at |
+| `snippets/actuating-system.xml`, `...-drawing.xml` | an actuating system: controlled actuator (fail close) and the valve it operates, and its drawing |
+| `snippets/signal-line.xml`, `...-drawing.xml` | a controller with its actuating function and the signal line to the actuating system, and the dashed line |
+| `snippets/offpage-connector.xml`, `...-drawing.xml` | a segment starting at a flow-in off-page connector, and the arrow |
 | `shapes.md` | every shape in the catalogue and which object uses it |
 
 The snippets are long because drawings are verbose. Read them with `grep -n` and line ranges
@@ -388,7 +503,8 @@ rather than in full. Snippets with several fragments say above each where it goe
 After every change:
 
 ```sh
-plantcode fmt pid/<sheet>.xml && plantcode validate
+plantcode fmt pid/<sheet>.xml
+plantcode validate
 plantcode render pid/<sheet>.xml --png --crop 240,120,320,180   # build/<sheet>_crop-240-120-320-180.png
 plantcode diff HEAD --list                                       # one line per changed plant item
 ```
@@ -412,7 +528,8 @@ every line should be a change you meant, and every changed plant item should be 
 | `xml.syntax` | unclosed tag, stray `&` | fix the XML at that line |
 | `dexpi.load` "Reference 'X' ... not found" | `#X` names no object | fix the id or add the object |
 | `dexpi.load` unknown class / property | misspelt `type` or `property` | copy the spelling from a snippet |
-| `plantcode.duplicate-id` | copied snippet without renaming | rename, and its references |
+| `plantcode.duplicate-id` | copied snippet without renaming | `plantcode rename OLD NEW` (renames its references) |
+| `plantcode.duplicate-tag` | two piping components (`PipingComponentNumber`/`PositionNumber` such as `HV-4146`) or two instruments share a tag, e.g. after a copy | `plantcode rename ID HV-4147 --tag` (an instrument: `rename ID FI-4150 --tag`, its sensor and actuator follow), or copy again with `--rename`/`--renumber` |
 | `plantcode.not-drawn` | conceptual object without a drawing | add a RepresentationGroup |
 | `plantcode.segment-ends` | segment Source/Target Item/Node is not where its pipes start/end (pyDEXPI's `pydexpi_segment_connectivity`, `..._reference_nodes_and_items_match`) | point the segment's SourceItem/SourceNode at where its pipes start, TargetItem/TargetNode at where they end (or, for an end item the segment owns, its other node; see Conventions) |
 | `plantcode.dn-mismatch` | a pipe joins nodes of different DN (also at a reducer port) | give both nodes the DN of the pipe; a reducer's own two nodes carry the two DNs |
@@ -420,5 +537,5 @@ every line should be a change you meant, and every changed plant item should be 
 | `plantcode.label-literal` warning | a literal-only label (`DN = 25/50`) contradicts its object's DN, a quantity or a string | correct the text, or show the attribute with an `AttributeRepresentation`; as info it only says the label repeats the data and must be changed with it |
 | `pydexpi_piping_node_single_connection` | two pipes on one node | give the item another node, or reroute |
 | `plantcode.dn-mismatch` | DN changed on one side of a pipe only | change all three DN properties on both nodes, or add a reducer |
-| `plantcode.label-stale` | data changed, cached label `Text` not | set the `Text` to what the template renders |
+| `plantcode.label-stale` | data changed, cached label `Text` not | change data with `plantcode set` (it updates the labels), or set the `Text` to what the template renders |
 | `plantcode.line-*`, `plantcode.instrument-*` | sheet and list disagree | `lists-sync` skill |

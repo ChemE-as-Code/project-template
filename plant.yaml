@@ -7,6 +7,13 @@ stages:
   - {id: concept, title: Concept and feasibility}
   - {id: basic, title: Basic engineering}
   - {id: detail, title: Detail engineering}
-# P&ID sheets, DEXPI 2.0.1 XML. Empty: every pid/*.xml.
+# Title-block data for `plantcode sheet new` (optional):
+# project: {number: "24-017", client: "", site: "", revision: A}
+# P&ID sheets, DEXPI 2.0.1 XML. Empty: every pid/*.xml. A sheet not drawn yet is
+# `status: planned` (no file needed); `plantcode sheet new P-01` starts it.
 sheets: []
-#  - {id: P-01, file: pid/P-01.xml, title: Feed and reaction}
+#  - {id: P-01, file: pid/P-01.xml, title: Feed and reaction, status: planned}
+# A generated sheet names its generator (script and the frame it starts from, a commit or a
+# file); it is then rebuilt with `plantcode regen P-02`, never edited by hand:
+#  - {id: P-02, file: pid/P-02.xml, title: Utilities,
+#     generator: {script: scripts/draft_P-02.py, frame: 1a2b3c4}}
