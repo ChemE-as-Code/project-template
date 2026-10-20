@@ -9,6 +9,7 @@ checked by [`plantcode`](https://github.com/process-intelligence-research/plantc
 | `plant.yaml` | name, stage, sheets |
 | `pid/` | P&ID sheets (DEXPI 2.0.1 XML) |
 | `process/design-basis.yaml` | capacity, feeds, products, utilities, site |
+| `process/materials.yaml`, `process/flowsheet.yaml` | components, blocks, steps and streams: the source of the generated BFD and PFD (`process/*.xml`, `plantcode process build`) |
 | `equipment/equipment-list.yaml`, `piping/line-list.yaml`, `control/instrument-list.yaml` | lists, consistent with the P&IDs |
 | `control/cause-effect.yaml` | interlocks and trips (cause and effect) |
 | `piping/special-items.yaml` (optional) | tagged piping components: safety valves, silencers, rupture discs (skill `lists-sync`) |
@@ -31,4 +32,6 @@ plantcode render --png --tiles auto # build/<sheet>_tile-A1.png ... to read the 
 plantcode show <id or tag>          # where an object and its drawing are in the file
 plantcode diff main [--list]        # build/diff.html, or one line per changed plant item
 plantcode check                     # engineering-step gates (--write only at sign-off)
+plantcode process build             # BFD and PFD from process/*.yaml
+plantcode process streams           # stream table with provenance, block balances
 ```

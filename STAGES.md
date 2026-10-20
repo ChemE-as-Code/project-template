@@ -12,12 +12,16 @@ the reviewer, not by its author (see `AGENTS.md`). A sign-off left on an unmerge
 taken effect.
 
 ## concept: Concept and feasibility
-Design basis agreed (assumed values marked `ASSUMED`), block flow, main equipment identified,
-the equipment, line and instrument lists and `DESIGN.md` started (gates `design-basis`,
-`concept-lists`, `assumptions-marked`).
+Design basis agreed (assumed values marked `ASSUMED`), block flow (`process/flowsheet.yaml`, the
+generated BFD, balances evaluable and clean), main equipment identified, the equipment, line and
+instrument lists and `DESIGN.md` started (gates `design-basis`, `concept-lists`,
+`assumptions-marked`, `process-concept`, `process-balances`; `process-links-concept` reports
+unresolved links).
 
 ## basic: Basic engineering
-P&IDs complete and valid, equipment and line lists complete, design review done.
+PFD generated with no refinement pending and no stale calculated values (`process-basic`), every
+flowsheet link resolved (`process-links`), P&IDs complete and valid, equipment and line lists
+complete, design review done.
 
 ## detail: Detail engineering
 Datasheets (one `equipment/datasheets/<TAG>.yaml` per equipment-list item, format in

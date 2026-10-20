@@ -1,6 +1,6 @@
 ---
 name: lists-sync
-description: Keep the equipment, line and instrument lists (YAML) consistent with the P&ID sheets - add missing items, flag removed ones, align types, sheets and nominal diameters. Use after any P&ID change that adds, removes or retags an item or changes a DN, or when plantcode validate reports equipment-*, line-* or instrument-* findings.
+description: Keep the equipment, line and instrument lists (YAML) consistent with the P&ID sheets and the flowsheet links - add missing items, flag removed ones, align types, sheets and nominal diameters. Use after any P&ID change that adds, removes or retags an item or changes a DN, or when plantcode validate reports equipment-*, line-*, instrument-* or process-link-unresolved findings.
 ---
 
 # Keeping the lists in step with the P&IDs
@@ -93,5 +93,15 @@ with a line naming what it compared (sheets, lists, cross-checks). The schemas a
    (`plantcode.datasheet-mismatch`), its tag must be listed (`plantcode.datasheet-not-listed`);
    mark every value you have not calculated `assumed: true`. A retagged item renames its
    datasheet in the same commit.
-10. `plantcode validate` again until no cross-check finding is left, then commit lists and sheet
+10. **Flowsheet links** (`process/flowsheet.yaml`, skill `process-design`): blocks, steps,
+   streams, feeds and products link to equipment, lines, instruments and sheets
+   (`links: [{target: equipment | line | instrument | sheet, ref: ..., sheet: ...}]`). A link
+   that resolves against no list entry (or a `sheet:` scope the list contradicts) is
+   `plantcode.process-link-unresolved`: info in `validate`, a warning in the concept gate
+   `process-links-concept`, an error in the basic gate `process-links`. When an item is
+   retagged, renumbered, moved to another sheet or removed, change the links in the same
+   commit; when a P&ID adds equipment or a line for a PFD step or stream, add the link.
+   `plantcode check --stage basic` runs the `process-links` gate, which names every unresolved
+   link and why; the viewer's stream table marks them too.
+11. `plantcode validate` again until no cross-check finding is left, then commit lists and sheet
    together.

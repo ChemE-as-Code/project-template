@@ -5,8 +5,22 @@ description: Draft a new P&ID sheet from the design basis and equipment list - s
 
 # Drafting a new P&ID sheet
 
-Inputs: `process/design-basis.yaml`, `equipment/equipment-list.yaml`, `piping/line-list.yaml`,
+Inputs: the PFD (`process/flowsheet.yaml` and `process/PFD.xml`, skill `process-design`),
+`process/design-basis.yaml`, `equipment/equipment-list.yaml`, `piping/line-list.yaml`,
 `control/instrument-list.yaml`, `DESIGN.md` for decisions already made.
+
+**Start from the PFD** when the plant has one. `plantcode process streams --md` gives the stream
+table (pressure, temperature, flow, phase per stream, with provenance) and
+`plantcode render process/PFD.xml --png` the drawing:
+- every PFD step becomes one or more equipment items (spares, trains): add them to the equipment
+  list with their `sheet:`, and give the step `links: [{target: equipment, ref: <tag>}]`;
+- every material stream becomes a line (or a chain of lines through equipment): add it to the
+  line list, and give the stream `{target: line, ref: <number>, sheet: <sheet>}`;
+- stream conditions are the operating point for design data and DN; do not copy them into the
+  sheet as text, the stream table stays their source;
+- a PFD block is a good first guess for a sheet split.
+`plantcode validate` checks the links (`plantcode.process-link-unresolved`) once the list
+entries exist.
 
 The sheet split can be declared at concept stage, before anything is drawn: list each sheet in
 `plant.yaml` with `status: planned` (no file needed) and give every list item its `sheet:`.
@@ -14,7 +28,8 @@ Validate then reports the planned sheet as info and holds back the not-on-pid fi
 items assigned to it; do not create empty frames to silence it.
 
 1. **Plan on paper first.** Write the sheet's content as a short list in `DESIGN.md`: equipment
-   (tag, class), lines (number, from, to, DN), valves per line, instruments. Decide a rough
+   (tag, class, the PFD step it implements), lines (number, from, to, DN, the PFD stream it
+   carries), valves per line, instruments. Decide a rough
    layout: process flow left to right, equipment in a row at mid height, the equipment-data
    band at the bottom.
 2. **Start the file** with `plantcode sheet new <sheet> --title '...'`: it writes
@@ -102,7 +117,8 @@ items assigned to it; do not create empty frames to silence it.
    every tile (`--findings` marks the lint's findings on them).
    `plantcode diff HEAD --list` before the commit lists every object the sheet adds.
 5. **Fill the lists** (`lists-sync`): line list with DN per line (and `segments` where the DN
-   changes along a line), instrument list with the printed tags.
+   changes along a line), instrument list with the printed tags, and the flowsheet links of the
+   steps and streams the sheet draws.
 6. **Trips and interlocks** go into `control/cause-effect.yaml` (kind `interlocks`: cause tag
    and condition, effects with an action each), not into literal sheet text or instrument-list
    notes. On the sheet put at most a short reference next to the instrument, e.g. `see C&E
