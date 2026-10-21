@@ -8,13 +8,13 @@ Run it with plantcode's interpreter (python3 and `uv run python` have no pyDEXPI
 It edits the sheet file given as its argument in place (start it with `plantcode sheet new`, so
 its title block is real) and formats it (`Sheet.save`). Copy it to `scripts/draft_<sheet>.py`
 for a real sheet. The builders are documented in the `pid-draft` skill and in the docstrings of
-`plantcode.authoring`.
+`plantcode.domains.piping.authoring`.
 """
 
 import sys
 from pathlib import Path
 
-from plantcode.authoring import (
+from plantcode.domains.piping.authoring import (
     Nozzle,
     Sheet,
     equipment,

@@ -5,6 +5,18 @@ description: Review the plant repository or a change to it - run validation and 
 
 # Reviewing
 
+## Purpose and when to use
+
+Review the plant repository or a branch and write the findings to `reviews/`. Sign off a stage
+only when asked (step 7).
+
+## Required inputs and missing inputs
+
+The commit to review and, for a branch, the default branch to diff against. What you cannot
+check goes under "Not checked" in the record.
+
+## Workflow and tools
+
 1. `plantcode validate` and `plantcode check`. Every failing check and every error is a finding.
    Read the last line of `validate`: it names the sheets, lists and cross-checks it ran; what it
    did not compare goes under "Not checked". `plantcode check` prints the gates and writes
@@ -50,6 +62,14 @@ description: Review the plant repository or a change to it - run validation and 
    `plantcode.offpage-mismatch` and `plantcode.label-tag-unknown` warn when one names a wrong
    line, sheet or tag; the `plantcode.label-tag` infos list what each such text names, so check
    they say what is meant. Note what you checked and what you could not.
+
+## Validation and failure handling
+
+Run `plantcode validate` after writing the record: it reports left-out previous findings and bad
+finding ids or statuses (`plantcode.review-*`).
+
+## Outputs and provenance
+
 5. Write `reviews/<YYYY-MM-DD>-<topic>.md` (format in `reviews/README.md`). It starts with front
    matter that a `kind: review` gate reads; `reviewed_commit` is `git rev-parse HEAD` of what you
    reviewed, `reviewer_kind` is `self` when you review your own work, `agent` for an independent
@@ -99,6 +119,9 @@ description: Review the plant repository or a change to it - run validation and 
 6. Do not fix findings in the same commit as the review; each fix is its own change. **Closing
    a finding**: fix it in its own commit, then the next review lists it under Previous findings
    as `closed <that commit>` with the evidence that it is fixed.
+
+## Required human judgment
+
 7. **Signing off a stage** (only when asked to sign off): you may not sign off your own review.
    The sign-off rests on a record by someone else: a human, or an independent agent
    (`reviewer_kind: agent`); a `self` record needs `approved_by: <human>`. A `kind: validate`
@@ -116,3 +139,8 @@ description: Review the plant repository or a change to it - run validation and 
    last on the branch, and the stage counts as signed off only once it is on the default
    branch. A human or the reviewer merges, never the author; the author's summary says whether
    a merge is pending.
+
+## References
+
+- `reviews/README.md` (record format), `checks/checks.yaml` (gates, accepted findings),
+  `checks/status.json` (sign-offs)

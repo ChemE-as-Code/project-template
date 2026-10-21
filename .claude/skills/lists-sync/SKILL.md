@@ -5,9 +5,18 @@ description: Keep the equipment, line and instrument lists (YAML) consistent wit
 
 # Keeping the lists in step with the P&IDs
 
+## Purpose and when to use
+
 The P&IDs and the lists describe the same plant. `plantcode validate` compares them and ends
 with a line naming what it compared (sheets, lists, cross-checks). The schemas are printed by
 `plantcode schema <kind>`; `plantcode schema` alone lists the kinds.
+
+## Required inputs and missing inputs
+
+The sheets in `pid/`, `equipment/equipment-list.yaml`, `piping/line-list.yaml`,
+`control/instrument-list.yaml`; leave unknown values out rather than guessing (step 2).
+
+## Workflow and tools
 
 1. Run `plantcode validate` and collect the cross-check findings:
 
@@ -105,3 +114,21 @@ with a line naming what it compared (sheets, lists, cross-checks). The schemas a
    link and why; the viewer's stream table marks them too.
 11. `plantcode validate` again until no cross-check finding is left, then commit lists and sheet
    together.
+
+## Validation and failure handling
+
+Run `plantcode validate` until no cross-check finding is left (step 11);
+`plantcode check --stage basic` names every unresolved flowsheet link (step 10).
+
+## Outputs and provenance
+
+Updated lists, `piping/special-items.yaml`, `control/cause-effect.yaml`, datasheets and
+flowsheet links, committed with the sheet (step 11).
+
+## Required human judgment
+
+An item in a list but on no drafted sheet: ask whether it was removed on purpose (step 3).
+
+## References
+
+Skills `dexpi-xml`, `process-design`; `equipment/datasheets/README.md`.

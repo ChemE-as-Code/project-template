@@ -5,8 +5,21 @@ description: Change an existing P&ID sheet in pid/ - add, remove or modify equip
 
 # Editing a P&ID sheet
 
+## Purpose and when to use
+
+Any change to an existing sheet in `pid/`.
+
+Large restructures (many items, a whole new section) are often easier with a generator script
+using `plantcode.domains.piping.authoring`, run by `plantcode run`: see `pid-draft`.
+
+## Required inputs and missing inputs
+
+The sheet `pid/<sheet>.xml` and its entry in `plant.yaml` (`generator:` or not, below).
+
 Read the `dexpi-xml` skill first if you have not in this session; its Conventions and Recipes
 (insert a valve or a tee, remove an item, add an instrument, change a DN) cover most edits.
+
+## Workflow and tools
 
 1. **Find the place.** `plantcode show <id or tag>` (an XML id, `TagName`, printed instrument
    tag, `LineNumber` or `PipingComponentNumber`) prints the `file:start-end` of the object's
@@ -87,8 +100,22 @@ to become the source instead, run `plantcode regen --detach <sheet>` first, then
 as above. A sheet without `generator:` is hand-maintained: a `scripts/draft_<sheet>.py` next
 to it is provenance only; never rerun it over the sheet.
 
-Large restructures (many items, a whole new section) are often easier with a generator script
-using `plantcode.authoring`, run by `plantcode run`: see `pid-draft`.
+## Validation and failure handling
+
+Steps 5 and 6: format, validate and render until clean, then review the diff.
 
 Never delete a validation finding by deleting the content it is about unless that is the change
 you were asked for.
+
+## Outputs and provenance
+
+The edited sheet, the list changes (step 7), and a commit with its `PROGRESS.md` entry (step 8).
+
+## Required human judgment
+
+Whether each changed item in the diff was meant (step 6); a reason for an accepted crossing
+(step 5); what copy or fragment could not do goes in the report (step 4).
+
+## References
+
+Skills `dexpi-xml`, `lists-sync`, `pid-draft`.

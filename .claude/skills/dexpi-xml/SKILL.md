@@ -5,6 +5,8 @@ description: How to read and write DEXPI 2.0.1 XML P&IDs by hand in this reposit
 
 # Writing DEXPI 2.0.1 XML
 
+## Purpose and when to use
+
 P&IDs in `pid/` are DEXPI 2.0.1 XML, edited directly as text. A sheet holds two parallel
 trees: **what the plant is** (the conceptual model) and **how it is drawn** (the diagram). Every
 plant item is in the first, and a `RepresentationGroup` in the second draws it.
@@ -24,7 +26,16 @@ Model
     Components ShapeCatalogues                the symbols (Shape objects) ShapeUsages point at
 ```
 
-## The five element kinds
+Use it before editing any `pid/*.xml` file.
+
+## Required inputs and missing inputs
+
+The sheet to change (`pid/<sheet>.xml`) and the change asked for. `plantcode show <id or tag>`
+gives the line ranges to read; a symbol not in the catalogue is handled under "Symbols" below.
+
+## Workflow and tools
+
+### The five element kinds
 
 | XML | meaning |
 |---|---|
@@ -48,78 +59,7 @@ A physical quantity:
 
 Pressures are gauge or absolute: `PressureGaugeUnit.Bar` (barg) vs `PressureAbsoluteUnit.Bar`.
 
-## Rules that keep a sheet valid
-
-1. **Every `<Object>` has an id, unique in the document**, matching `[A-Za-z_][A-Za-z0-9_]*`
-   (no hyphens, no dots). Use readable ids: `Pump_P101B`, `Pipe_P101B_suction`.
-   `plantcode fmt` names any object you leave without one.
-2. **References point at ids that exist.** Rename an id with
-   `plantcode rename OLD NEW [--children]`: it renames every `#OLD` too (`--children` also the
-   ids derived from it, `OLD_Drawing`, `OLD_Pos`, ...) and refuses a name that is taken.
-3. **A pipe connects two nodes.** Each `Plant/Piping.Pipe` has `SourceItem` + `SourceNode` and
-   `TargetItem` + `TargetNode`. Nodes belong to items: a nozzle owns one `PipingNode`, an inline
-   valve owns two. Convention: **node 1 (first) is the inlet, node 2 (second) the outlet**; flow
-   runs source -> target.
-4. **A segment is one run in flow order.** `PipingNetworkSegment` owns `Items` (valves, reducers,
-   ...) and `Connections` (pipes), and references its own ends: `SourceItem`/`SourceNode` = where
-   the first pipe starts, `TargetItem`/`TargetNode` = where the last one ends (see Conventions).
-   One node is connected by at most one pipe.
-5. **Tags** are `Data property="TagName"` on equipment (with `TagNamePrefix`,
-   `TagNameSequenceNumber`), `PipingComponentNumber` on valves, `LineNumber` on a piping system,
-   category + functions + number on an instrument function (printed `PI-4712.01`). Keep the
-   equipment, line and instrument lists in step (`lists-sync`).
-6. **Every plant item is drawn**: a `RepresentationGroup` under `Diagram/Groups` (or nested in
-   its owner's group) with `<References objects="#TheItem" property="Represents"/>`.
-7. Coordinates are millimetres on the sheet, **Y down** (like SVG). The reference sheet is
-   420 x 297 (A3; `MinX`/`MaxX`/`MinY`/`MaxY` on the Diagram). Keep new symbols inside the
-   border and off existing ones.
-
-## Conventions
-
-`plantcode validate` checks the ones that name a rule id. The snippets are unmodified excerpts
-of the reference P&ID and follow them.
-
-- **Coordinates**: millimetres, origin top left, **Y grows downwards**. `--crop X0,Y0,X1,Y1` of
-  `plantcode render` takes the same numbers. Rotation is in degrees.
-- **Segment ends** (`plantcode.segment-ends`): `SourceItem`/`SourceNode` of a segment are the
-  first pipe's `SourceItem`/`SourceNode`; `TargetItem`/`TargetNode` are the last pipe's
-  `TargetItem`/`TargetNode`. Prefer the node the last pipe ends at. Validate also accepts the
-  reference convention: when the segment **owns** its end item (it is in the segment's `Items`,
-  e.g. the tee or check valve it ends at), the node may be that item's other node -- the one the
-  next segment starts at, so consecutive segments share a node (`snippets/tee-branch.xml`: S3
-  ends at `PipeTee1`/`PipingNode30`, where S4 starts). Do not "fix" existing segments that use
-  it. For a segment that ends in a `DirectPipingConnection` (valve bolted to a blind flange),
-  that connection is the last one.
-- **Tees and property breaks only at segment ends.** A `PipeTee` (or `PropertyBreak`) is where
-  segments meet. It is an `Item` of exactly one segment: the one that **ends** at it. The
-  segments leaving it start at its other nodes and do not own it. A tee owns three
-  `PipingNode`s: run in, run out, branch.
-- **Drawing a tee**: one `ShapeUsage` of `Shape12` at the tee point, `ScaleX`/`ScaleY` 0.0001
-  (a dot), and the three `PipingNodePosition`s 0.001 mm from it towards their pipes: run in at
-  (x - 0.001, y), run out at (x + 0.001, y), branch at (x, y - 0.001) for a branch going up
-  (`snippets/tee-branch-drawing.xml`). The lines then appear to meet in one point.
-- **Instrument bubble** (`Shape16` field, `Shape17` central/DCS with a middle bar; scale 1):
-  `Position` is the centre (x, y). The bubble is a stadium **13.5 mm wide, 7.5 mm high**: straight
-  top and bottom from x - 3 to x + 3, ends of radius 3.75 -- keep 6.75 mm clear left and right.
-  Its group has four `InstrumentationNodePosition`s where lines attach: top (x, y - 3.75),
-  bottom (x, y + 3.75), left (x - 6.75, y), right (x + 6.75, y). In the reference measuring lines
-  end at the bottom one; signal lines leave from the top one (going up) or a side one (going
-  sideways). The label (`ProcessInstrumentationFunctionLabel`)
-  has two `Text`s, size 3, `CenterCenter`: the letters (category + functions, e.g. `PI`) at
-  (x, y - 2.25), the number at (x, y + 1.2). The measuring line is a `ConnectorLine` (green,
-  0.2 mm) from an `InstrumentationNodePosition` on the sensing location to the bubble.
-- **Nominal diameter is stated three times** on every `PipingNode`, segment and system:
-  `NominalDiameterRepresentation` (`DN 50`), `NominalDiameterNumericalValueRepresentation`
-  (`50`) and `NominalDiameterTypeRepresentation` (`DN`). Change all three together. Two nodes
-  joined by a pipe have the same DN unless one item is a reducer (`plantcode.dn-mismatch`).
-- **Labels cache their text.** A `Core/Diagram.Text` holds a `TextTemplate` (fragments that name
-  attributes) and the rendered `Text` string. When you change an attribute a label shows, update
-  the cached `Text` too (`plantcode.label-stale` finds the ones you missed). A label made of
-  literal text only (`DN = 25/50` on the reference's safety valve, the nozzle DN labels) follows
-  nothing: `plantcode.label-literal` reports it as info while it repeats the object's DN, a
-  physical quantity or a string, and warns once it contradicts them.
-
-## Drawing an object
+### Drawing an object
 
 A drawing is a `Core/Diagram.RepresentationGroup` that `Represents` the object and holds:
 
@@ -135,11 +75,11 @@ A pipe is drawn by a group representing the `Pipe` with a `Static` holding one
 `Core/Diagram.ConnectorLine`: `Source` and `Target` reference the two **PipingNodePosition**
 objects (not the nodes), `InnerPoints` lists the bends, `Stroke` the line style.
 
-## Writing the verbose parts: `plantcode copy` and `plantcode fragment`
+### Writing the verbose parts: `plantcode copy` and `plantcode fragment`
 
 Most of a sheet's XML is drawing: a valve is ~60 lines of nodes, node positions and symbol.
 Do not type it, and do not write a templating script for it (a generator script uses the
-`plantcode.authoring` API with the same builders, run by `plantcode run`; skill `pid-draft`):
+`plantcode.domains.piping.authoring` API with the same builders, run by `plantcode run`; skill `pid-draft`):
 
 - `plantcode copy ID --prefix NEWID [--tag T] [--offset DX,DY] [--into PARENT] [--print]`
   duplicates an object with its parts and **everything that draws it** (symbol, nozzles, node
@@ -230,7 +170,7 @@ Do not type it, and do not write a templating script for it (a generator script 
   - Trip and interlock text goes in a `note` (or a signal line), not into an instrument's or
     valve's drawing: there `plantcode.label-literal` reads it as a label of that object.
 
-## Changing what is on a sheet: `plantcode move`, `rename` and `set`
+### Changing what is on a sheet: `plantcode move`, `rename` and `set`
 
 Use these before a hand edit: they find every coordinate, reference and label text for you, run
 `plantcode fmt` afterwards, and `--print` shows the change as a diff without writing.
@@ -260,7 +200,7 @@ Hand edits remain for what is short: re-pointing a `References` (a pipe's `Targe
 segment's ends, a ConnectorLine's `Target`), moving an existing `<Object>` block into another
 segment, deleting blocks. After pasting: `plantcode fmt` re-indents everything.
 
-## Symbols: scales and missing shapes
+### Symbols: scales and missing shapes
 
 The catalogue (`shapes.md`) holds the reference's shapes and the ones plantcode adds:
 compressors (centrifugal, axial), turbine/expander, blower, column body with packed-bed and tray
@@ -282,7 +222,7 @@ meaning (`STEAM_TRAP_SHAPE`), with the name as its `SymbolRegistrationNumber` as
 does: never invent a registration number, and never use one shape for things of different
 meaning.
 
-## Recipes
+### Recipes
 
 Start every recipe with `plantcode show <id or tag>`: it prints the `file:start-end` of the
 object's `<Object>` block and of its drawing(s), its owner chain, and the ids it references and
@@ -290,7 +230,7 @@ that reference it, each with a line number. Read those line ranges instead of th
 After every recipe: fmt, validate, `plantcode render --png --crop ...` around the change, and
 `plantcode diff HEAD --list` to check the change list is what you meant (see Loop).
 
-### Insert a valve into an existing pipe
+#### Insert a valve into an existing pipe
 
 `plantcode fragment valve --id ... --class ... --dn ... --at X,Y --rotation R --sheet ...` gives
 the valve and its drawing; `plantcode fragment pipe` the new pipe.
@@ -303,7 +243,7 @@ the valve and its drawing; `plantcode fragment pipe` the new pipe.
    side along the line), shorten the old ConnectorLine to end at the first node position, add a
    ConnectorLine for the new pipe from the second node position to the old end.
 
-### Insert a tee and a branch (split a segment)
+#### Insert a tee and a branch (split a segment)
 
 `plantcode fragment tee`, `segment` and `pipe` write the new objects and their drawings;
 `snippets/tee-branch.xml` and `tee-branch-drawing.xml` show the same in the reference.
@@ -327,7 +267,7 @@ the valve and its drawing; `plantcode fragment pipe` the new pipe.
    new one starts at the run-out position.
 5. `plantcode validate`: `plantcode.segment-ends` catches ends that disagree with their pipes.
 
-### Parallel / spare equipment (a standby pump)
+#### Parallel / spare equipment (a standby pump)
 
 Example: a spare P4711B beside P4711 (suction line 47121, discharge 47122, both DN 80, flowing
 left to right at y 154).
@@ -372,7 +312,7 @@ left to right at y 154).
    P4711B until `lists-sync` adds it; the new segments go into the line list's `segments` if
    their DN differs.
 
-### Bypass around a valve
+#### Bypass around a valve
 
 Two tees, four segments. Example: control valve C1 (`GlobeValve2`) on line 47123, which runs
 upwards at x 160 (`Pipe3` from `Nozzle4` to C1's inlet at y 121, `Pipe4` from C1's outlet at
@@ -401,7 +341,7 @@ y 117 up to `Nozzle5`), all in `PipingNetworkSegment3`.
 5. The Loop. Isolation valves either side of C1 and an `NC` note on the bypass valve are
    engineering decisions: add them or record why not in `DESIGN.md`.
 
-### Remove an item cleanly
+#### Remove an item cleanly
 
 1. `plantcode show <id or tag>`: note its block, its drawing(s) and **every incoming reference**.
    For equipment it also prints `connections:` (the segment and line at each nozzle, and what is
@@ -426,7 +366,7 @@ y 117 up to `Nozzle5`), all in `PipingNetworkSegment3`.
 5. `grep -n '#<id>\b' pid/<sheet>.xml` for each deleted id (item, nodes, pipes, node positions)
    must print nothing. Then remove the tag from the lists (`lists-sync`).
 
-### Add an instrument with an instrument nozzle
+#### Add an instrument with an instrument nozzle
 
 The measured point is an item on the line (here a blind flange on a short branch with an
 isolation valve) that carries both a `PipingNodePosition` (the pipe attaches) and an
@@ -450,7 +390,7 @@ and `instrument-function-drawing.xml`.
    `InstrumentationNodePosition` to the bubble's lower one.
 4. Add the printed tag (e.g. `PI-4712.01`) to `control/instrument-list.yaml` (`lists-sync`).
 
-### Change a line's DN everywhere
+#### Change a line's DN everywhere
 
 1. `plantcode show <LineNumber>` lists the system, its segments, items, pipes and nodes with
    their DN and line numbers.
@@ -475,30 +415,80 @@ and `instrument-function-drawing.xml`.
 6. `plantcode validate` must not report `plantcode.dn-mismatch`, `plantcode.label-stale`,
    `plantcode.label-literal` warnings or `plantcode.line-dn-mismatch`.
 
-## Snippets (copy, then rename every id)
+## Validation and failure handling
 
-To read how the reference does something. To write, prefer `plantcode copy` and
-`plantcode fragment` (above): they name every id for you.
+### Rules that keep a sheet valid
 
+1. **Every `<Object>` has an id, unique in the document**, matching `[A-Za-z_][A-Za-z0-9_]*`
+   (no hyphens, no dots). Use readable ids: `Pump_P101B`, `Pipe_P101B_suction`.
+   `plantcode fmt` names any object you leave without one.
+2. **References point at ids that exist.** Rename an id with
+   `plantcode rename OLD NEW [--children]`: it renames every `#OLD` too (`--children` also the
+   ids derived from it, `OLD_Drawing`, `OLD_Pos`, ...) and refuses a name that is taken.
+3. **A pipe connects two nodes.** Each `Plant/Piping.Pipe` has `SourceItem` + `SourceNode` and
+   `TargetItem` + `TargetNode`. Nodes belong to items: a nozzle owns one `PipingNode`, an inline
+   valve owns two. Convention: **node 1 (first) is the inlet, node 2 (second) the outlet**; flow
+   runs source -> target.
+4. **A segment is one run in flow order.** `PipingNetworkSegment` owns `Items` (valves, reducers,
+   ...) and `Connections` (pipes), and references its own ends: `SourceItem`/`SourceNode` = where
+   the first pipe starts, `TargetItem`/`TargetNode` = where the last one ends (see Conventions).
+   One node is connected by at most one pipe.
+5. **Tags** are `Data property="TagName"` on equipment (with `TagNamePrefix`,
+   `TagNameSequenceNumber`), `PipingComponentNumber` on valves, `LineNumber` on a piping system,
+   category + functions + number on an instrument function (printed `PI-4712.01`). Keep the
+   equipment, line and instrument lists in step (`lists-sync`).
+6. **Every plant item is drawn**: a `RepresentationGroup` under `Diagram/Groups` (or nested in
+   its owner's group) with `<References objects="#TheItem" property="Represents"/>`.
+7. Coordinates are millimetres on the sheet, **Y down** (like SVG). The reference sheet is
+   420 x 297 (A3; `MinX`/`MaxX`/`MinY`/`MaxY` on the Diagram). Keep new symbols inside the
+   border and off existing ones.
 
-| file | what |
-|---|---|
-| `snippets/empty-sheet.xml` | the frame `plantcode sheet new` starts from: metadata (empty, status "for review"), border, title block, full shape catalogue; use `sheet new` rather than copying it |
-| `snippets/equipment-tank.xml`, `...-drawing.xml` | Tank with chambers and nozzles, and its drawing |
-| `snippets/equipment-pump.xml`, `...-drawing.xml` | centrifugal pump with two nozzles, and its drawing |
-| `snippets/piping-system-with-valve.xml`, `...-drawing.xml` | a line: nozzle -> globe valve -> nozzle, and its drawing |
-| `snippets/tee-branch.xml`, `...-drawing.xml` | a run segment ending at a tee, the run continuing, and a branch segment |
-| `snippets/instrument-function.xml`, `...-drawing.xml` | a field instrument, and its bubble and measuring line |
-| `snippets/instrument-nozzle.xml`, `...-drawing.xml` | the measured point: branch, isolation valve, blind flange with the `InstrumentationNodePosition` the measuring line starts at |
-| `snippets/actuating-system.xml`, `...-drawing.xml` | an actuating system: controlled actuator (fail close) and the valve it operates, and its drawing |
-| `snippets/signal-line.xml`, `...-drawing.xml` | a controller with its actuating function and the signal line to the actuating system, and the dashed line |
-| `snippets/offpage-connector.xml`, `...-drawing.xml` | a segment starting at a flow-in off-page connector, and the arrow |
-| `shapes.md` | every shape in the catalogue and which object uses it |
+### Conventions
 
-The snippets are long because drawings are verbose. Read them with `grep -n` and line ranges
-rather than in full. Snippets with several fragments say above each where it goes.
+`plantcode validate` checks the ones that name a rule id. The snippets are unmodified excerpts
+of the reference P&ID and follow them.
 
-## Loop
+- **Coordinates**: millimetres, origin top left, **Y grows downwards**. `--crop X0,Y0,X1,Y1` of
+  `plantcode render` takes the same numbers. Rotation is in degrees.
+- **Segment ends** (`plantcode.segment-ends`): `SourceItem`/`SourceNode` of a segment are the
+  first pipe's `SourceItem`/`SourceNode`; `TargetItem`/`TargetNode` are the last pipe's
+  `TargetItem`/`TargetNode`. Prefer the node the last pipe ends at. Validate also accepts the
+  reference convention: when the segment **owns** its end item (it is in the segment's `Items`,
+  e.g. the tee or check valve it ends at), the node may be that item's other node -- the one the
+  next segment starts at, so consecutive segments share a node (`snippets/tee-branch.xml`: S3
+  ends at `PipeTee1`/`PipingNode30`, where S4 starts). Do not "fix" existing segments that use
+  it. For a segment that ends in a `DirectPipingConnection` (valve bolted to a blind flange),
+  that connection is the last one.
+- **Tees and property breaks only at segment ends.** A `PipeTee` (or `PropertyBreak`) is where
+  segments meet. It is an `Item` of exactly one segment: the one that **ends** at it. The
+  segments leaving it start at its other nodes and do not own it. A tee owns three
+  `PipingNode`s: run in, run out, branch.
+- **Drawing a tee**: one `ShapeUsage` of `Shape12` at the tee point, `ScaleX`/`ScaleY` 0.0001
+  (a dot), and the three `PipingNodePosition`s 0.001 mm from it towards their pipes: run in at
+  (x - 0.001, y), run out at (x + 0.001, y), branch at (x, y - 0.001) for a branch going up
+  (`snippets/tee-branch-drawing.xml`). The lines then appear to meet in one point.
+- **Instrument bubble** (`Shape16` field, `Shape17` central/DCS with a middle bar; scale 1):
+  `Position` is the centre (x, y). The bubble is a stadium **13.5 mm wide, 7.5 mm high**: straight
+  top and bottom from x - 3 to x + 3, ends of radius 3.75 -- keep 6.75 mm clear left and right.
+  Its group has four `InstrumentationNodePosition`s where lines attach: top (x, y - 3.75),
+  bottom (x, y + 3.75), left (x - 6.75, y), right (x + 6.75, y). In the reference measuring lines
+  end at the bottom one; signal lines leave from the top one (going up) or a side one (going
+  sideways). The label (`ProcessInstrumentationFunctionLabel`)
+  has two `Text`s, size 3, `CenterCenter`: the letters (category + functions, e.g. `PI`) at
+  (x, y - 2.25), the number at (x, y + 1.2). The measuring line is a `ConnectorLine` (green,
+  0.2 mm) from an `InstrumentationNodePosition` on the sensing location to the bubble.
+- **Nominal diameter is stated three times** on every `PipingNode`, segment and system:
+  `NominalDiameterRepresentation` (`DN 50`), `NominalDiameterNumericalValueRepresentation`
+  (`50`) and `NominalDiameterTypeRepresentation` (`DN`). Change all three together. Two nodes
+  joined by a pipe have the same DN unless one item is a reducer (`plantcode.dn-mismatch`).
+- **Labels cache their text.** A `Core/Diagram.Text` holds a `TextTemplate` (fragments that name
+  attributes) and the rendered `Text` string. When you change an attribute a label shows, update
+  the cached `Text` too (`plantcode.label-stale` finds the ones you missed). A label made of
+  literal text only (`DN = 25/50` on the reference's safety valve, the nozzle DN labels) follows
+  nothing: `plantcode.label-literal` reports it as info while it repeats the object's DN, a
+  physical quantity or a string, and warns once it contradicts them.
+
+### Loop
 
 After every change:
 
@@ -539,3 +529,38 @@ every line should be a change you meant, and every changed plant item should be 
 | `plantcode.dn-mismatch` | DN changed on one side of a pipe only | change all three DN properties on both nodes, or add a reducer |
 | `plantcode.label-stale` | data changed, cached label `Text` not | change data with `plantcode set` (it updates the labels), or set the `Text` to what the template renders |
 | `plantcode.line-*`, `plantcode.instrument-*` | sheet and list disagree | `lists-sync` skill |
+
+## Outputs and provenance
+
+The edited `pid/<sheet>.xml`, formatted by `plantcode fmt`, and the lists kept in step
+(`lists-sync`). `plantcode diff HEAD --list` shows which plant items the change touched.
+
+## Required human judgment
+
+Isolation valves, an `NC` note on a bypass valve and similar engineering decisions: add them or
+record why not in `DESIGN.md`. A substitute for a missing symbol is said in a `note` or the review.
+
+## References
+
+### Snippets (copy, then rename every id)
+
+To read how the reference does something. To write, prefer `plantcode copy` and
+`plantcode fragment` (above): they name every id for you.
+
+
+| file | what |
+|---|---|
+| `snippets/empty-sheet.xml` | the frame `plantcode sheet new` starts from: metadata (empty, status "for review"), border, title block, full shape catalogue; use `sheet new` rather than copying it |
+| `snippets/equipment-tank.xml`, `...-drawing.xml` | Tank with chambers and nozzles, and its drawing |
+| `snippets/equipment-pump.xml`, `...-drawing.xml` | centrifugal pump with two nozzles, and its drawing |
+| `snippets/piping-system-with-valve.xml`, `...-drawing.xml` | a line: nozzle -> globe valve -> nozzle, and its drawing |
+| `snippets/tee-branch.xml`, `...-drawing.xml` | a run segment ending at a tee, the run continuing, and a branch segment |
+| `snippets/instrument-function.xml`, `...-drawing.xml` | a field instrument, and its bubble and measuring line |
+| `snippets/instrument-nozzle.xml`, `...-drawing.xml` | the measured point: branch, isolation valve, blind flange with the `InstrumentationNodePosition` the measuring line starts at |
+| `snippets/actuating-system.xml`, `...-drawing.xml` | an actuating system: controlled actuator (fail close) and the valve it operates, and its drawing |
+| `snippets/signal-line.xml`, `...-drawing.xml` | a controller with its actuating function and the signal line to the actuating system, and the dashed line |
+| `snippets/offpage-connector.xml`, `...-drawing.xml` | a segment starting at a flow-in off-page connector, and the arrow |
+| `shapes.md` | every shape in the catalogue and which object uses it |
+
+The snippets are long because drawings are verbose. Read them with `grep -n` and line ranges
+rather than in full. Snippets with several fragments say above each where it goes.

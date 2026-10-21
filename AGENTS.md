@@ -14,7 +14,7 @@ This repository is a process plant design. The files are the design; there is no
   and `plantcode set` (one data value and the labels showing it) before reaching for a hand
   edit; hand edits remain for re-pointing references and moving blocks. For what fragments
   cannot express, a generator script in
-  `scripts/draft_<sheet>.py` uses the Python API `plantcode.authoring` (the same builders as
+  `scripts/draft_<sheet>.py` uses the Python API `plantcode.domains.piping.authoring` (the same builders as
   `fragment`; example `scripts/example_draft.py`). Run it with `plantcode run`: `python3` and
   `uv run python` have no pyDEXPI in this repository. Never write your own XML helpers.
 - Every sheet is either **hand-maintained** (the default: the XML is the source; a script in
@@ -68,6 +68,7 @@ This repository is a process plant design. The files are the design; there is no
 | | |
 |---|---|
 | `plantcode status [--json]` | start here: stage, each sheet drawn / empty / planned with the listed items it does not draw yet, the next sheet to draw, findings by sheet, gates per stage, sign-offs (and whether merged), open review findings, branch state |
+| `plantcode impact [--json]` | review needed (info, read-only): review records whose scope or `basis` changed since, generated sheets whose `process/*.yaml` changed, stale calculated values; nothing is regenerated |
 | `plantcode validate [files] [--json] [--ignore RULE[,RULE]] [--only RULE] [--skip-generators]` | all P&IDs and lists, and lists vs P&IDs (equipment, lines and DN, instruments), drawing geometry (lines through labels, crossings, overlapping and misplaced labels, each with a `[crop ...]`) and tags named in texts; a `drawing <sheet>:` count line per sheet; the last line says what was compared; rules may be globs (`plantcode.*-not-on-pid`); generated sheets are rebuilt in a scratch copy and compared unless `--skip-generators` |
 | `plantcode sheet new <ID> [--title T] [--file F]` | a new sheet from the template with its title block filled from `plant.yaml` (project block), added to `sheets:` (a planned one becomes drafted) |
 | `plantcode sheet meta <ID> [Key=Value ...]` | show or set title-block values (`Revision=B`, `Title=...`, `Status=...`, any MetaData property, `ModelName`, `DiagramName`): MetaData and the title-block texts together |
@@ -78,12 +79,13 @@ This repository is a process plant design. The files are the design; there is no
 | `plantcode check [--stage S [--only-stage]] [--write --review R]` | engineering-step gates in `checks/checks.yaml` of every stage up to S; `--write` only at sign-off. For what a P&ID must show write `kind: on-sheet` gates (printed tags and classes in the model), not `grep` over the XML |
 | `plantcode cause-effect` | the cause-and-effect matrix of `control/cause-effect.yaml` to `build/cause-effect.html` and `.csv` |
 | `plantcode schema [kind]` | JSON Schema of a YAML file kind; no kind lists them |
+| `plantcode skills status \| update [NAME...] [--force]` | the bundled skills in `.claude/skills/`: current, outdated, modified (changed here) or missing; `update` installs missing and outdated files and keeps a modified one (reported) unless `--force` |
 | `plantcode git-setup` | once per clone: `git diff` shows P&IDs as review text with their XML ids, pre-commit hook |
 | `plantcode copy <id or tag> --prefix NEWID [--tag T] [--offset DX,DY] [--into PARENT] [--rename OLD=NEW] [--renumber A:B] [--set PROP=VALUE] [--connect PIPE=ITEM:NODE] [--sense-at ID[:X,Y]] [--print]` | duplicate an object with its parts and everything that draws it, every id renamed from `NEWID`; `--rename`/`--renumber` give inner valves their own tags, `--set` e.g. the fluid code, `--connect` closes an open pipe end, `--sense-at` re-points an instrument's sensing location; prints the new ids, the lines written, what was not copied and the tags still duplicated |
 | `plantcode move <id or tag> --offset DX,DY [--print]` | move an object's drawing (symbol, node positions, labels); attached lines follow, bends that stay are listed |
 | `plantcode rename OLD NEW [--children] [--ids] [--tag] [--print]` | an id and every `#OLD` reference (`--children`: also `OLD_*`); given a tag, the tag data and its labels (`--ids`: and the ids that spell it); `--tag`: NEW is the new tag of the object with the id OLD (retag one of two objects sharing a tag; an instrument's sensor and actuator follow) |
 | `plantcode set <id or tag> PROP=VALUE... [--print]` | data values by DEXPI name, typed (string, number, enumeration, `'50 mm'` quantity, `Stroke.Width`), and the label texts showing them; `PROP=` removes one |
-| `plantcode run [--fmt SHEET] SCRIPT [ARGS]` | run a Python script in plantcode's interpreter (pyDEXPI and `plantcode.authoring` import), cwd the repository root; arguments and exit code pass through; `--fmt` goes before SCRIPT (after it, it goes to the script) |
+| `plantcode run [--fmt SHEET] SCRIPT [ARGS]` | run a Python script in plantcode's interpreter (pyDEXPI and `plantcode.domains.piping.authoring` import), cwd the repository root; arguments and exit code pass through; `--fmt` goes before SCRIPT (after it, it goes to the script) |
 | `plantcode regen [SHEET...] [--force \| --detach \| --list]` | rebuild generated sheets (frame -> script -> fmt); refuses a sheet edited by hand and names the items; `--detach` makes a sheet hand-maintained |
 | `plantcode process build [SHEET...] [--force]` | generate the BFD and PFD from `process/*.yaml`; refuses while the flowsheet has errors, and over a sheet edited by hand unless `--force` |
 | `plantcode process streams [--case C] [--md \| --csv \| --json]` | the stream table (value, unit, provenance G/A/C per property, stale calculated values) and the balance of every block and step |

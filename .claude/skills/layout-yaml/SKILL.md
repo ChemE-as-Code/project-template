@@ -5,6 +5,14 @@ description: Edit the 3D layout in layout/ - site plan (areas, roads, pipe racks
 
 # Editing the 3D layout
 
+## Purpose and when to use
+
+Edit the 3D layout in `layout/` and keep it consistent with the equipment list and clear of
+clashes. Use it when placing, moving or resizing equipment, or adding a building, area, road
+or rack.
+
+## Required inputs and missing inputs
+
 Three optional files, explained in `layout/README.md`; their schemas are
 `plantcode schema site_plan`, `plantcode schema building` and `plantcode schema placement`.
 Coordinates are metres, x east, y north, z up, origin at the site's south-west corner.
@@ -12,6 +20,11 @@ Coordinates are metres, x east, y north, z up, origin at the site's south-west c
 1. **Read first**: `layout/site-plan.yaml` for the site box and what is already taken (areas,
    roads, racks), `layout/building.yaml` for building outlines and level elevations, and
    `equipment/equipment-list.yaml` for the tags and types.
+
+A dimension not known yet may be estimated: mark it `notes: ASSUMED ...` (step 2).
+
+## Workflow and tools
+
 2. **Placing equipment** (`layout/equipment-placement.yaml`):
    - one entry per equipment-list tag, spelled exactly as in the list (`plantcode.layout-unknown-tag`
      otherwise); every listed item should get one (`layout-not-placed` is reported as info).
@@ -54,9 +67,28 @@ Coordinates are metres, x east, y north, z up, origin at the site's south-west c
    prints them; never write a distance you have not measured.
 7. **Buildings** turn only in steps of 90 degrees, about their `origin` corner. Column grid
    offsets are along the building's own x and y and must lie within its width and depth.
+
+## Validation and failure handling
+
 8. **Check**: run `plantcode validate`; it ends with `compared: ...` naming `layout` among the
    cross-checks when the layout rules ran. Fix every `plantcode.layout-*` error; a `yaml.schema`
    error names the line. Then look at it: `plantcode serve` and open **Layout 3D**, where
    clashing items show red and the findings are listed beside the model.
+
+## Outputs and provenance
+
+The edited `layout/*.yaml` files; the layout basis, assumed dimensions and measured distances
+go into `DESIGN.md`.
+
 9. When a tag changes in the equipment list or on a P&ID, change it here too, in the same
    commit.
+
+## Required human judgment
+
+Maintenance and access space, pump positions and spacing criteria are design choices:
+plantcode only flags real intersections and measures the `separations:` you give it.
+
+## References
+
+- `layout/README.md`; `plantcode schema site_plan`, `building`, `placement`
+- `plantcode show <tag> --layout`, `plantcode serve` (**Layout 3D**)

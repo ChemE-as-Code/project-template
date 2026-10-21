@@ -1,7 +1,7 @@
 # Scripts
 
 Generator scripts for P&ID sheets. Run them with `plantcode run scripts/<script>.py ARGS`: it
-uses plantcode's own interpreter, where pyDEXPI and the authoring API `plantcode.authoring`
+uses plantcode's own interpreter, where pyDEXPI and the authoring API `plantcode.domains.piping.authoring`
 import (`python3` and `uv run python` do not have them here). `example_draft.py` shows the API.
 
 A sheet is in one of two states, set in `plant.yaml`:

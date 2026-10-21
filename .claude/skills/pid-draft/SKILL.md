@@ -1,9 +1,16 @@
 ---
 name: pid-draft
-description: Draft a new P&ID sheet from the design basis and equipment list - start from the empty sheet, add equipment, lines, valves, instruments, signal lines and off-page connectors with plantcode fragment (any size of sheet); a generator script using the plantcode.authoring API, run by plantcode run, only for what fragments cannot express. Use when a sheet does not exist yet or a section is redrawn from scratch.
+description: Draft a new P&ID sheet from the design basis and equipment list - start from the empty sheet, add equipment, lines, valves, instruments, signal lines and off-page connectors with plantcode fragment (any size of sheet); a generator script using the plantcode.domains.piping.authoring API, run by plantcode run, only for what fragments cannot express. Use when a sheet does not exist yet or a section is redrawn from scratch.
 ---
 
 # Drafting a new P&ID sheet
+
+## Purpose and when to use
+
+Draft a new sheet in `pid/` when it does not exist yet or a section is redrawn from scratch;
+change an existing sheet with `pid-edit`.
+
+## Required inputs and missing inputs
 
 Inputs: the PFD (`process/flowsheet.yaml` and `process/PFD.xml`, skill `process-design`),
 `process/design-basis.yaml`, `equipment/equipment-list.yaml`, `piping/line-list.yaml`,
@@ -26,6 +33,8 @@ The sheet split can be declared at concept stage, before anything is drawn: list
 `plant.yaml` with `status: planned` (no file needed) and give every list item its `sheet:`.
 Validate then reports the planned sheet as info and holds back the not-on-pid findings of the
 items assigned to it; do not create empty frames to silence it.
+
+## Workflow and tools
 
 1. **Plan on paper first.** Write the sheet's content as a short list in `DESIGN.md`: equipment
    (tag, class, the PFD step it implements), lines (number, from, to, DN, the PFD stream it
@@ -58,7 +67,7 @@ items assigned to it; do not create empty frames to silence it.
      `plantcode render pid/<sheet>.xml --png --crop X0,Y0,X1,Y1` around it to see it placed.
      `plantcode show <id>` finds what you wrote earlier by id or tag.
    - **Generator script, when fragments cannot express it** (or the sheet should stay
-     generated): write `scripts/draft_<sheet>.py` with the Python API `plantcode.authoring`
+     generated): write `scripts/draft_<sheet>.py` with the Python API `plantcode.domains.piping.authoring`
      (start from `scripts/example_draft.py`) and run it with
      **`plantcode run scripts/draft_<sheet>.py pid/<sheet>.xml`**. System `python3` and
      `uv run python` cannot import pyDEXPI or plantcode in a plant repository; `plantcode run`
@@ -66,8 +75,16 @@ items assigned to it; do not create empty frames to silence it.
      repository root.
      ```python
      import sys
-     from plantcode.authoring import Sheet, Nozzle, equipment, line, valve, tee, instrument
-     from plantcode.authoring import offpage, note
+     from plantcode.domains.piping.authoring import (
+         Sheet,
+         Nozzle,
+         equipment,
+         line,
+         valve,
+         tee,
+         instrument,
+     )
+     from plantcode.domains.piping.authoring import offpage, note
 
      sheet = Sheet.load(sys.argv[1])  # the frame: the empty sheet
      pump = equipment(
@@ -127,3 +144,22 @@ items assigned to it; do not create empty frames to silence it.
 7. **Commit** the sheet, the plant.yaml entry, the lists and the script together. For a
    generated sheet commit the script and the regenerated sheet in the same commit, so `regen`
    can tell later hand edits from script changes.
+
+## Validation and failure handling
+
+Step 4: `plantcode validate` until clean, then render and read the sheet; a finding in a
+generated sheet is fixed in the script and the sheet regenerated.
+
+## Outputs and provenance
+
+`pid/<sheet>.xml`, its `plant.yaml` entry, the list entries and any `scripts/draft_<sheet>.py`,
+committed together (step 7); the script is the source only if `generator:` names it (step 3).
+
+## Required human judgment
+
+The layout and sheet split (step 1); approver and checker go in only after sign-off (step 2).
+
+## References
+
+Skills `dexpi-xml`, `pid-edit`, `lists-sync`, `process-design`; `scripts/README.md`,
+`scripts/example_draft.py`.

@@ -28,6 +28,18 @@ branch, where the stage's sign-off takes effect.
 A review gate fails when a file of `scope` changed after `reviewed_commit`, so a review always
 covers the drawings as they are.
 
+Optionally, `basis:` lists other files the review rests on without reviewing them, each with the
+revision used (a commit sha, or `sha256:<hex>` of the file) and how the review relates to it
+(`derived-from`, `represents`, `analyses` or `depends-on`, the default):
+
+```yaml
+basis:
+  - {path: process/flowsheet.yaml, revision: <sha>, relation: analyses}
+```
+
+`plantcode impact` lists the records whose scope or basis changed since, as review needed
+(info). It never changes a record or marks it invalid.
+
 ## Findings
 
 ```markdown
