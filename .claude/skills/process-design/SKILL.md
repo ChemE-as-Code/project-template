@@ -132,6 +132,11 @@ never overwrites), and rerun `--fill` when `validate` reports them stale. A comp
 that becomes evaluable and fails is a design finding: correct the assumed values, and record it
 in `DESIGN.md`. Run propagate before `props --fill`.
 
+`plantcode process simulate --fill` solves the whole flowsheet in DWSIM, separators, exchangers,
+columns and recycles included, from the feeds and the specs in `process/simulation.yaml`; see
+the skill `process-simulation`. It writes what propagate cannot (temperatures, pressures, the
+outlets of separators) and reports where an assumed value contradicts the energy balance.
+
 `plantcode process props --fill` (plantcode installed with the `props` extra) writes `phase` and
 `calculated: {molar_mass, density, enthalpy}` with provenance `calculated`, a source and an
 input fingerprint, and records the method and package versions in `materials.yaml`. It never

@@ -13,7 +13,9 @@ schema: plantcode/lca/v1
 kind: lca_factors
 example: true
 categories:
-  - {id: climate-change, title: Climate change, unit: kg CO2-eq, method: IPCC 2021 GWP100}
+  # elementary: the packaged method that characterises the plant's own emissions (mapped
+  # elementary: {compartment, origin} in lca/lca.yaml) in this category, by CAS number
+  - {id: climate-change, title: Climate change, unit: kg CO2-eq, method: IPCC 2021 GWP100, elementary: ipcc2021-gwp100}
 factors:
   - {id: electricity, title: "EXAMPLE grid electricity", unit: kWh, values: {climate-change: 0.5}, status: ASSUMED, source: "EXAMPLE placeholder", year: 2026}
   - {id: co2-fossil, title: "EXAMPLE fossil CO2 to air", unit: kg, values: {climate-change: 1.0}, status: ASSUMED, source: "EXAMPLE: IPCC 2021 GWP100 of CO2 is 1 by definition", year: 2021}

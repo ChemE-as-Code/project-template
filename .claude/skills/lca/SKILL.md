@@ -39,15 +39,22 @@ gate `lca` fails.
 
 1. **Scope.** Write `lca/lca.yaml`: `goal`, `functional_unit`, `boundary`, `case`. Decide the
    co-products. With several products (an ASU: GOX, GAN, LOX, LIN), allocation changes the
-   answer more than most factors. Mass allocation is the screening default. Use economic
-   allocation when prices differ widely. Exergy or substitution are better when the products'
-   states differ; for those, compare variants and record why.
+   answer more than most factors. ISO 14044 prefers avoiding allocation (system expansion:
+   `method: substitution`, with the avoided production of each co-product); otherwise a
+   physical basis (`exergy` when the products differ in pressure, temperature or purity; run
+   `plantcode process props --fill` first, or give `properties.<product>.exergy`), then
+   economic. Read the allocation comparison in `lca/results.md`: every method whose data is
+   complete is computed. Choose one, record why in `allocation.source`, and report the
+   spread.
 2. **Map every flow.** Run `plantcode assess lca` and read `plantcode.lca-unmapped`. For each
    feed, product and emitted component give one entry:
    - `free: true` for resources without burden (ambient air) and for atmospheric components
      returned unchanged (N2, O2, Ar, water, CO2 taken in with the air);
-   - `emission: true` for a product released to the environment;
-   - a `factor:` or an `activity:` otherwise.
+   - `emission: true` for a product released to the environment, then each component free or
+     `elementary: {compartment: air, origin: fossil}` (characterised by its CAS number);
+   - a `factor:` or an `activity:` otherwise, or a `dataset:` (another process's unallocated LCI
+     dataset, `kind: lci_dataset`) when the input comes from a process modelled in the
+     repository or a process library.
    Choose market activities ("market for electricity, medium voltage") for the right location.
    For energy, mind the unit: the inventory counts kWh, a heat activity is per MJ, and the
    conversion is automatic when the kinds match.
@@ -59,10 +66,14 @@ gate `lca` fails.
    the contributions. Check the dominant contributor against an independent estimate. Example:
    specific power x grid factor for an air separation, or the fuel's carbon for a reformer.
    Investigate any result that disagrees by more than the data's accuracy.
-5. **Scenarios.** Add `scenarios:` for the questions the goal asks, e.g. a grid factor for 2030
+5. **Uncertainty.** Give `uncertainty:` with defaults by provenance (assumed values wider than
+   given ones), and the known uncertainties of the main flows and factors (gsd2, or pedigree
+   scores for factors from a database). Report the 95 % interval with the result, and read the
+   sensitivity: refine first what ranks highest.
+6. **Scenarios.** Add `scenarios:` for the questions the goal asks, e.g. a grid factor for 2030
    or 2050 (`factors:`), or premise databases (`databases:`, see docs/framework/lca.md). Name
    the model, pathway and year in `source`.
-6. **Write and gate.** `plantcode assess lca --write`; commit `lca/*` with the inputs. The gate
+7. **Write and gate.** `plantcode assess lca --write`; commit `lca/*` with the inputs. The gate
    `kind: lca` requires `mapped`, then `lca-current`, and `factors` once the project's own
    replace the example.
 
@@ -87,6 +98,8 @@ gate `lca` fails.
   mapping.
 - `lca/results.csv` and `lca/results.md`: impacts per scenario, category, phase and
   contributor, with the factor's status, source and year, or the Brightway activity.
+- `lca/dataset.yaml`: the plant's unallocated LCI dataset (foreground scope, per hour): what
+  a process library keeps and other studies reference.
 - `--json` adds the findings and the source revision (git commit, fingerprints of the files
   read).
 

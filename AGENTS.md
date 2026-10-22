@@ -27,8 +27,8 @@ This repository is a process plant design. The files are the design; there is no
   `plant.yaml`) are **generated** from `process/materials.yaml` and `process/flowsheet.yaml` by
   `plantcode process build` (skill `process-design`). Change the YAML and rebuild, never the XML
   (`plantcode.generated-edited`). Stream values carry their provenance (`given` with a `source`,
-  `assumed`, `calculated` by `plantcode process propagate --fill` or `plantcode process props
-  --fill` only); `DESIGN.md` keeps the
+  `assumed`, `calculated` by `plantcode process propagate --fill`, `plantcode process simulate
+  --fill` or `plantcode process props --fill` only); `DESIGN.md` keeps the
   decisions, not a second copy of the numbers. P&IDs start from the PFD (skill `pid-draft`).
 - After every change: `plantcode fmt <sheet>`, then `plantcode validate`. Fix every `error`. Do not
   commit with errors; the pre-commit hook and CI refuse it anyway.
@@ -99,6 +99,7 @@ This repository is a process plant design. The files are the design; there is no
 | `plantcode process build [SHEET...] [--force]` | generate the BFD and PFD from `process/*.yaml`; refuses while the flowsheet has errors, and over a sheet edited by hand unless `--force` |
 | `plantcode process streams [--case C] [--md \| --csv \| --json]` | the stream table (value, unit, provenance G/A/C per property, stale calculated values) and the balance of every block and step |
 | `plantcode process propagate --fill \| --check [--case C]` | compositions and flows through pass-through steps, mixers and splitters (`split:` fractions); separators and reactors only checked; never overwrites given or assumed values; `--check` writes nothing |
+| `plantcode process simulate --fill \| --check [--case C] [--save F.dwxmz]` | the flowsheet solved by DWSIM (skill `process-simulation`): property package and step specs from `process/simulation.yaml`; temperatures, pressures, flows, compositions and duties of the streams downstream of the feeds; never overwrites given or assumed values, a deviation from them is a warning; `--check` writes nothing |
 | `plantcode process props --fill \| --check [--case C]` | phase, molar mass, density, enthalpy (extra `props`), inside the validated range only; never overwrites given or assumed values; `--check` writes nothing |
 | `plantcode process layout [IDS...] [--view bfd\|pfd] [--pin]` | the generated positions; `--pin` writes them into `layout.<view>` of `flowsheet.yaml` |
 | `plantcode fragment KIND --id ID [--sheet F] ...` | ready-to-paste XML, a CONCEPTUAL and a DRAWING part each saying where it goes; KIND `valve`, `tee`, `node`, `pipe`, `segment`, `line`, `label`, `equipment`, `nozzle`, `instrument`, `signal`, `offpage`, `note`, `shape` (`plantcode fragment --help`, skill `dexpi-xml`) |
@@ -110,6 +111,7 @@ This repository is a process plant design. The files are the design; there is no
 | `plant.yaml` | `plant` (sheets, each optionally with `generator: {script, frame}`) |
 | `process/design-basis.yaml` | `design_basis` |
 | `process/materials.yaml` | `process-materials` (components, templates, the property method `props --fill` records) |
+| `process/simulation.yaml` | `process-simulation` (property package, specs per step, tear streams; optional) |
 | `process/flowsheet.yaml` | `process-flowsheet` (units, cases, tolerance, feeds, products, blocks, steps, streams with per-case state and provenance, links, `layout.bfd`/`layout.pfd`) |
 | `equipment/equipment-list.yaml` | `equipment` (tag, type, service, sheet, design data, `dimensions`, notes) |
 | `piping/line-list.yaml` | `lines` (number, from, to, nominal_diameter, ..., notes, `segments` with a DN each) |
