@@ -1,6 +1,6 @@
 ---
 name: structures-access
-description: Decide what stands on a steel structure and how people reach it - frames in layout/structures.yaml (levels, bracing, stairs, ladders, enclosures such as a cold box casing or fire wall), equipment mounted on their levels, access platforms and ladders for manways, valves and instruments above 2.5 m, escape routes and maintenance envelopes. Use when an item is elevated, a platform is proposed (review_needed), a cold box or enclosure is modelled, or access findings appear.
+description: Decide what stands on a steel structure and how people reach it - frames in layout/structures.yaml (levels, bracing, stairs, ladders, enclosures such as a cold box casing or fire wall with their openings), equipment mounted on their levels, access platforms and ladders for manways, valves and instruments, escape (two ways down, travel to a stair), crane pads, lifting lanes and laydown, and maintenance envelopes. Use when an item is elevated, a platform is proposed (review_needed), a cold box or enclosure is modelled, or access, escape, operability, lifting or wall penetration findings appear.
 ---
 
 # Structures and access
@@ -46,9 +46,30 @@ review.
 3. **Cold boxes and enclosures.** Model a cold box as a structure with an `enclosure` (casing
    walls all round, the casing's height) and the columns, exchangers and separators inside it
    mounted or standing at grade inside its footprint; stacked columns stand on each other. Keep
-   the casing's purge, breather and manholes on the P&ID and their access on the frame. An
-   enclosure is not a pipe obstacle (pipes pass through the casing); a fire wall's separation
-   distances go in `separations:` of the site plan.
+   the casing's purge, breather and manholes on the P&ID and their access on the frame. The
+   walls are obstacles for lines passing by and passable for a line with an end inside; every
+   pipe that meets a wall outside a declared opening is a model `penetration` with the opening
+   it would need (finding `layout-wall-penetration`: info for a casing penetration, a warning
+   for a fire wall, a building's cladding, a line passing through or one running in the wall).
+   Declare the openings you accept (`enclosure: {..., openings: [{id, side, offset, width,
+   height, sill, kind: opening}]}`, offset along the side from its left end seen from outside,
+   sill above grade; or `plantcode layout pin OWNER/LINE`): the walls are cut around them. A
+   fire wall's separation distances go in `separations:` of the site plan.
+   **Nobody stands inside a casing.** A perlite-filled, purged cold box has no walkable level
+   below the top of its walls: a level whose extent lies inside the frame and below the casing
+   height is no walking level and is finding `layout-access-enclosed` (so are ladders, stairs
+   and item platforms inside it); it does not count as a way down, and nothing is operable
+   from it. Put the access platforms outside the casing: a level's `extent` may reach up to
+   3 m outside the frame (a cantilevered platform, e.g. `[0, 9.2, 15, 10.7]` along the north
+   face of a 9 m deep casing with 0.2 m walls). The build proposes such a platform for every
+   level inside the casing (`S/<level>-out`, along the side the level runs longest on, outside
+   the wall, `review_needed`) and a landing at the casing roof on that side, with the stairs
+   and ladders to them outside the platforms: pin the platforms first (`plantcode layout pin
+   CB-1/P10-out`), then the stairs and ladders. Valves and instruments inside the casing are
+   not operable from outside (`layout-operability`): route them to the casing face and
+   declare an access `hatch` (`openings: [{..., kind: hatch}]`) within `casing_reach_m`
+   (1 m) of the item, with a platform outside within reach of the hatch, or bring the item
+   out of the casing.
 4. **Platforms and ladders of vertical items.** The build proposes a platform for every nozzle
    and in-line valve more than 2.5 m above the item's base (`review_needed: true`, `serves:`
    lists them). For each proposal decide: needed (operating or maintenance access), reachable
@@ -67,13 +88,57 @@ review.
      structure's working levels;
    - every platform and deck has two ways out where the travel distance or the hazard (oxygen,
      inert vents, flammables) requires it; escape routes are declared as `escape` zones in
-     `layout/zones.yaml` (kept clear of pipes up to the walkway headroom);
+     `layout/zones.yaml` (kept clear of pipes up to the walkway headroom). The rules check it:
+     `layout-escape-ways` (a structure floor with fewer than two **connected declared** ways
+     down to grade: a stair or ladder counts only when it is outside any casing, its top
+     landing reaches the floor (within 0.3 m in plan; a ladder's top within 0.8 m), its foot
+     stands on the floor below, and that floor has its own connected way down; proposals count
+     once pinned; an item's platform whose far end is more than `dead_end_m`, 7.5 m, along it
+     from its only ladder), `layout-access-unconnected` (a declared stair or ladder that does
+     not reach the levels it names: a stair tower beside the platforms serves none of them),
+     `layout-escape-travel` (a floor at 6 m or more, or in regular use, without a connected
+     declared stair, or a point of it more than `stair_travel_m`, 25 m, from its nearest
+     stair). Where the stair's top landing lands depends on its flights (an odd number ends at
+     the far end of its run, an even number at its start): check it in a section;
+   - valves and instruments within reach: `layout-operability` flags a manual handwheel or lever
+     more than 1.8 m (a transmitter more than 2 m) above the nearest floor below it within
+     0.6 m in plan (stair landings, a tank's landing and roof platform count as floors; treads
+     do not), and every in-line item inside a casing (above). Give it a platform, move it, or
+     record a chain wheel;
    - headroom on platforms and walkways at least 2.1 to 2.2 m (`headroom_walkway_m`).
-5. **Maintenance envelopes.** Keep the generated `bundle_pull` (in front of an exchanger's
+5. **Access proposals on structures and racks.** The build proposes (`source: generated`,
+   `review_needed: true`, with a `reason`) a stair for every structure level at 6 m or higher,
+   or in regular use (`use: regular`; a deck's default), that has no connected stair down:
+   stacked on the frame's declared stair where that reaches the level, else on a side the
+   level reaches, from the highest floor below its foot lands on; a caged ladder while a floor
+   (levels at one elevation within 0.3 m of each other, not across a casing wall) has fewer
+   than two connected ways down (outside the casing); a caged ladder at each free end of a rack, to its top
+   tier; and a step-over where a low pipe (top within 0.75 m) crosses an escape route or a
+   grating. Decide each one like a platform: pin it (`plantcode layout pin S-1/stair-to-L2`,
+   `S-1/ladder-to-L2`, `RACK/ladder-start`), declare something else (a stair on another side,
+   `ladders: []` on a rack reached from a structure), or move the pipe. Step-overs follow the
+   route: raise or reroute the pipe rather than accept many of them. Guard rails are drawn with
+   a top rail, a mid rail, a toe plate and posts. The rules are ASSUMED defaults: check them
+   against the site's standard and the local regulations.
+6. **Maintenance envelopes.** Keep the generated `bundle_pull` (in front of an exchanger's
    channel), `motor_removal` and pump `access` boxes free of steel, pipes and other items
    (`layout-access-blocked`); add `maintenance` and `laydown` zones for crane access, removal
    routes and laydown areas. Look at them in a plan (`plantcode layout render --plan --png`) and
    a section through the structure (`--section x=.. --png`).
+7. **Lifting.** Give heavy items their `weight` (t) in the equipment list's `dimensions`. An
+   item of `heavy_lift_t` (5 t) or more needs a crane: inside a building its overhead crane
+   (`crane: {capacity_t}` at least the item's weight), outside a `crane_pad` zone (`kind:
+   crane_pad`, a box where the mobile crane stands, with its `reach_m`) within reach, with the
+   lane from the pad over the item clear above the item's top (no pipes, cable trays, ducts,
+   racks, steel or roofs: `layout-lifting`; a tray over the item, even its own feed, blocks the
+   lift: bring the cable in from the side or at grade), and a `laydown` zone within reach that
+   holds the item's footprint (`layout-laydown`). Crane pads and laydown zones stand on open
+   ground: one overlapping a rack, a structure or a building is `layout-pad-overlap`. Items
+   inside a closed casing are left out.
+8. **Criteria.** The values above (operator height and reach, dead end, stair travel, heavy
+   lift, crane reach, lane margin and clearance) are package defaults, ASSUMED. Where the site's
+   standard says otherwise, put its values under `criteria:` in `layout/site-plan.yaml` and
+   cite the standard in `DESIGN.md`.
 
 ## Validation and failure handling
 
@@ -82,15 +147,19 @@ review.
   objects generated, pinned or declared).
 - Gate `layout-3d` requirement `mounted`: every item above grade on a building or structure
   level, or stacked on another item.
+- `layout-escape-*`, `-access-enclosed`, `-access-unconnected`, `-operability`, `-lifting`,
+  `-laydown`, `-pad-overlap`, `-wall-penetration` findings: fix
+  the cause, or accept the finding with the reason (an operating philosophy, a mobile crane
+  plan) and record it in the layout review.
 - A frame that fails its schema (spans, levels, a stair to an unknown level) names the line;
   fix it before building (the build refuses invalid layout files).
 
 ## Outputs and provenance
 
-`layout/structures.yaml`, the `mount:` and `access:` of the placements, zones for escape and
-maintenance; the rebuilt `layout/plant-model.yaml`. Structures, stairs and ladders are
-`source: declared`; generated platforms stay `generated` with `review_needed` until pinned or
-declared. Record the access philosophy and the assumed sections in `DESIGN.md`.
+`layout/structures.yaml`, the `mount:` and `access:` of the placements, rack `ladders` in the
+site plan, zones for escape and maintenance; the rebuilt `layout/plant-model.yaml`. Structures,
+stairs and ladders are `source: declared`; generated platforms, stairs, ladders and step-overs
+stay `generated` with `review_needed` until pinned or declared. Record the access philosophy and the assumed sections in `DESIGN.md`.
 
 ## Required human judgment
 

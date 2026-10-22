@@ -3,7 +3,8 @@
 The 3D layout of the plant, as optional YAML files and a generated model. `plantcode validate` checks them
 against their schemas and each other; `plantcode serve` shows them in 3D (Layout 3D in the
 viewer). The skill `.claude/skills/layout-yaml` says how to edit them; `pipe-routing`,
-`structures-access` and `area-classification` cover routes, steel and access, and zones.
+`structures-access`, `area-classification` and `hvac-ducts` cover routes, steel and access,
+zones, and ventilation.
 
 | file | schema | holds |
 |---|---|---|
@@ -12,6 +13,7 @@ viewer). The skill `.claude/skills/layout-yaml` says how to edit them; `pipe-rou
 | `equipment-placement.yaml` | `plantcode schema placement` | where each equipment-list item stands, on which level, nozzle overrides |
 | `structures.yaml` | `plantcode schema structures` | steel frames: spans, levels (deck/platform), bracing, stairs, ladders, enclosure (cold box casing, fire wall) |
 | `zones.yaml` | `plantcode schema zones` | keep-clear, laydown, maintenance, escape, hazardous, oxygen-enriched/-deficient zones: a box/cylinder/sphere, or `sources` sized by plantcode's radius table (ASSUMED) |
+| `hvac.yaml` | `plantcode schema hvac` | air handling units (in a building, `intake` and `exhaust` louvres), ventilated rooms (`air_changes_per_h` or `flow_m3h`, the unit, optional terminals), duct rules (velocity limits, sides, ceiling gap, spacing; defaults ASSUMED); optional, skill `hvac-ducts` |
 | `../piping/routing.yaml` | `plantcode schema routing` | router rules (rack tiers by fluid or line prefix, battery limits, pipe-way elevation, `local_max_m`, spacing, headroom, grid) and intent per line (`rack`, `tier`, `via`, `elevation`, pinned `route`, `skip`) |
 | `../piping/pipe-specs.yaml` | `plantcode schema pipe_specs` | pipe classes (material, colour) and insulation thickness by type and DN (optional) |
 | `plant-model.yaml` (generated) | `plantcode schema layout_model` | the 3D model `plantcode layout build` derives: parts, nozzles, envelopes, steel, platforms, zones, pipe routes, in-line items |

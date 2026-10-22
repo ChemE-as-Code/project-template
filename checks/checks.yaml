@@ -100,6 +100,14 @@ checks:
     # accept:
     #   - id: "layout/plant-model.yaml#layout-clash-pipe:P-01/Line_A_S1+P-01/Line_B_S1"
     #     reason: "insulated lines touch at the support only; J. Smith, layout review 2026-11-02"
+  # The material take-off of the 3D model (estimate/, skill mto-estimate): rewritten after the
+  # model's last change. Add rates (the project's own, not the example) and estimate-current
+  # once the project prices it.
+  - id: mto
+    title: Material take-off current with the 3D model
+    stage: basic
+    kind: mto
+    require: [mto-current]
   - id: layout-review
     title: A current, independent layout review is recorded
     stage: basic
@@ -112,6 +120,20 @@ checks:
     kind: layout-model
     require: [model-current, nozzles, mounted, routed, clashes]
     min_dn: 0
+  # Cables and trays (electrical/, skill electrical-cabling): every motor and instrument has a
+  # cable routed in trays, no tray over its fill, power and instrument trays apart.
+  - id: electrical
+    title: A cable to every motor and instrument, routed in trays, fill and separation kept
+    stage: detail
+    kind: layout-model
+    require: [model-current, cables, trays]
+  # Ventilation (layout/hvac.yaml, skill hvac-ducts): every clad building ventilated, ducts
+  # routed inside it within their velocity limits, units and louvres large enough.
+  - id: hvac
+    title: Clad buildings ventilated, ducts routed within their velocity limits
+    stage: detail
+    kind: layout-model
+    require: [model-current, hvac]
   - id: datasheets
     title: A datasheet for every equipment-list item
     stage: detail

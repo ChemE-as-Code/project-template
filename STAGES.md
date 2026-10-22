@@ -30,10 +30,16 @@ line of DN 25 and above routed or skipped with a reason (utilities follow at det
 or headroom finding left unaccepted, zones declared (`layout/zones.yaml`, skill
 `area-classification`), and a layout review (topic `layout`, gate `layout-review`) that cites
 the rendered plot plan and at least two sections (skills `pipe-routing`, `structures-access`,
-`review`).
+`review`). The material take-off (`estimate/mto.csv`, skill `mto-estimate`) is rewritten from
+the committed model (gate `mto`).
 
 ## detail: Detail engineering
 Datasheets (one `equipment/datasheets/<TAG>.yaml` per equipment-list item, format in
 `equipment/datasheets/README.md`, `plantcode schema datasheet`; gate `datasheets`), instrument
 list, HAZOP actions closed. Every line routed, utilities and small bore included, still
-without clashes (gate `layout-detail`).
+without clashes (gate `layout-detail`). Every motor and instrument has a cable routed in trays
+from its room, no tray over its fill, power and instrument trays kept apart
+(`electrical/electrical-list.yaml`, skill `electrical-cabling`; gate `electrical`). Every
+clad building is ventilated: air handling units, rooms with their air changes, ducts routed
+inside the building within their velocity limits, louvres large enough (`layout/hvac.yaml`,
+skill `hvac-ducts`; gate `hvac`).
