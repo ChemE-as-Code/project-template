@@ -93,6 +93,8 @@ This repository is a process plant design. The files are the design; there is no
 | `plantcode layout render --plan [--level ID \| --z A,B] \| --section x=V\|y=V [--depth D] [--crop X0,Y0,X1,Y1] [--png]` | plot plan, level plans and sections of the model into `build/layout-*.svg\|png` |
 | `plantcode layout cables [--csv \| --json] [--write \| --check]` | the cable schedule of `layout/plant-model.yaml` (every motor, feeder, instrument and junction box cable: from, to, size, trays, length; trays with width and fill); `--write` into `electrical/cable-schedule.*` (skill `electrical-cabling`) |
 | `plantcode assess mto \| estimate [--csv \| --json] [--write \| --check]` | the material take-off of `layout/plant-model.yaml` (pipe by DN, class and insulation, fittings, flanges, valves, steel tonnage, grating, insulation, concrete) and its estimate with `estimate/rates.yaml` (factor method); `--write` into `estimate/` (skill `mto-estimate`) |
+| `plantcode assess lca [--csv \| --inventory \| --json] [--write \| --check]` | the LCA per functional unit (skill `lca`): operation (the flowsheet's feeds and products in the case of `lca/lca.yaml`) and construction (take-off, equipment weights), allocated between co-products, characterised with `lca/factors.yaml` or a Brightway project, baseline and scenarios; `--write` into `lca/` |
+| `plantcode assess lca-search TEXT [--database DB]` | activities of the Brightway project (extra `lca`), as `activity:` mappings for `lca/lca.yaml` |
 | `plantcode process build [SHEET...] [--force]` | generate the BFD and PFD from `process/*.yaml`; refuses while the flowsheet has errors, and over a sheet edited by hand unless `--force` |
 | `plantcode process streams [--case C] [--md \| --csv \| --json]` | the stream table (value, unit, provenance G/A/C per property, stale calculated values) and the balance of every block and step |
 | `plantcode process propagate --fill \| --check [--case C]` | compositions and flows through pass-through steps, mixers and splitters (`split:` fractions); separators and reactors only checked; never overwrites given or assumed values; `--check` writes nothing |
@@ -129,5 +131,7 @@ This repository is a process plant design. The files are the design; there is no
 | `electrical/electrical-list.yaml` | `electrical` (substations, transformers, rooms in buildings, defaults, the motor list's powers and rooms, feeders, junction boxes, instrument cabling) |
 | `electrical/tray-rules.yaml` (optional) | `trays` (tray widths, depth, fill, power/instrument separation, rack tray tiers, branch elevation, cable allowances) |
 | `estimate/rates.yaml` | `rates` (the project's unit rates and estimate factors, each with status, source and year; the one `plantcode init` writes is an example) |
+| `lca/lca.yaml` | `lca` (goal and scope of the LCA: functional unit, case, allocation, categories, and the background of each feed, product and emitted component) |
+| `lca/factors.yaml` | `lca_factors` (the project's characterised factors, each with status, source, year and licence; the one `plantcode init` writes is an example) |
 
 `plantcode schema <kind>` prints the full JSON Schema.

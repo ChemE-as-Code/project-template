@@ -1,0 +1,49 @@
+# LCA
+
+The life cycle assessment of the plant's operation (ISO 14040/44), per functional unit.
+
+| file | what | written by |
+|---|---|---|
+| `lca.yaml` | goal and scope: the functional unit (a product of `process/flowsheet.yaml`), the case, the allocation between co-products, the impact categories, and the background of every feed, product and emitted component (`plantcode schema lca`) | people; `plantcode init` writes none, since the flowsheet has no products yet |
+| `factors.yaml` | the project's characterised factors per kg, t, kWh, MJ, ... of a flow, one value per impact category, each with status, source, year and licence (`plantcode schema lca_factors`) | people; the file `plantcode init` writes is an **example** (`example: true`) and characterises nothing |
+| `inventory.csv` | the foreground inventory per functional unit: feeds and products of the flowsheet (kg, energy in kWh), emissions by component, co-products | `plantcode assess lca --write` |
+| `results.csv`, `results.md` | impacts per category, with the contribution of each flow | `plantcode assess lca --write` |
+
+A minimal `lca.yaml`:
+
+```yaml
+schema: plantcode/lca/v1
+kind: lca
+goal: Carbon footprint of the product for the concept comparison (DESIGN.md D-0xx)
+functional_unit: {product: PROD, amount: 1, unit: t}
+allocation: {method: mass, coproducts: [PROD, BYPROD], source: "DESIGN.md D-0xx"}
+flows:
+  - {key: feed:AIR, free: true, source: "ambient air, a resource without burden"}
+  - {key: feed:POWER, factor: electricity, source: "grid supply at the site"}
+  - {key: product:VENT, emission: true, source: "released to the atmosphere"}
+  - {key: emission:CO2, factor: co2-fossil, source: "fossil CO2 from the reformer"}
+```
+
+The construction phase counts the take-off (`estimate/mto.csv`) and the equipment weights,
+spread over the plant's life:
+
+```yaml
+operation: {hours_per_year: 8000, life_years: 20, source: "design basis"}
+construction:
+  - {id: steel, takeoff: mto, category: steel, factor: steel-sections, source: "rack and structure steel"}
+  - {id: vessels, takeoff: equipment, equipment: {material: "*SS*"}, factor: stainless-steel, source: "empty weights"}
+```
+
+With a Brightway project (ecoinvent or an open database, `pip install 'plantcode[lca]'`), set
+`backend: brightway` and give the flows an `activity:` (`plantcode assess lca-search` finds
+them). `scenarios:` compare the baseline with other factors or databases (e.g. premise 2050).
+See the skill `lca`.
+
+Never edit `inventory.csv` or `results.*` by hand: change the flowsheet, `lca.yaml` or
+`factors.yaml`, then rewrite them. Energy streams (`kind: energy`, with `duty`) from an energy
+feed (electric power, steam) or to an energy product (cooling water) are counted in kWh. The
+gate `kind: lca` (`checks/checks.yaml`, require `mapped`, `factors`, `lca-current`) checks the
+mapping is complete, the factors are the project's, and the outputs are current.
+
+Licensed databases (ecoinvent and others) must not be copied into this repository. Record the
+dataset a factor comes from in its `source` and its terms in `licence`.
