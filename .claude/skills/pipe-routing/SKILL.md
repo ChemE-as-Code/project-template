@@ -61,7 +61,8 @@ review.
      Use it for oxygen, inert and flammable vents that must discharge above where people
      stand; the criterion (radius, headroom) is ASSUMED until the vent study gives it.
 3. **Intent per line or segment** (`lines:`, `{line, segment?}`; a segment by DEXPI id or
-   segment number):
+   segment number; where a line drawn on two sheets repeats a segment id, by its pipe id
+   `<sheet stem>/<DEXPI id>`, e.g. `P-03/Line_A_S1`, which `layout pin` then writes):
    - `rack: PR2` or `tier: 8` to force the rack (and the tier);
    - `via: [[x, y, z], ...]` points the route must pass, in order; `elevation: z` runs it at
      that height;
@@ -120,16 +121,45 @@ review.
      farther between supports than the DN's span (`pipe-spans.yaml`, after ASME B31.1, liquid
      or gas by the fluid's name), or has no support in the model at all (a local pipe-way
      without steel). Small lines on a rack with bents 6 m apart usually need intermediate
-     steel or to ride on a larger line; record which. The supports themselves (shoes, guides)
-     are generated where a pipe rests on a beam;
+     steel: declare `intermediate_supports: {spacing_m: 3}` on the rack in
+     `layout/site-plan.yaml` (a stringer along each tier's edges and a beam across every
+     3 m, optionally only on `levels`), or let them ride on a larger line; record which. Off
+     the racks the build proposes support steel under each run that spans too far
+     (`support_steel`, `<pipe>/post-<k>`: a T-post from grade or a stub on the steel below,
+     dashed in the plans, named in the finding): check where it stands (roads, walkways,
+     foundations) and `plantcode layout pin <pipe>/post-<k>` it into `pipe_supports` of
+     `layout/structures.yaml`, or declare your own posts there. The supports themselves (shoes,
+     guides) are generated where a pipe rests on a beam or a declared crossbar;
    - `layout-operability`: a manual valve's handwheel or lever more than 1.8 m above the floor
-     below it (a transmitter more than 2 m), with no floor within 0.6 m in plan. Move the valve
-     on the route (a pinned route with the valve near a floor), add a platform (skill
-     `structures-access`), or record a chain wheel or extension spindle.
+     below it (a transmitter more than 2 m), with no floor within 0.6 m in plan, or no free
+     standing space there (a stair flight or steel in front of it). Move the valve on the route
+     (a pinned route with the valve near a floor), add a platform (the build proposes a
+     valve access platform `VP-<n>` and names it in the finding; skill `structures-access`),
+     or declare its operator under `operators:` in this file: a
+     `chainwheel` (a handwheel valve of `use: infrequent`, at most 6 m up), an
+     `extension_spindle` or `remote_operator` (at most 6 m long), a transmitter's
+     `remote_mount` (`via: impulse`, 6 m, or `capillary`, 10 m), each with its `basis`;
+   - `layout-headroom` over walking surfaces: a pipe lower than 2.1 m (`access_headroom_m`)
+     over a structure floor, a platform, a stair or landing, a tank's stair or roof platform.
+     Route it above the headroom or under the steel; a line leaving a casing face must clear
+     the stair tower and the platforms on that face. A pinned route is taken as it is: check
+     it against them before pinning;
+   - a pinned vent or relief route keeps its open end, so the zones derived from the line
+     (`layout/zones.yaml` sources) stay; `layout-zone-source` (also in `validate`, and failing
+     the `zones` requirement of gate `layout-3d`) means a source the model cannot place.
 7. **Pin what is good.** `plantcode layout pin LINE` (or a pipe id) copies the route into
    `piping/routing.yaml` (`route:`, `source: pinned`): later builds take it as it is, so a
-   reviewed route stays reviewed. Pin a route only after looking at it; re-pin or delete the
-   pin when its ends move (`layout build` keeps a pinned route even when it no longer fits).
+   reviewed route stays reviewed. Pinning a route as it was generated does not move the other
+   lines: a pinned pipe becomes an obstacle where its chain would have been routed, and takes
+   back its rack lane on the millimetre, so the other lines keep their lanes and tiers. It
+   keeps its racks and tier too (intermediate rack steel carries it; no post is proposed under
+   it). The other segments of its own line can move: one segment pinned out of a chain (a
+   branch's tee to a nozzle) leaves the rest of the chain to be routed from the pinned end, so
+   pin a line's segments together (`layout pin LINE`). Pin a route only after looking at it;
+   re-pin or delete the pin when
+   its ends move (`layout build` keeps a pinned route even when it no longer fits, and
+   `layout-pipe-disconnected` (error) then names every pipe end more than 10 mm from its
+   nozzle, its tee or connector partner, its placed item or its line).
 
 ## Validation and failure handling
 

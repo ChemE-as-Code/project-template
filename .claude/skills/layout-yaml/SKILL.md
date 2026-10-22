@@ -111,8 +111,10 @@ A dimension not known yet may be estimated: mark it `notes: ASSUMED ...` (step 2
    `mount: {building, level}`; on a steel frame of `layout/structures.yaml` `mount: {structure,
    level}` with `z` at the level's elevation (skill `structures-access` says when an item
    belongs on a structure). An item stacked on another (an LP column on its HP column) stands
-   on it: its `z` is the other's top. Every item above grade must be mounted or stacked (gate
-   `layout-3d`, requirement `mounted`).
+   on it: its `z` is the other's top. An item raised on a concrete foundation block (a tank
+   whose bottom outlet must stand above its pumps' suctions) takes `plinth: <height>` with
+   `z` equal to it: the model draws the plinth and a tank's stair from grade. Every item above
+   grade must be mounted, stacked or on a plinth (gate `layout-3d`, requirement `mounted`).
 7b. **Nozzles** come from the P&ID side; override the ones that must face elsewhere
    (`nozzles:` of the placement, step 2). A piped nozzle placed `basis: default` (no drawn
    position: `plantcode.layout-nozzle-defaulted`) needs an override before the basic gate
@@ -131,7 +133,15 @@ A dimension not known yet may be estimated: mark it `notes: ASSUMED ...` (step 2
    pipes through walls outside them as `penetrations` (`plantcode layout pin OWNER/LINE`).
 7e. **Pipe routes** (`piping/routing.yaml`): rules (rack tiers per fluid, battery limits, the
    pipe-way elevation, vent riser heights) and intent per line (`rack`, `tier`, `via`,
-   `elevation`, `skip: reason`, pinned `route`): skill `pipe-routing`.
+   `elevation`, `skip: reason`, pinned `route`): skill `pipe-routing`. `operators:` declares
+   how a valve or transmitter out of reach is worked (chain wheel, extension spindle, remote
+   operator, remote mount): skill `structures-access`.
+7f. **Crane charts** (`layout/crane-chart.yaml`, kind `crane_chart`, optional): the load chart
+   of a crane the project has chosen (radius against capacity, with its source), so
+   `plantcode layout lifting` checks each heavy lift's capacity; skill `structures-access`. A
+   machine train whose heaviest maintenance lift is one part (the motor that sets a building
+   crane) gives it as `dimensions.lift_weight` in the equipment list (ASSUMED with its basis
+   until the vendor's).
 
 ## Validation and failure handling
 

@@ -71,11 +71,16 @@ check goes under "Not checked" in the record.
      rule (`layout-clash-*`, `-headroom`, `-access-blocked`, `-zone-crossing`, `-separation`,
      and the engineering rules `-wall-penetration`, `-tier`, `-vent-outlet`, `-free-span`,
      `-operability`, `-access-enclosed`, `-access-unconnected`, `-escape-ways`,
-     `-escape-travel`, `-lifting`, `-laydown`, `-pad-overlap`, `-spacing`,
-     `-building-spacing`, and the tray rules `-tray-zone`, `-tray-span`),
-     platforms, stairs, ladders and penetrations `review_needed`. For each engineering finding
+     `-escape-travel`, `-ladder-clearance`, `-walkway-riser`, `-landing-width`, `-egress-zone`, `-operator-unknown`, `-lifting`,
+     `-laydown`, `-pad-overlap`, `-spacing`, `-building-spacing`, `-zone-source`, and the
+     tray rules `-tray-zone`, `-tray-span`),
+     platforms, stairs, ladders, valve access platforms (`VP-<n>`), support steel
+     (`support_steel`) and penetrations `review_needed`, and every `layout-pipe-disconnected`
+     (error: a pipe end that does not meet its connection). For each engineering finding
      say whether it is fixed, accepted (with the reason) or open; their criteria are ASSUMED
-     package values unless `criteria:` in the site plan cites the site's standard;
+     package values unless `criteria:` in the site plan cites the site's standard. An
+     acceptance that quotes a length (a span, a run, a distance) must quote the current one:
+     `plantcode.accept-stale` (validate) names one whose value is out of date;
    - render and **read** the plot plan and at least two sections: `plantcode layout render
      --plan --png` (`build/layout-plan.png`), `--section y=<across the main rack> --png` and
      `--section x=<through the tallest structure or cold box> --png`, plus crops around what
@@ -87,7 +92,10 @@ check goes under "Not checked" in the record.
      upwind of vents, pumps near their suction source, maintenance envelopes free, every
      elevated valve, instrument and manway reachable (skill `structures-access`), vent and
      relief outlets above the walking levels, pipes through walls only in declared openings,
-     heavy items with a crane, a clear lane and laydown, escape routes;
+     heavy items with a crane, a clear lane and laydown (`plantcode layout lifting`: the
+     working radius, load moment and capacity needed per lift), escape routes; the
+     operators declared for valves and transmitters out of reach (`operators:` in
+     `piping/routing.yaml`): a chain wheel only on a valve that is really used rarely;
      a rule that finds nothing is not proof: look in the sections for platforms, ladders and
      valves inside a casing, stair towers whose landings meet no platform, relief tailpipes
      under stairs and landings, trays over machines and in zones, crane pads on racks,

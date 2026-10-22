@@ -17,6 +17,31 @@ named after its tag). Change a value in the datasheet and the list in the same c
   basis, a `DESIGN.md` decision).
 - `sizing_basis`: the figures the item is sized from, each with its `reference`.
 - `type_specific`: fields of the equipment type (a pump's NPSH, a vessel's volume, ...).
+- `nozzles`: name, DN and lines from the P&ID; where the layout fixes a nozzle's position, also
+  `face` (`top`, `bottom`, `side`), `orientation_deg` (plan direction from site east,
+  counter-clockwise, as `angle_deg` in `layout/equipment-placement.yaml`: of the axis for a
+  side nozzle, of its offset from the item's centre for a top or bottom one), `offset_m` (a top
+  or bottom nozzle's plan distance from the centre), `elevation_m` (centre above the item's
+  base) and `location_source`. `plantcode validate`
+  compares them with `layout/plant-model.yaml` (`plantcode.datasheet-nozzle-layout`), so the
+  datasheet that goes to the supplier and the layout say the same; once any datasheet gives a
+  location, a nozzle the placement overrides without one on its datasheet is reported too.
+
+`plantcode datasheets draft [--tag T]` writes a draft for each listed item without a datasheet
+(it never touches an existing one): type, service, design conditions and material from the
+equipment list, dimensions, nozzles from the P&IDs, inlet and outlet conditions of the flowsheet
+streams linked to the item; every value with its `source`, what the lists cannot give `TBD`
+(the size keys the equipment estimate reads: `area_m2`, `volume_m3`, `shaft_power_kw`,
+`fluid_power_kw`, `gas_flow_m3_s`, `duty_kw`), and `draft: true`. Complete it and remove
+`draft: true`: the `datasheets` gate does not count a draft.
+
+`plantcode datasheets fill [--tag T] [--param name=value]` fills the TBD sizes of the drafts
+with calculated values and their basis (exchanger duty, LMTD and area; pump head, NPSH available
+and power along the routed lines; compressor stages and power; column shortcut stages; vessel
+volume and residence time against `residence_times` in `process/design-basis.yaml`). It never
+overwrites a value it did not write; what it cannot calculate stays TBD with the reason.
+`plantcode datasheets fill --list` names the parameters a datasheet can declare in
+`type_specific` (efficiencies, arrangement, typical-U row, ...).
 
 Example, `equipment/datasheets/P-101A.yaml`:
 
