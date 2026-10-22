@@ -26,7 +26,7 @@
       "target": "basic",
       "budget_usd": 6,
       "review_budget_usd": 2,
-      "task": "Layout: site plan, buildings, structures and equipment placement (skills layout-yaml, structures-access), separations for the spacing criteria in DESIGN.md, racks for every line between areas, zones (skill area-classification), then plantcode layout build and the routes (skill pipe-routing): render the plan and two sections and look at them."
+      "task": "Layout: site plan, buildings, structures and equipment placement (skills layout-yaml, structures-access), separations for the spacing criteria in DESIGN.md, racks for every line between areas, zones (skill area-classification), then cheme layout build and the routes (skill pipe-routing): render the plan and two sections and look at them."
     },
     {
       "id": "S5",

@@ -1,18 +1,18 @@
-# EXAMPLE RATES - THEY PRICE NOTHING. Schema: `plantcode schema rates`.
+# EXAMPLE RATES - THEY PRICE NOTHING. Schema: `cheme schema rates`.
 #
 # This file shows the shape of the project's unit rates and estimate factors. The numbers are
-# round placeholders in no currency (XXX, ISO 4217 "no currency"), not prices: plantcode holds
-# no cost data. `plantcode assess estimate` warns while `example: true` stands, and a gate that
+# round placeholders in no currency (XXX, ISO 4217 "no currency"), not prices: cheme-as-code holds
+# no cost data. `cheme assess estimate` warns while `example: true` stands, and a gate that
 # requires `rates` fails. Replace every rate and factor with the project's own (a quotation, a
 # company cost database, a published index), each with its status, source and year, then set
 # the currency and remove `example: true`.
 #
-# A take-off row (`plantcode assess mto`) is priced by the FIRST rate of its category whose
+# A take-off row (`cheme assess mto`) is priced by the FIRST rate of its category whose
 # where: filters all match it, so put specific rates before general ones. Units per category:
 # pipe m; elbow, tee, reducer, flange, gasket, valve, inline ea; steel t; grating, insulation
 # m2; concrete m3. Filters: item (glob), dn_min, dn_max, class (pipe class, glob), spec (glob),
 # group (glob).
-schema: plantcode/rates/v1
+schema: cheme/rates/v1
 example: true
 currency: XXX
 cost_year: 2026

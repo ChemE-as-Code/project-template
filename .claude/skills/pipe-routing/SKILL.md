@@ -1,19 +1,19 @@
 ---
 name: pipe-routing
-description: Steer and review the generated pipe routes of the 3D model - routing intent in piping/routing.yaml (rack tiers per service, battery limits, the pipe-way elevation, vent riser heights, via points, pins, skips with a reason), iterate with plantcode layout route, report and render --plan/--section, look at the PNGs, fix clashes, tier, wall penetration, vent outlet and span findings, and pin good routes. Use when lines are unrouted, run the wrong way, clash, or before a layout review or the layout-3d gate.
+description: Steer and review the generated pipe routes of the 3D model - routing intent in piping/routing.yaml (rack tiers per service, battery limits, the pipe-way elevation, vent riser heights, via points, pins, skips with a reason), iterate with cheme layout route, report and render --plan/--section, look at the PNGs, fix clashes, tier, wall penetration, vent outlet and span findings, and pin good routes. Use when lines are unrouted, run the wrong way, clash, or before a layout review or the layout-3d gate.
 ---
 
 # Pipe routing
 
 ## Purpose and when to use
 
-`plantcode layout build` routes one pipe per P&ID segment (DN, insulation, class from the line
+`cheme layout build` routes one pipe per P&ID segment (DN, insulation, class from the line
 list and `piping/pipe-specs.yaml`). The router is deterministic and simple: it goes over the
 racks for lines between areas, across roads or longer than `local_max_m`, and runs local lines
 at the pipe-way elevation. It knows nothing of stress or drainage; the rules on the model then
 screen what it produced (tiers, wall penetrations, vent outlets, spans between supports, valves
 within reach), each against an ASSUMED criterion. This skill says how to give it the intent it lacks, how to check the
-result, and when to stop iterating and pin. Use it when `plantcode layout report` shows lines
+result, and when to stop iterating and pin. Use it when `cheme layout report` shows lines
 unrouted or `direct`, when routes clash or look wrong in the drawings, and before the layout
 review.
 
@@ -23,7 +23,7 @@ review.
   `insulation`, `from`/`to` (skill `layout-yaml`). A segment with no DN on the P&ID or in the
   line list is routed at DN 50, a line without `insulation` bare: fix the list first (skill
   `lists-sync`).
-- `piping/routing.yaml` (`plantcode schema routing`), optional. Without it the defaults apply,
+- `piping/routing.yaml` (`cheme schema routing`), optional. Without it the defaults apply,
   each ASSUMED: `local_max_m` 15, `local_elevation_m` 3.5 (bottom of pipe), `grade_max_m` 3,
   `rack_reach_m` 50, `rack_detour_factor` 2.5, `spacing_m` 0.1, `headroom_road_m` 6,
   `headroom_walkway_m` 2.2, `grid_m` 0.5.
@@ -32,7 +32,7 @@ review.
 
 ## Workflow and tools
 
-1. **Read the result first.** `plantcode layout report` lists each line (routed, partly routed,
+1. **Read the result first.** `cheme layout report` lists each line (routed, partly routed,
    skipped, unrouted with the reason), the chains per method (`astar`, `astar_coarse`,
    `astar_fine`, `rack`, `rack+...`, `via`, `open`, `direct`, `pinned`) and per reason (`rack:
    across areas`, `rack: crosses a road`, `local: pipe-way`, `local: pump run at grade`, `local:
@@ -74,17 +74,17 @@ review.
    rule); a silencer or safety valve that discharges elsewhere (a vent stack area) is listed in
    `piping/special-items.yaml` and placed in `layout/equipment-placement.yaml` by its tag:
    the line is then routed to it.
-4. **Iterate on the lines you changed only**: `plantcode layout route --line L [--line M]`
-   reroutes those and keeps every other route of the committed model; `plantcode layout build`
+4. **Iterate on the lines you changed only**: `cheme layout route --line L [--line M]`
+   reroutes those and keeps every other route of the committed model; `cheme layout build`
    reroutes all (needed after a placement change). Lines route in order of DN, largest first:
    a small line that clashes may need a via, a large one moves everything after it.
-5. **Look at it.** `plantcode layout render --plan --png` (plot plan), `--z 2,6` (a band of
+5. **Look at it.** `cheme layout render --plan --png` (plot plan), `--z 2,6` (a band of
    elevations), `--section y=68 --depth 8 --png` (across a rack), `--section x=.. --crop
    X0,Y0,X1,Y1 --png` (around one item). Read the PNGs in `build/`: lines through items, lines
    at grade across walkways, lines in front of manways, bundle-pull or motor-removal space,
    lines over a road below the headroom, too many bends, dead legs, a lane jumping across the
-   rack. `plantcode serve` (Layout 3D) shows the same in 3D with the findings.
-6. **Fix clashes** (`plantcode.layout-clash-pipe`, `-clash-pipe-equipment`, `-clash-pipe-steel`,
+   rack. `cheme serve` (Layout 3D) shows the same in 3D with the findings.
+6. **Fix clashes** (`cheme.layout-clash-pipe`, `-clash-pipe-equipment`, `-clash-pipe-steel`,
    `-headroom`, `-access-blocked`, `-zone-crossing`): each finding names both objects and a
    `box`. Prefer, in this order: move the item or turn the nozzle (skill `layout-yaml`), give a
    tier rule, add a via, change the pipe-way elevation. Rebuild after each step. A clash that is
@@ -101,7 +101,7 @@ review.
      declared openings, passing through a building or enclosure it has no end in, or running in
      a wall's plane (warning); into a casing outside a declared opening (info, for the casing
      penetration schedule). The model's `penetrations` hold the opening each would need:
-     `plantcode layout pin OWNER/LINE` declares it in `layout/building.yaml` (`openings`) or
+     `cheme layout pin OWNER/LINE` declares it in `layout/building.yaml` (`openings`) or
      `layout/structures.yaml` (`enclosure: openings`), and the next build cuts the wall around
      it. Prefer fewer, grouped openings (route lines through one declared opening with `via`
      points) and keep pipes out of fire walls where you can: a fire-rated penetration is a
@@ -127,7 +127,7 @@ review.
      the racks the build proposes support steel under each run that spans too far
      (`support_steel`, `<pipe>/post-<k>`: a T-post from grade or a stub on the steel below,
      dashed in the plans, named in the finding): check where it stands (roads, walkways,
-     foundations) and `plantcode layout pin <pipe>/post-<k>` it into `pipe_supports` of
+     foundations) and `cheme layout pin <pipe>/post-<k>` it into `pipe_supports` of
      `layout/structures.yaml`, or declare your own posts there. The supports themselves (shoes,
      guides) are generated where a pipe rests on a beam or a declared crossbar;
    - `layout-operability`: a manual valve's handwheel or lever more than 1.8 m above the floor
@@ -147,7 +147,7 @@ review.
    - a pinned vent or relief route keeps its open end, so the zones derived from the line
      (`layout/zones.yaml` sources) stay; `layout-zone-source` (also in `validate`, and failing
      the `zones` requirement of gate `layout-3d`) means a source the model cannot place.
-7. **Pin what is good.** `plantcode layout pin LINE` (or a pipe id) copies the route into
+7. **Pin what is good.** `cheme layout pin LINE` (or a pipe id) copies the route into
    `piping/routing.yaml` (`route:`, `source: pinned`): later builds take it as it is, so a
    reviewed route stays reviewed. Pinning a route as it was generated does not move the other
    lines: a pinned pipe becomes an obstacle where its chain would have been routed, and takes
@@ -163,16 +163,16 @@ review.
 
 ## Validation and failure handling
 
-- `plantcode validate` checks `piping/routing.yaml` against its schema and the model rules on
-  the committed model; `plantcode layout build --check` says whether the model is current.
+- `cheme validate` checks `piping/routing.yaml` against its schema and the model rules on
+  the committed model; `cheme layout build --check` says whether the model is current.
 - Unrouted reasons and what to do: `<tag> is not placed` (place it, or skip the line with the
   reason); `both ends are open` (a vent between two open ends: check the P&ID); `it starts or
   ends at <tee/line>, which no route reaches` (route the run first, or fix the topology);
   `connector ...: line ... is not in the line list` (add the line).
-- The `layout-3d` gate (`plantcode check --stage basic`) fails while a process line of DN 25
+- The `layout-3d` gate (`cheme check --stage basic`) fails while a process line of DN 25
   and above is neither routed nor skipped, or a clash or headroom finding is not accepted; the
   `layout-detail` gate requires every line, utilities included. A gate's `rules:` may add the
-  engineering rules (`plantcode.layout-tier`, `-wall-penetration`, `-vent-outlet`, ...); a
+  engineering rules (`cheme.layout-tier`, `-wall-penetration`, `-vent-outlet`, ...); a
   finding left as it is gets an acceptance with its reason.
 
 ## Outputs and provenance
@@ -199,6 +199,6 @@ records which routes were checked by whom.
 
 ## References
 
-- `plantcode schema routing`, `layout/README.md`, `docs/framework/layout-model.md` (the router)
-- `plantcode layout build | route | pin | report | render`, `plantcode serve` (Layout 3D)
+- `cheme schema routing`, `layout/README.md`, `docs/framework/layout-model.md` (the router)
+- `cheme layout build | route | pin | report | render`, `cheme serve` (Layout 3D)
 - skills `layout-yaml`, `structures-access`, `review`

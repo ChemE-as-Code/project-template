@@ -1,4 +1,4 @@
-# Cause and effect list: interlocks and trips. Schema: `plantcode schema interlocks`.
+# Cause and effect list: interlocks and trips. Schema: `cheme schema interlocks`.
 # On a sheet, refer to an interlock ("see C&E I-01") instead of spelling out what it trips.
 interlocks: []
 #  - id: I-01

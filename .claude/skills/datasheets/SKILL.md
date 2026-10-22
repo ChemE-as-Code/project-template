@@ -1,18 +1,18 @@
 ---
 name: datasheets
-description: Draft and size equipment datasheets - plantcode datasheets draft (a draft per listed item from the equipment list, the P&ID nozzles and the linked flowsheet streams) and plantcode datasheets fill (exchanger duty, LMTD and area; pump head, NPSH available and power along the routed lines; compressor and expander stages, power and intercooler duties; Fenske-Underwood-Gilliland stages; vessel volume and residence time), every value with its basis, ASSUMED or TBD with the reason. Use when datasheets are asked for, when sizes for the equipment estimate are missing, when the datasheets gate fails, or after the flowsheet, the layout or a sizing assumption changed.
+description: Draft and size equipment datasheets - cheme datasheets draft (a draft per listed item from the equipment list, the P&ID nozzles and the linked flowsheet streams) and cheme datasheets fill (exchanger duty, LMTD and area; pump head, NPSH available and power along the routed lines; compressor and expander stages, power and intercooler duties; Fenske-Underwood-Gilliland stages; vessel volume and residence time), every value with its basis, ASSUMED or TBD with the reason. Use when datasheets are asked for, when sizes for the equipment estimate are missing, when the datasheets gate fails, or after the flowsheet, the layout or a sizing assumption changed.
 ---
 
 # Equipment datasheets and sizing
 
 ## Purpose and when to use
 
-A datasheet (`equipment/datasheets/<TAG>.yaml`, `plantcode schema datasheet`) is what goes to a
-supplier: operating and design conditions, materials, nozzles and the sizes. `plantcode
-datasheets draft` writes a draft for every listed item without one; `plantcode datasheets fill`
+A datasheet (`equipment/datasheets/<TAG>.yaml`, `cheme schema datasheet`) is what goes to a
+supplier: operating and design conditions, materials, nozzles and the sizes. `cheme
+datasheets draft` writes a draft for every listed item without one; `cheme datasheets fill`
 calculates the sizes a draft leaves `TBD` from the flowsheet, the layout model and the
 assumptions the project declares, and writes each value with its basis. Use it when datasheets
-are asked for, when `plantcode assess equipment` reports items without a size, when the
+are asked for, when `cheme assess equipment` reports items without a size, when the
 `datasheets` gate fails, and again after the flowsheet, the layout model or an assumption
 changed (a fill rewrites only what an earlier fill wrote).
 
@@ -25,13 +25,13 @@ changed (a fill rewrites only what an earlier fill wrote).
   a column one feed and two products.
 - Stream states (pressure, temperature, flow, composition) of the case (`--case`, default the
   flowsheet's). Enthalpies, densities, vapour pressures and volatilities come from the property
-  adapter (`plantcode process props`, extra `props`), which is claimed only inside its validated
+  adapter (`cheme process props`, extra `props`), which is claimed only inside its validated
   range: a state outside it is a finding and the value stays `TBD`. Give such a value yourself
   with its source (`density_kg_m3`, `vapour_pressure_kpa`, `heat_capacity_ratio`, ...).
-- For pump line losses: `layout/plant-model.yaml` (`plantcode layout build`) with the suction
+- For pump line losses: `layout/plant-model.yaml` (`cheme layout build`) with the suction
   and discharge lines routed between the pump and the items linked to the other ends of its
   streams. Without it the head is the pressure difference only, marked ASSUMED.
-- **Declared parameters** (`plantcode datasheets fill --list`): in the datasheet's
+- **Declared parameters** (`cheme datasheets fill --list`): in the datasheet's
   `type_specific` with their source, or for every item with `--param name=value` (then written
   ASSUMED with that basis and recorded in `sizing_basis`). Efficiencies, the maximum pressure
   ratio per stage, the exchanger arrangement, the typical-U row (`u_service`), margins, reflux
@@ -40,14 +40,14 @@ changed (a fill rewrites only what an earlier fill wrote).
 
 ## Workflow and tools
 
-1. `plantcode datasheets draft [--tag T]` for the items without a datasheet.
+1. `cheme datasheets draft [--tag T]` for the items without a datasheet.
 2. Declare what the calculations need in each draft's `type_specific` (with `source`), or decide
    project-wide assumptions and pass them as `--param`.
-3. `plantcode datasheets fill [--tag T] [--param name=value ...] --dry-run`, read the findings
+3. `cheme datasheets fill [--tag T] [--param name=value ...] --dry-run`, read the findings
    and the TBD reasons, then run it without `--dry-run`.
 4. Check every filled value against its `source`: the streams, nozzles, pipes and tables it
    names. A value computed from an ASSUMED input is `assumed: true`.
-5. `plantcode assess equipment` picks up the filled `area_m2`, `shaft_power_kw`,
+5. `cheme assess equipment` picks up the filled `area_m2`, `shaft_power_kw`,
    `fluid_power_kw`, `duty_kw` and `volume_m3` with their source (ASSUMED and draft marked).
 6. When a supplier confirms a value, write it with its source (the fill never touches it),
    complete the datasheet and remove `draft: true`.
@@ -88,25 +88,25 @@ What `fill` calculates:
 
 ## Validation and failure handling
 
-- `plantcode.datasheet-fill-property-unsupported` / `-out-of-range`: a state outside the
+- `cheme.datasheet-fill-property-unsupported` / `-out-of-range`: a state outside the
   validated property method. Do not widen the claim; give the value with its source.
-- `plantcode.datasheet-fill-temperatures`: a temperature cross or an F that no 1-2 exchanger
+- `cheme.datasheet-fill-temperatures`: a temperature cross or an F that no 1-2 exchanger
   reaches: check the temperatures and the arrangement (more shells, counter-current).
-- `plantcode.datasheet-fill-correction-factor`: F of one 1-2 shell below 0.75 (the usual design
+- `cheme.datasheet-fill-correction-factor`: F of one 1-2 shell below 0.75 (the usual design
   limit, Sinnott Section 12.6; Kern): the area is written, but more shells in series are the
   sound design.
-- `plantcode.datasheet-fill-phase`: a pump suction that is not liquid.
-- `plantcode.datasheet-fill-balance`: two linked sides whose duties differ by more than 1 %.
-- `plantcode.datasheet-residence-time`: less hold-up than the design basis asks for.
-- `plantcode.datasheet-fill-param` / `-tag`: an unknown `--param` or a tag without a datasheet.
-- `plantcode validate` checks the datasheets afterwards (schema, list agreement).
+- `cheme.datasheet-fill-phase`: a pump suction that is not liquid.
+- `cheme.datasheet-fill-balance`: two linked sides whose duties differ by more than 1 %.
+- `cheme.datasheet-residence-time`: less hold-up than the design basis asks for.
+- `cheme.datasheet-fill-param` / `-tag`: an unknown `--param` or a tag without a datasheet.
+- `cheme validate` checks the datasheets afterwards (schema, list agreement).
 
 ## Outputs and provenance
 
-Each filled value is `{value, unit, source: "plantcode datasheets fill: <calculation, inputs,
+Each filled value is `{value, unit, source: "cheme datasheets fill: <calculation, inputs,
 tables>", assumed}`; a value that cannot be calculated is `TBD` with the reason. The `--param`
 assumptions are in `sizing_basis`. The fill rewrites only the values whose source starts with
-`plantcode datasheets fill` (or `TBD`), never a value someone else wrote, and only draft
+`cheme datasheets fill` (or `TBD`), never a value someone else wrote, and only draft
 datasheets; a non-draft datasheet is reported as kept. The file is rewritten as YAML (the header
 comment kept). The output is deterministic for the same inputs.
 
@@ -122,7 +122,7 @@ datasheet is still a draft until an engineer has checked its values.
 
 Skills `process-design` (links, stream states), `phase-calculation`, `mto-estimate`
 (equipment estimate), `pipe-routing` (routed lines); `equipment/datasheets/README.md`;
-`plantcode schema datasheet`; `plantcode datasheets fill --list`. Sources of the methods:
+`cheme schema datasheet`; `cheme datasheets fill --list`. Sources of the methods:
 Sinnott, Coulson & Richardson's Chemical Engineering Vol. 6, 4th ed. (2005), Table 12.1;
 Bowman, Mueller and Nagle, Trans. ASME 62 (1940) 283; Moody, Trans. ASME 66 (1944) 671;
 Colebrook, J. Inst. Civil Eng. 11 (1939) 133; Swamee and Jain, J. Hydraulics Div. ASCE 102

@@ -1,13 +1,13 @@
-# Components and templates of the process. Schema plantcode/process/v1 (`plantcode schema
+# Components and templates of the process. Schema cheme/process/v1 (`cheme schema
 # process-materials`). Every component has a stable id; molar_mass in kg/kmol,
 # normal_boiling_point in K at 101.325 kPa.
-schema: plantcode/process/v1
+schema: cheme/process/v1
 kind: materials
 components: []
 #  - {id: N2, name: Nitrogen, formula: N2, cas: 7727-37-9, molar_mass: 28.014, normal_boiling_point: 77.36}
 templates: []
 #  - {id: air, title: Air, components: [N2, O2, AR]}
-# property_method is a placeholder until `plantcode process props --fill` records the method,
+# property_method is a placeholder until `cheme process props --fill` records the method,
 # its package versions and its application range: validated (against NIST WebBook reference
 # values) for N2/O2/Ar, 77-315 K, vapour 100-3200 kPa(a), liquid and two-phase 100-600 kPa(a).
 property_method:

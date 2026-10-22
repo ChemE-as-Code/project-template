@@ -1,7 +1,7 @@
-# The root of this plant repository. Schema: `plantcode schema plant`.
+# The root of this plant repository. Schema: `cheme schema plant`.
 name: "My plant"
-# The oldest plantcode this repository works with; an older one stops with an upgrade hint.
-requires: plantcode>=0.6
+# The oldest cheme-as-code this repository works with; an older one stops with an upgrade hint.
+requires: cheme-as-code>=0.7
 description: ""
 units: SI
 stage: concept
@@ -9,17 +9,17 @@ stages:
   - {id: concept, title: Concept and feasibility}
   - {id: basic, title: Basic engineering}
   - {id: detail, title: Detail engineering}
-# Title-block data for `plantcode sheet new` (optional):
+# Title-block data for `cheme sheet new` (optional):
 # project: {number: "24-017", client: "", site: "", revision: A}
 # P&ID sheets, DEXPI 2.0.1 XML. Empty: every pid/*.xml. A sheet not drawn yet is
-# `status: planned` (no file needed); `plantcode sheet new P-01` starts it.
+# `status: planned` (no file needed); `cheme sheet new P-01` starts it.
 sheets: []
 #  - {id: P-01, file: pid/P-01.xml, title: Feed and reaction, status: planned}
 # The block and process flow diagrams are generated from process/flowsheet.yaml by
-# `plantcode process build` (skill `process-design`); declare them by kind:
+# `cheme process build` (skill `process-design`); declare them by kind:
 #  - {id: BFD, kind: bfd, file: process/BFD.xml, title: Block flow diagram}
 #  - {id: PFD, kind: pfd, file: process/PFD.xml, title: Process flow diagram}
 # A generated sheet names its generator (script and the frame it starts from, a commit or a
-# file); it is then rebuilt with `plantcode regen P-02`, never edited by hand:
+# file); it is then rebuilt with `cheme regen P-02`, never edited by hand:
 #  - {id: P-02, file: pid/P-02.xml, title: Utilities,
 #     generator: {script: scripts/draft_P-02.py, frame: 1a2b3c4}}

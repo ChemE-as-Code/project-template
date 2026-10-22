@@ -1,20 +1,20 @@
 """Example generator: a tank, a pump, three lines, two instruments and a note.
 
-Run it with plantcode's interpreter (python3 and `uv run python` have no pyDEXPI here):
+Run it with cheme-as-code's interpreter (python3 and `uv run python` have no pyDEXPI here):
 
-    plantcode sheet new P-99 --title 'Example'
-    plantcode run scripts/example_draft.py pid/P-99.xml
+    cheme sheet new P-99 --title 'Example'
+    cheme run scripts/example_draft.py pid/P-99.xml
 
-It edits the sheet file given as its argument in place (start it with `plantcode sheet new`, so
+It edits the sheet file given as its argument in place (start it with `cheme sheet new`, so
 its title block is real) and formats it (`Sheet.save`). Copy it to `scripts/draft_<sheet>.py`
 for a real sheet. The builders are documented in the `pid-draft` skill and in the docstrings of
-`plantcode.domains.piping.authoring`.
+`chemeascode.domains.piping.authoring`.
 """
 
 import sys
 from pathlib import Path
 
-from plantcode.domains.piping.authoring import (
+from chemeascode.domains.piping.authoring import (
     Nozzle,
     Sheet,
     equipment,
@@ -28,7 +28,7 @@ from plantcode.domains.piping.authoring import (
 
 target = Path(sys.argv[1] if len(sys.argv) > 1 else "pid/P-99.xml")
 if not target.exists():
-    sys.exit(f"{target} does not exist: start it with `plantcode sheet new {target.stem}`")
+    sys.exit(f"{target} does not exist: start it with `cheme sheet new {target.stem}`")
 
 sheet = Sheet.load(target)
 

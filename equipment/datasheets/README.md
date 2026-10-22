@@ -1,12 +1,12 @@
 # Datasheets
 
 One YAML file per equipment-list item: `equipment/datasheets/<TAG>.yaml`, schema
-`plantcode schema datasheet`. They are the detail-stage deliverable: the `datasheets` gate in
+`cheme schema datasheet`. They are the detail-stage deliverable: the `datasheets` gate in
 `checks/checks.yaml` fails until every item of `equipment/equipment-list.yaml` has a valid one.
 
-`plantcode validate` checks each file against the schema and the equipment list:
-`plantcode.datasheet-not-listed` (a tag not in the list), `plantcode.datasheet-mismatch` (design
-pressure or temperature, or type, other than the list says), `plantcode.datasheet-name` (file not
+`cheme validate` checks each file against the schema and the equipment list:
+`cheme.datasheet-not-listed` (a tag not in the list), `cheme.datasheet-mismatch` (design
+pressure or temperature, or type, other than the list says), `cheme.datasheet-name` (file not
 named after its tag). Change a value in the datasheet and the list in the same commit.
 
 - `operating` and `design`: conditions, by key with the unit in the name (`pressure_barg`,
@@ -22,12 +22,12 @@ named after its tag). Change a value in the datasheet and the list in the same c
   counter-clockwise, as `angle_deg` in `layout/equipment-placement.yaml`: of the axis for a
   side nozzle, of its offset from the item's centre for a top or bottom one), `offset_m` (a top
   or bottom nozzle's plan distance from the centre), `elevation_m` (centre above the item's
-  base) and `location_source`. `plantcode validate`
-  compares them with `layout/plant-model.yaml` (`plantcode.datasheet-nozzle-layout`), so the
+  base) and `location_source`. `cheme validate`
+  compares them with `layout/plant-model.yaml` (`cheme.datasheet-nozzle-layout`), so the
   datasheet that goes to the supplier and the layout say the same; once any datasheet gives a
   location, a nozzle the placement overrides without one on its datasheet is reported too.
 
-`plantcode datasheets draft [--tag T]` writes a draft for each listed item without a datasheet
+`cheme datasheets draft [--tag T]` writes a draft for each listed item without a datasheet
 (it never touches an existing one): type, service, design conditions and material from the
 equipment list, dimensions, nozzles from the P&IDs, inlet and outlet conditions of the flowsheet
 streams linked to the item; every value with its `source`, what the lists cannot give `TBD`
@@ -35,12 +35,12 @@ streams linked to the item; every value with its `source`, what the lists cannot
 `fluid_power_kw`, `gas_flow_m3_s`, `duty_kw`), and `draft: true`. Complete it and remove
 `draft: true`: the `datasheets` gate does not count a draft.
 
-`plantcode datasheets fill [--tag T] [--param name=value]` fills the TBD sizes of the drafts
+`cheme datasheets fill [--tag T] [--param name=value]` fills the TBD sizes of the drafts
 with calculated values and their basis (exchanger duty, LMTD and area; pump head, NPSH available
 and power along the routed lines; compressor stages and power; column shortcut stages; vessel
 volume and residence time against `residence_times` in `process/design-basis.yaml`). It never
 overwrites a value it did not write; what it cannot calculate stays TBD with the reason.
-`plantcode datasheets fill --list` names the parameters a datasheet can declare in
+`cheme datasheets fill --list` names the parameters a datasheet can declare in
 `type_specific` (efficiencies, arrangement, typical-U row, ...).
 
 Example, `equipment/datasheets/P-101A.yaml`:

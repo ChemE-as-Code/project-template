@@ -1,8 +1,8 @@
-# The flowsheet: the source of the BFD and PFD (`plantcode process build` writes process/*.xml;
-# never edit those). Schema plantcode/process/v1 (`plantcode schema process-flowsheet`).
+# The flowsheet: the source of the BFD and PFD (`cheme process build` writes process/*.xml;
+# never edit those). Schema cheme/process/v1 (`cheme schema process-flowsheet`).
 # Units are explicit: a property without its own unit is in these. Pressure is absolute; a gauge
 # value needs its own unit (kPa(g)). Nm3/h needs normal_conditions.
-schema: plantcode/process/v1
+schema: cheme/process/v1
 kind: flowsheet
 title: ""
 units:
