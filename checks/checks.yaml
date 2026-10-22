@@ -108,6 +108,13 @@ checks:
     stage: basic
     kind: mto
     require: [mto-current]
+  # The LCA of the operation (lca/): once lca/lca.yaml exists, uncomment; add factors once the
+  # project's own replace the example.
+  # - id: lca
+  #   title: LCA mapped and current with the flowsheet
+  #   stage: basic
+  #   kind: lca
+  #   require: [mapped, lca-current]
   - id: layout-review
     title: A current, independent layout review is recorded
     stage: basic

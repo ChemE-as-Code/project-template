@@ -1,0 +1,19 @@
+# EXAMPLE FACTORS - THEY CHARACTERISE NOTHING. Schema: `plantcode schema lca_factors`.
+#
+# This file shows the shape of the project's characterised factors. The numbers are round
+# placeholders, not data: plantcode holds no LCA data. `plantcode assess lca` warns while
+# `example: true` stands, and a gate that requires `factors` fails. Replace every factor with
+# the project's own (a published dataset, an EPD, a licensed database's result), each with its
+# status (ASSUMED, PUBLISHED, EPD), source, reference year and licence, then remove
+# `example: true`. Do not copy licensed database content beyond what its licence allows.
+#
+# A factor is per kg or t (material flows and emissions) or per kWh, MWh, MJ or GJ (energy
+# flows), and gives one value per impact category below.
+schema: plantcode/lca/v1
+kind: lca_factors
+example: true
+categories:
+  - {id: climate-change, title: Climate change, unit: kg CO2-eq, method: IPCC 2021 GWP100}
+factors:
+  - {id: electricity, title: "EXAMPLE grid electricity", unit: kWh, values: {climate-change: 0.5}, status: ASSUMED, source: "EXAMPLE placeholder", year: 2026}
+  - {id: co2-fossil, title: "EXAMPLE fossil CO2 to air", unit: kg, values: {climate-change: 1.0}, status: ASSUMED, source: "EXAMPLE: IPCC 2021 GWP100 of CO2 is 1 by definition", year: 2021}
