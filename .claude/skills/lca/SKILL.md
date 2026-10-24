@@ -63,8 +63,9 @@ gate `lca` fails.
      repository or a process library.
    A published factor used for a related flow (another material, geography or technology)
    gets `proxy: "<what stands for what, and where that holds>"`; a number the project derives
-   is a factor `ESTIMATE` with `basis` and `validity`. A flow without any background stays
-   unmapped: it is a gap, and the results say so; never map it `free` to make it disappear.
+   is a factor `ESTIMATE` with `basis` and `validity`. A flow without any background gets
+   `missing: "<why>"`: it stays in the inventory as a gap, and the results say so; never map
+   it `free` or drop the entry to make it disappear.
    Choose market activities ("market for electricity, medium voltage") for the right location.
    For energy, mind the unit: the inventory counts kWh, a heat activity is per MJ, and the
    conversion is automatic when the kinds match.
@@ -93,9 +94,11 @@ gate `lca` fails.
    local Brightway project, keep the same foreground (`lca/dataset.yaml` does not change) and
    switch `backend: brightway`, giving each mapping an `activity:` beside its `factor:` (a
    mapping may hold both, so either backend runs). Record in
-   `DESIGN.md` which mappings changed, so the two results can be compared. Results drawing on
-   a licensed database stay local unless its terms and a reviewed project policy allow more;
-   never commit or publish them by default.
+   `DESIGN.md` which mappings changed, so the two results can be compared. Give
+   `brightway.expect` (provider, version, system model) so the database is identified, not
+   just named. Results drawing on a licensed database are `restricted`: they stay local
+   unless its terms and a reviewed `publication:` decision of a person allow more; never
+   commit or publish them by default, and never write that decision yourself.
 9. **Foreground only.** `cheme assess lca --dataset` exports the unallocated foreground with
    no factors, Brightway or credentials: what a process library publishes.
 
@@ -124,6 +127,9 @@ gate `lca` fails.
 - `lca/results.csv` and `lca/results.md`: impacts per scenario, category, phase and
   contributor, with the factor's status, source and year, or the Brightway activity.
 - `lca/gaps.csv`: every exchange and category without a burden, with its quantity.
+- `lca/manifest.json`: what the results rest on (inputs, mappings, background versions,
+  methods, settings, software) and their class and publication policy; a change to any of
+  them makes the gate's `lca-current` fail.
 - `lca/dataset.yaml`: the plant's unallocated LCI dataset (foreground scope, per hour): what
   a process library keeps and other studies reference. Give `rights:` (its own data's terms),
   `location`, `year` and `technology` in `lca/lca.yaml`.

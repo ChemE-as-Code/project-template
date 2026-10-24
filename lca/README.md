@@ -9,6 +9,7 @@ The life cycle assessment of the plant's operation (ISO 14040/44), per functiona
 | `inventory.csv` | the foreground inventory per functional unit: feeds and products of the flowsheet (kg, energy in kWh), emissions by component, co-products | `cheme assess lca --write` |
 | `results.csv`, `results.md` | impacts per category, with the contribution of each flow | `cheme assess lca --write` |
 | `gaps.csv` | every exchange and category without a burden (unmapped, a factor without the category, an emission the method does not characterise, an unlinked exchange of a referenced dataset): excluded from the totals, never 0 | `cheme assess lca --write` |
+| `manifest.json` | what the results rest on (inputs, mappings, background versions, methods, settings, software), their class and publication policy | `cheme assess lca --write` |
 | `dataset.yaml` | the plant's unallocated LCI dataset (`kind: lci_dataset`, per hour of operation): what other studies and a process library reference (`dataset: {path, product, allocation}`) | `cheme assess lca --write` |
 | `datasets/*.yaml` | LCI datasets of other processes, written by hand or copied from a library, used as backgrounds | people |
 
@@ -50,9 +51,9 @@ See the skill `lca`.
 Never edit `inventory.csv` or `results.*` by hand: change the flowsheet, `lca.yaml` or
 `factors.yaml`, then rewrite them. Energy streams (`kind: energy`, with `duty`) from an energy
 feed (electric power, steam) or to an energy product (cooling water) are counted in kWh. The
-gate `kind: lca` (`checks/checks.yaml`, require `mapped`, `factors`, `no-gaps`, `lca-current`)
-checks the mapping is complete, the factors are the project's, no exchange is a gap, and the
-outputs are current.
+gate `kind: lca` (`checks/checks.yaml`, require `mapped`, `factors`, `no-gaps`, `publishable`, `lca-current`)
+checks the mapping is complete, the factors are the project's, no exchange is a gap, the
+results may be published under their sources' terms, and the outputs are current.
 
 `results.md` says what the result is: **complete** within the declared boundary (every exchange
 characterised in every category with published or declared data; not a validation),
