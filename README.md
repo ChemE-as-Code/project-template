@@ -19,6 +19,20 @@ checked by [`cheme-as-code`](https://github.com/ChemE-as-Code/core).
 | `scripts/` | generator scripts: the source of generated sheets (`generator:` in `plant.yaml`), provenance for the others |
 | `.claude/skills/` | how an agent works here |
 
+## How this repository works
+
+- **This repository holds your plant**: drawings, lists, decisions. It does not hold the tools.
+- **The tools come from [`cheme-as-code`](https://github.com/ChemE-as-Code/core)**, installed once on
+  your computer (`uv tool install git+https://github.com/ChemE-as-Code/core.git`). Every check,
+  drawing and generated file is made by the `cheme` command, so you need it to work here. The CI
+  in `.github/workflows/` installs it too.
+- **The skills in `.claude/skills/` are copies** of the ones in cheme-as-code, so that Claude Code
+  finds them here. After upgrading (`uv tool upgrade cheme-as-code`), run `cheme skills update` to
+  refresh them; `cheme skills status` shows which are out of date. A skill you changed here is
+  kept.
+- **While cheme-as-code is private**, you need read access to it, and the CI needs the secrets
+  named in `.github/workflows/validate.yml`.
+
 ## Working here
 
 ```sh

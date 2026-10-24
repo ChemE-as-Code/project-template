@@ -109,7 +109,9 @@ review.
      flight, a ladder, a column or another item in it blocks it, and the same holds in front
      of a casing hatch (a stair flight rising across the hatch). Give it a platform, move the
      valve or the stair, or declare its operator in `piping/routing.yaml` (below);
-   - **valve access platforms** (`VP-<n>`, proposed): for the manual valves no floor reaches
+   - **valve access platforms** (`VP-<valve tag>`, proposed; named after the first valve it
+     serves in sorted order, so the id is the same from build to build and never passes to
+     another platform; pinned ones keep the id they were pinned with, `VP-<n>` included): for the manual valves no floor reaches
      and no declared operator serves, the build proposes a small platform of its own beside
      the pipes (`valve_platform_depth_m` 1.2 m wide, its floor `valve_platform_operating_m`
      1.2 m below the highest handwheel), shared by valves within `valve_platform_group_m`
@@ -118,7 +120,7 @@ review.
      names what stands in its way: over the floor, and under it where its columns from grade
      would meet a pipe (the served valve's own pipe too), an item, steel or a rack; the side
      with the fewest is proposed. Decide first whether a chain wheel, a spindle, moving the
-     valve or a larger platform is the better answer; then `cheme layout pin VP-<n>`
+     valve or a larger platform is the better answer; then `cheme layout pin VP-<valve tag>`
      declares it (a structure with `serves: [valves]`, which needs one way down while its far
      end is within `dead_end_m`) and pins the routes of the valves' pipes. Until pinned the
      rules do not count it (the `layout-operability` finding names it);

@@ -1,5 +1,6 @@
 # Cause and effect list: interlocks and trips. Schema: `cheme schema interlocks`.
 # On a sheet, refer to an interlock ("see C&E I-01") instead of spelling out what it trips.
+schema: cheme/interlocks/v1
 interlocks: []
 #  - id: I-01
 #    title: LIN tank low-low level

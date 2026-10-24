@@ -25,6 +25,7 @@ The sheets in `pid/`, `equipment/equipment-list.yaml`, `piping/line-list.yaml`,
    | `cheme.equipment-not-listed` / `equipment-not-on-pid` | equipment tag on a sheet and not in `equipment/equipment-list.yaml`, or the reverse |
    | `cheme.line-not-listed` / `line-not-on-pid` | `LineNumber` of a `PipingNetworkSystem` and `piping/line-list.yaml` disagree |
    | `cheme.line-dn-mismatch` | the list's `nominal_diameter` (or a segment's) differs from the sheet |
+   | `cheme.line-endpoint-mismatch` | the list's `from`/`to` names equipment the drawn line does not reach, and the line ends at other equipment instead: connect the line to the right nozzle, or fix the list |
    | `cheme.instrument-not-listed` / `instrument-not-on-pid` | printed instrument tag (e.g. `PI-4712.01`) and `control/instrument-list.yaml` disagree |
    | `cheme.line-not-on-pid` with id `<line>/<segment>` | a listed segment whose `SegmentNumber` is not on the line's sheet |
    | `cheme.equipment-duplicate` / `line-duplicate` / `instrument-duplicate` | an entry listed twice; keep one |

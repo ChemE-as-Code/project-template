@@ -1,6 +1,6 @@
 ---
 name: datasheets
-description: Draft and size equipment datasheets - cheme datasheets draft (a draft per listed item from the equipment list, the P&ID nozzles and the linked flowsheet streams) and cheme datasheets fill (exchanger duty, LMTD and area; pump head, NPSH available and power along the routed lines; compressor and expander stages, power and intercooler duties; Fenske-Underwood-Gilliland stages; vessel volume and residence time), every value with its basis, ASSUMED or TBD with the reason. Use when datasheets are asked for, when sizes for the equipment estimate are missing, when the datasheets gate fails, or after the flowsheet, the layout or a sizing assumption changed.
+description: Draft and size equipment datasheets - cheme datasheets draft (a draft per listed item from the equipment list, the P&ID nozzles and the linked flowsheet streams) and cheme datasheets fill (exchanger duty, LMTD and area; pump head, NPSH available and power along the routed lines; compressor and expander stages, power and intercooler duties; Fenske-Underwood-Gilliland stages; vessel volume and residence time; reactor catalyst mass and volume, pressure drop and duty from its bed or the catalyst's space velocity), every value with its basis, ASSUMED or TBD with the reason. Use when datasheets are asked for, when sizes for the equipment estimate are missing, when the datasheets gate fails, or after the flowsheet, the layout or a sizing assumption changed.
 ---
 
 # Equipment datasheets and sizing
@@ -31,6 +31,14 @@ changed (a fill rewrites only what an earlier fill wrote).
 - For pump line losses: `layout/plant-model.yaml` (`cheme layout build`) with the suction
   and discharge lines routed between the pump and the items linked to the other ends of its
   streams. Without it the head is the pressure difference only, marked ASSUMED.
+- A pump no flowsheet stream links (it draws from a battery limit): declare its end points
+  `suction_from` / `discharge_to` (`TAG`, `TAG/N2`, or a routed pipe's end
+  `pipe:<pipe id>:start|end`: a free end at the battery limit or a tie-in on another pipe) and `mass_flow_kg_h`, `density_kg_m3`, `viscosity_mpa_s`,
+  `suction_pressure_kpa`, `discharge_pressure_kpa` (pressures at those end points), each with
+  its source; `vapour_pressure_kpa` and `pump_efficiency` for NPSHa and power. On a linked pump
+  `suction_from` / `discharge_to` replace the flowsheet's source or destination. In a script use
+  `chemeascode.domains.equipment.pumps` (`size_pump`, `route_line`), never the private
+  `fill._route` / `_Network`.
 - **Declared parameters** (`cheme datasheets fill --list`): in the datasheet's
   `type_specific` with their source, or for every item with `--param name=value` (then written
   ASSUMED with that basis and recorded in `sizing_basis`). Efficiencies, the maximum pressure
@@ -51,13 +59,28 @@ changed (a fill rewrites only what an earlier fill wrote).
    `fluid_power_kw`, `duty_kw` and `volume_m3` with their source (ASSUMED and draft marked).
 6. When a supplier confirms a value, write it with its source (the fill never touches it),
    complete the datasheet and remove `draft: true`.
+7. Main dimensions and weights: `cheme datasheets fill --dimensions [--tag T] --dry-run`
+   adds what the equipment list and the layout model state (the model's tangent length and
+   support height are its proportions: ASSUMED until the vessel design gives them); write the
+   designed values (ID, T-T, tubes, plates, baseplate, sections, weights) with their source.
+   Give each nozzle its `face`, `orientation_deg`, `elevation_m` (and `axial_m` on a
+   horizontal item), DN, rating and facing.
+8. `cheme datasheets drawing --write` regenerates `equipment/datasheets/<TAG>.svg`; commit it
+   with the datasheet. Never edit the SVG.
+9. A field waiting for the supplier: `{value: supplier, unit, source: <the enquiry or data
+   awaited>}`; a field that does not apply to this item (stages of a packed contact cooler):
+   `{value: not_applicable, reason: <why>}`. The fill never writes either. A sheet whose only
+   open fields are these markers can be final (no `draft: true`); a `TBD` left on a final sheet
+   is `cheme.datasheet-open` and fails the `datasheets` gate. Never mark a field `supplier` to
+   hide a value you can calculate, nor `not_applicable` without a real reason.
 
 What `fill` calculates:
 
 - **Exchangers**: duty `Q = n (h_out - h_in)` of a linked side (adapter enthalpies), or the
   datasheet's own `duty_kw`; LMTD for `counter-current`, `co-current` or `1-2` (with the
   Bowman-Mueller-Nagle F); `A = Q / (U F LMTD) (1 + area_margin)` with `overall_u_w_m2k` or
-  the middle of a row of the typical coefficients (Sinnott, C&R Vol. 6, 4th ed., Table 12.1),
+  the middle of a row of the typical coefficients (Sinnott, C&R Vol. 6, 4th ed., Table 12.1;
+  rows checked against public reproductions, not the print: `check` in the data file),
   always ASSUMED. The other side's temperatures come from a second linked node or from
   `utility_inlet/outlet_temperature_degc`.
 - **Pumps**: `H = (p_out - p_in)/(rho g) + (z_dest - z_source) + h_suction + h_discharge`
@@ -99,12 +122,25 @@ What `fill` calculates:
 - `cheme.datasheet-fill-balance`: two linked sides whose duties differ by more than 1 %.
 - `cheme.datasheet-residence-time`: less hold-up than the design basis asks for.
 - `cheme.datasheet-fill-param` / `-tag`: an unknown `--param` or a tag without a datasheet.
+- `cheme.datasheet-marker` (error): `not_applicable` without a `reason`, or `supplier` without
+  a `source` or `reason`.
+- `cheme.datasheet-open` (warning): a final datasheet with a field still `TBD`, at any depth
+  (nested `type_specific` tables, `nozzles[].dn`, `sizing_basis[].value` count too).
+- `cheme.datasheet-dimension-mismatch` / `-dimension-layout`: a main dimension or the empty
+  weight against the equipment list or the layout model: change them together.
+- `cheme.datasheet-nozzle-pid` / `-nozzle-line`: the schedule against the P&ID nozzles (count,
+  DN, lines) and the line list.
+- `cheme.datasheet-drawing-stale`: rerun `cheme datasheets drawing --write`.
+- `cheme.datasheet-stale` (warning): a filled value whose streams changed since (its
+  `fingerprint`); rerun `cheme datasheets fill --tag T` on the draft.
 - `cheme validate` checks the datasheets afterwards (schema, list agreement).
 
 ## Outputs and provenance
 
 Each filled value is `{value, unit, source: "cheme datasheets fill: <calculation, inputs,
-tables>", assumed}`; a value that cannot be calculated is `TBD` with the reason. The `--param`
+tables>", assumed}`; a value that cannot be calculated is `TBD` with the reason. A `TBD` is
+added only for the size fields of the item's class (and a column's flooding diameter); a TBD
+reason written by hand is kept. The `--param`
 assumptions are in `sizing_basis`. The fill rewrites only the values whose source starts with
 `cheme datasheets fill` (or `TBD`), never a value someone else wrote, and only draft
 datasheets; a non-draft datasheet is reported as kept. The file is rewritten as YAML (the header

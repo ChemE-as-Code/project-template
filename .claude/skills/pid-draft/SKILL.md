@@ -109,7 +109,9 @@ items assigned to it; do not create empty frames to silence it.
      instrument(sheet, "PI-201", at=(175, 125), sensing=pump["N2"])
      sheet.save()  # writes and runs cheme fmt
      ```
-     `equipment` (class, tag, catalogue shape, nozzles), `line` (start port, bends, `valve`,
+     `equipment` (class, tag, catalogue shape, nozzles; a column with `scale=(1.0, 1.6)` and
+     `markers=[Marker("COLUMN_PACKED_BED_SHAPE", -20, 1.5), Marker("COLUMN_TRAY_SHAPE", 20)]`
+     for its beds and trays, never pasted `fragment equipment` XML), `line` (start port, bends, `valve`,
      `tee`, end port or `offpage`; it builds the system, segments, pipes and node positions
      and puts the number and DN labels beside the route, never on it), `instrument`
      (`sensing=`, `signal_to=` a valve: actuating system, actuator and signal line), `note`
