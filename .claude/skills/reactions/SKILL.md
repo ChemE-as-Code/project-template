@@ -98,7 +98,9 @@ each value taken from the evidence cites its observation in `source`.
      `rate:` laws (1D plug flow, ideal gas): give `catalyst:` and `bed:` (`catalyst_mass`, or
      `volume`, or `tubes` x `diameter` x `length`; `heat`: `adiabatic`, `isothermal` or
      `cooled` with `coolant_temperature` and `heat_transfer_coefficient` in W/(m2 K); the gas
-     `viscosity` in Pa s and a `diameter` for the Ergun pressure drop). Propagate writes the
+     `viscosity` in Pa s and a `diameter` for the Ergun pressure drop; `time_on_stream` in h
+   solves it at that catalyst age, the rates times the deactivation law's activity: size the
+   bed at the end of run). Propagate writes the
      outlet's composition, flow, temperature and pressure; the inlet needs its temperature and
      pressure. `examples/process-shift` is an adiabatic high-temperature shift bed.
      `cheme process simulate` couples the same bed to the DWSIM solve as an external unit
@@ -138,7 +140,8 @@ each value taken from the evidence cites its observation in `source`.
    `cheme schema process-catalysts`: active phase, promoters, support, `physical` (form,
    particle diameter in m, particle and bulk density, bed voidage, surface area), `window`
    (temperature K, pressure kPa(a)), `space_velocity`, `poisons` by component id,
-   `deactivation`, `price`, each block with provenance and source) and name it on the step
+   `deactivation` (with `law: first_order | power`, `kd` in 1/h and `order`, the activity
+   over time on stream), `price`, each block with provenance and source) and name it on the step
    (`catalyst: FE_NH3`). Kinetics go on the reaction as `rate:` (power law or LHHW, per kg of
    catalyst or per m3, on partial pressures in bar or concentrations in kmol/m3, for a liquid
    also on `mole_fraction` or `activity`, `reverse: equilibrium` for the (1 - Q/K) factor, Q on
@@ -167,6 +170,11 @@ each value taken from the evidence cites its observation in `source`.
    sites per kg from the dispersion), then `cheme experiments fit-rate FILE [--form lhhw
    --adsorb CO --power 2] [--reverse]`: the `rate:` to paste, each parameter with its 95 %
    interval. A fit holds inside its data's range only (`temperature_range` is set to it).
+   Conversions measured in reactors (what papers report more often than rates) go into the
+   same file as `integral:` points (`reactor: pfr | batch | cstr`, `temperature`, `time` s,
+   the feed's `concentrations` in kmol/m3, `conversion` of the file's `key`): `fit-rate` fits
+   a power law on concentrations through isothermal reactors of constant density (the
+   reactants' orders fixed at their coefficients, `--order-of A` fits one), with intervals.
 7. To choose the reactor type for a network with rate laws, run `cheme process
    reactor-choice NODE --product P [--key K] [--tanks 3] --svg build/choice.svg`: the yield and
    selectivity of P against the key's conversion for a PFR, one CSTR and N CSTRs in series
@@ -174,7 +182,23 @@ each value taken from the evidence cites its observation in `source`.
    peaks (the space time of its peak is printed); parallel reactions of a lower desired order
    favour mixing (a CSTR), of a higher order plug flow. It compares ideal reactors only: heat
    removal, mixing and the rate law's range decide the real choice.
-8. Run `cheme process propagate --fill`, then `cheme validate`, then `cheme process reactors`:
+8. For an exothermic reaction, run `cheme process reactor-hazards`: the adiabatic temperature
+   rise, the MTSR after a cooling failure (a batch: all its charge; a CSTR: its unconverted
+   key), the MTT (the reactor's `hazard.mtt`, else the lowest normal boiling point at about
+   atmospheric pressure) and, with `hazard: {td24: K, provenance, source}` from calorimetry,
+   Stoessel's criticality class (classes 3 to 5 are warnings); for a cooled bed, the hot spot's
+   sensitivity to the coolant temperature. Never estimate a TD24: without one the class stays
+   open (`cheme.reactor-hazard-missing`). These are screening values for the HAZOP study, not a
+   reaction-hazard assessment.
+9. Where the reaction data are uncertain (a fit's intervals, a literature range), give them:
+   `rate.uncertainty: {A: {gsd2: 3}, Ea: {distribution: normal, cv: 0.05}}`, and an
+   `uncertainty:` on `heat_of_reaction`, `equilibrium_constant` (of K) or `conversion` (the
+   shared model: lognormal `gsd2` or `pedigree`, `normal` `cv`, `triangular`/`uniform` `low`
+   and `high`). `cheme process reactor-uncertainty NODE [--samples 200] [--seed 1]` samples
+   them through the step's reactor (bed, tank, batch, conversion) and prints the spread of
+   the key's conversion and the outlet and highest temperatures. Nothing is written, and an
+   uncertainty never makes an outlet stale.
+10. Run `cheme process propagate --fill`, then `cheme validate`, then `cheme process reactors`:
    per reactor the extents, the heat of each reaction and ln K at the outlet, `ln(Q/K)`
    (0 at equilibrium, negative short of it), the rate at the outlet where there is a rate law,
    and the duty H(out) - H(in) on the elements basis (give every stream's temperature).
