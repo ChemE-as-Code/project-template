@@ -86,7 +86,13 @@ gate `lca` fails.
    sensitivity: refine first what ranks highest.
 6. **Scenarios.** Add `scenarios:` for the questions the goal asks, e.g. a grid factor for 2030
    or 2050 (`factors:`), or premise databases (`databases:`, see docs/framework/lca.md). Name
-   the model, pathway and year in `source`.
+   the model, pathway and year in `source`. A regional background (another country's grid)
+   gives `location`, `year` and `electricity` (grid-average, residual-mix, contractual with its
+   instrument in `source`, on-site), and declares `missing:` or `proxy:` (flow key -> why) where
+   no background of that region exists: never a zero, never the baseline's relabelled. A
+   physical change (a hot climate, another capacity) needs its own computed flowsheet case
+   (`case:`); never scale a design. `cheme assess lca-scenarios --write` writes one record per
+   scenario (`lca/scenarios/<id>.json`, docs/framework/lci-scenarios.md).
 7. **Write and gate.** `cheme assess lca --write`; commit `lca/*` with the inputs. The gate
    `kind: lca` requires `mapped`, then `lca-current`, `no-gaps` when the result must not be
    partial, and `factors` once the project's own replace an example.
