@@ -164,6 +164,22 @@ checks:
     stage: detail
     kind: layout-model
     require: [model-current, hvac]
+  # Control records (control/loops.yaml, control/sequences.yaml, process/narrative.md,
+  # control/philosophy.md; skills control-loops, control-sequences, control-narrative): at
+  # concept and basic a draft may have gaps (cheme.control-incomplete and -unresolved are info);
+  # at detail every loop and sequence is complete and every reference resolves. A plant without
+  # control records passes. Left out on purpose: logic given as text, a loop sharing a tag with
+  # an interlock, an alarm at a trip level (each to be judged, not removed) and a changed basis
+  # (cheme.control-stale); a file that fails its schema is the pids-valid gate's.
+  - id: control-complete
+    title: Loops and sequences complete, every control reference resolved
+    stage: detail
+    kind: validate
+    fail_on: info
+    rules: [cheme.control-incomplete, cheme.control-unresolved, cheme.control-ref,
+            cheme.control-unknown-tag, cheme.control-conflict, cheme.control-unit,
+            cheme.control-case, cheme.control-cycle, cheme.control-duplicate,
+            cheme.control-document, cheme.control-unreachable]
   - id: datasheets
     title: A datasheet for every equipment-list item
     stage: detail

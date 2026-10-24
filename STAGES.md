@@ -46,5 +46,9 @@ from its room, no tray over its fill, power and instrument trays kept apart
 (`electrical/electrical-list.yaml`, skill `electrical-cabling`; gate `electrical`). Every
 clad building is ventilated: air handling units, rooms with their air changes, ducts routed
 inside the building within their velocity limits, louvres large enough (`layout/hvac.yaml`,
-skill `hvac-ducts`; gate `hvac`). Economics: a class 3 estimate from quotations and the
-take-off, the TEA current with it, ready for the investment decision.
+skill `hvac-ducts`; gate `hvac`). Where the plant documents its control: every loop and
+sequence complete and every control reference resolved (`control/loops.yaml`,
+`control/sequences.yaml`, `process/narrative.md`, `control/philosophy.md`; skills
+`control-loops`, `control-sequences`, `control-narrative`; gate `control-complete`).
+Economics: a class 3 estimate from quotations and the take-off, the TEA current with it, ready
+for the investment decision.

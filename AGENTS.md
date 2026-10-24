@@ -80,6 +80,7 @@ This repository is a process plant design. The files are the design; there is no
 | `cheme diff <old> [new] [--list [--verbose \| --flat] \| --json]` | HTML report in `build/diff.html`; `--list` one line per changed plant item with its added/removed/modified counts, `--verbose` each change under it, `--flat` one line per changed object with the drawing that shows it; `--json` the data |
 | `cheme check [--stage S [--only-stage]] [--write --review R]` | engineering-step gates in `checks/checks.yaml` of every stage up to S; `--write` only at sign-off. For what a P&ID must show write `kind: on-sheet` gates (printed tags and classes in the model), not `grep` over the XML |
 | `cheme cause-effect` | the cause-and-effect matrix of `control/cause-effect.yaml` to `build/cause-effect.html` and `.csv` |
+| `cheme control report [--json] [-o DIR]` | the loop summary (`build/control-loops.html`, `.csv`) and the sequence report (`build/control-sequences.html`) with each control file's review status (drafted, reviewed, accepted) and the `cheme.control-*` findings (skills `control-loops`, `control-sequences`, `control-narrative`) |
 | `cheme schema [kind]` | JSON Schema of a YAML file kind; no kind lists them |
 | `cheme skills status \| update [NAME...] [--force]` | the bundled skills in `.claude/skills/`: current, outdated, modified (changed here) or missing; `update` installs missing and outdated files and keeps a modified one (reported) unless `--force` |
 | `cheme git-setup` | once per clone: `git diff` shows P&IDs as review text with their XML ids, pre-commit hook |
@@ -120,7 +121,10 @@ This repository is a process plant design. The files are the design; there is no
 | `equipment/equipment-list.yaml` | `equipment` (tag, type, service, sheet, design data, `dimensions`, notes) |
 | `piping/line-list.yaml` | `lines` (number, from, to, nominal_diameter, ..., notes, `segments` with a DN each) |
 | `control/instrument-list.yaml` | `instruments` (tag as printed, service, sheet, notes) |
-| `control/cause-effect.yaml` | `interlocks` (id, cause tag and condition, effects with actions, sheet, sil): every trip, instead of literal sheet text |
+| `control/cause-effect.yaml` | `interlocks` (id, cause tag and condition, effects with actions, sheet, sil; optional logic, delay, latching, reset, bypass): every trip, instead of literal sheet text |
+| `control/loops.yaml` | `loops` (regulatory loops: measurement, controller, final elements with fail positions, action, targets with units and provenance, modes, links, alarms; not safeguards) |
+| `control/sequences.yaml` | `sequences` (startup, shutdown, abnormal modes: permissives, steps, abort, reset; trips by C&E id) |
+| `process/narrative.md`, `control/philosophy.md` front matter | `narrative`, `control_philosophy` (sections, objectives and failures by id, with the loops, sequences and interlocks they rest on) |
 | `piping/special-items.yaml` (optional) | `piping_items` (tag, type, line, sheet, set_pressure_barg, relief_case: safety valves, silencers) |
 | `checks/checks.yaml` | `checks` |
 | `equipment/datasheets/<TAG>.yaml` | `datasheet` (one per equipment item: conditions, materials, sizing basis, `assumed` values) |
