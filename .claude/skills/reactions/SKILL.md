@@ -167,7 +167,14 @@ each value taken from the evidence cites its observation in `source`.
    sites per kg from the dispersion), then `cheme experiments fit-rate FILE [--form lhhw
    --adsorb CO --power 2] [--reverse]`: the `rate:` to paste, each parameter with its 95 %
    interval. A fit holds inside its data's range only (`temperature_range` is set to it).
-7. Run `cheme process propagate --fill`, then `cheme validate`, then `cheme process reactors`:
+7. To choose the reactor type for a network with rate laws, run `cheme process
+   reactor-choice NODE --product P [--key K] [--tanks 3] --svg build/choice.svg`: the yield and
+   selectivity of P against the key's conversion for a PFR, one CSTR and N CSTRs in series
+   (ideal, isothermal at the inlet), and the PFR's instantaneous selectivity. A series product
+   peaks (the space time of its peak is printed); parallel reactions of a lower desired order
+   favour mixing (a CSTR), of a higher order plug flow. It compares ideal reactors only: heat
+   removal, mixing and the rate law's range decide the real choice.
+8. Run `cheme process propagate --fill`, then `cheme validate`, then `cheme process reactors`:
    per reactor the extents, the heat of each reaction and ln K at the outlet, `ln(Q/K)`
    (0 at equilibrium, negative short of it), the rate at the outlet where there is a rate law,
    and the duty H(out) - H(in) on the elements basis (give every stream's temperature).
