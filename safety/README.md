@@ -3,7 +3,7 @@
 | path | what |
 |---|---|
 | `safety/hazop/<study-id>/study.yaml` | one HAZOP study (`cheme schema hazop-study`): the one authoritative file, edited by the team and by agents |
-| `safety/risk-matrix.yaml` | the risk matrix the studies rate against (`cheme schema risk-matrix`). **The one `cheme init` writes is example data** (`example: true`): replace it with your company's matrix before anything is assessed |
+| `safety/risk-matrix.yaml` | the risk matrix the studies rate against (`cheme schema risk-matrix`). **The one `cheme init` writes is example data** (`example: true`): replace it with your company's matrix before anything is assessed. A matrix is `status: proposed` until the team accepts it (`status: accepted`, `accepted_by:`); a study rated against a proposed matrix stays a draft |
 | `build/hazop/<study-id>.md`, `.html` | the report, derived from the study (`cheme safety hazop report`); never edited |
 | `reviews/<date>-hazop-<study-id>.md` | the review record of the study (skill `review`, `cheme safety hazop review`) |
 
@@ -97,7 +97,7 @@ actions:
 | `cheme safety hazop check [ID] [--json]` | the study's findings and state: `invalid`, `draft`, `assessed` (complete, current, accepted), `reviewed` (and a current human review) |
 | `cheme safety hazop rate ID [--target NODE\|SCENARIO] [--write] [--json]` | the band of every rating from the matrix; `--write` records them, nothing else changes |
 | `cheme safety hazop report ID` | `build/hazop/ID.md` and `.html` |
-| `cheme safety hazop stamp ID [--input F]... [--write]` | the analysed inputs' recorded and current revisions; `--write` records the current ones |
+| `cheme safety hazop stamp ID [--input F]... [--write]` | the analysed inputs' recorded and current revisions (a file by its sha256, a committed directory by the commit); `--write` records the current ones |
 | `cheme safety hazop review ID [--write]` | a review record to complete, in the format of `reviews/` |
 
 `cheme validate` checks every study: ids, references inside the study, tags against the lists

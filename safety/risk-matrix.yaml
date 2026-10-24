@@ -7,6 +7,7 @@ kind: risk-matrix
 id: example-4x4
 title: Illustrative 4x4 risk matrix
 example: true
+status: proposed  # the team accepts its matrix: status: accepted, accepted_by: <who, procedure>
 source: illustrative only; not derived from any standard or company procedure
 bands:
   - {id: low, title: Low, description: Acceptable; no further action needed}

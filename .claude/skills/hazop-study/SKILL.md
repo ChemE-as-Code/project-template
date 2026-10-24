@@ -37,7 +37,8 @@ or during a session. You draft; the team decides. Everything you write is a prop
      --input pid/P-01.xml --input control/cause-effect.yaml
    ```
    It writes the header, `analysed:` with the sha256 of each input (the revision analysed) and
-   `risk_matrix: safety/risk-matrix.yaml` when that file exists. Fill in `scope`, `modes`,
+   `risk_matrix: safety/risk-matrix.yaml` when that file exists. An input may be a directory
+   (`--input control/`): it is recorded at the HEAD commit and must have no uncommitted change. Fill in `scope`, `modes`,
    `team` and `assessment_basis` from what the team tells you. An input added later:
    `cheme safety hazop stamp H-01 --input pid/P-02.xml --write`.
 2. **Propose nodes.** A node is a part of the plant with one design intent: a vessel and its

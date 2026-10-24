@@ -46,20 +46,20 @@ nodes:
                   likelihood: C
                   basis: A release of cold water at the seal; first aid at most.
                   status: accepted
-                  band: {value: low, provenance: calculated, source: 'cheme safety hazop rate: example-4x4 (safety/risk-matrix.yaml)', fingerprint: bfc1e9d2a9aa32cb}
+                  band: {value: low, provenance: calculated, source: 'cheme safety hazop rate: example-4x4 (safety/risk-matrix.yaml)', fingerprint: bfc1e9d2a9aa32cb, inputs: {matrix: b6caa11838fe6bc7, severity: '1', likelihood: C}}
                 - category: asset
                   severity: "3"
                   likelihood: C
                   basis: Pump seal and impeller damage; weeks without the transfer.
                   status: accepted
-                  band: {value: medium, provenance: calculated, source: 'cheme safety hazop rate: example-4x4 (safety/risk-matrix.yaml)', fingerprint: 4255ea3f73fe5efe}
+                  band: {value: medium, provenance: calculated, source: 'cheme safety hazop rate: example-4x4 (safety/risk-matrix.yaml)', fingerprint: 4255ea3f73fe5efe, inputs: {matrix: b6caa11838fe6bc7, severity: '3', likelihood: C}}
               residual:
                 - category: asset
                   severity: "3"
                   likelihood: A
                   basis: The team credits interlock I-01 (LT-102 LALL stops P-101); the alarm is not credited separately.
                   status: accepted
-                  band: {value: low, provenance: calculated, source: 'cheme safety hazop rate: example-4x4 (safety/risk-matrix.yaml)', fingerprint: f04923bf0bf2e0ec}
+                  band: {value: low, provenance: calculated, source: 'cheme safety hazop rate: example-4x4 (safety/risk-matrix.yaml)', fingerprint: f04923bf0bf2e0ec, inputs: {matrix: b6caa11838fe6bc7, severity: '3', likelihood: A}}
       - id: N1-HL
         guide_word: more
         parameter: level
@@ -76,7 +76,7 @@ nodes:
                   likelihood: C
                   basis: Clean water spill, contained on site.
                   status: accepted
-                  band: {value: medium, provenance: calculated, source: 'cheme safety hazop rate: example-4x4 (safety/risk-matrix.yaml)', fingerprint: 286f676bb8108832}
+                  band: {value: medium, provenance: calculated, source: 'cheme safety hazop rate: example-4x4 (safety/risk-matrix.yaml)', fingerprint: 286f676bb8108832, inputs: {matrix: b6caa11838fe6bc7, severity: '2', likelihood: C}}
             notes: No high level alarm is configured on LT-102.
   - id: N2
     title: P-101 discharge through FV-104 to the battery limit
@@ -104,14 +104,14 @@ nodes:
                   likelihood: C
                   basis: Hot water release near the pump while an operator is present.
                   status: accepted
-                  band: {value: high, provenance: calculated, source: 'cheme safety hazop rate: example-4x4 (safety/risk-matrix.yaml)', fingerprint: b6fe1208a949a698}
+                  band: {value: high, provenance: calculated, source: 'cheme safety hazop rate: example-4x4 (safety/risk-matrix.yaml)', fingerprint: b6fe1208a949a698, inputs: {matrix: b6caa11838fe6bc7, severity: '3', likelihood: C}}
               residual:
                 - category: people
                   severity: "3"
                   likelihood: B
                   basis: Operator response to the PT-101 high pressure alarm, as judged by the team.
                   status: accepted
-                  band: {value: medium, provenance: calculated, source: 'cheme safety hazop rate: example-4x4 (safety/risk-matrix.yaml)', fingerprint: aa86891dd127d418}
+                  band: {value: medium, provenance: calculated, source: 'cheme safety hazop rate: example-4x4 (safety/risk-matrix.yaml)', fingerprint: aa86891dd127d418, inputs: {matrix: b6caa11838fe6bc7, severity: '3', likelihood: B}}
       - id: N2-RF
         guide_word: reverse
         parameter: flow
