@@ -99,6 +99,23 @@ each value taken from the evidence cites its observation in `source`.
      pressure. `examples/process-shift` is an adiabatic high-temperature shift bed.
      `cheme process simulate` couples the same bed to the DWSIM solve as an external unit
      (an outer loop, not a native DWSIM reactor; skill `process-simulation`).
+   - `cstr`: stirred tanks from the reactions' `rate:` laws at the outlet composition: give
+     `tank:` (`volume` m3 or `residence_time` s, V / Q0 on the inlet's volumetric flow, of each of
+     `count` equal tanks in series; `heat`: `isothermal`, at the outlet's given temperature or
+     else the inlet's, or `adiabatic`; `catalyst_loading` kg/m3 for rates per kg of catalyst).
+     An adiabatic tank's temperature is the steady state nearest the inlet's; a tank can have
+     others (ignition), so check the reported temperature against the expected regime.
+   - `batch`: the inlet is the charge (its flow the charge per hour), the outlet its composition
+     at the end: give `batch:` (`time` s, or `target: {key, conversion}`; `heat`;
+     `catalyst_loading`). A target the reactions cannot reach (equilibrium, a reactant used up)
+     is reported, not extrapolated. `process reactors` gives the profile, the heat released per
+     kmol of charge and the largest heat release per m3.
+   Tanks and batches hold gas-phase or liquid-phase reactions (one phase). A liquid needs
+   `liquid_molar_volume` for concentrations and space times, and for an adiabatic tank or a
+   liquid duty `liquid_heat_capacity` (kJ/(kmol K)) and each reaction's `heat_of_reaction`. A
+   gas uses the ideal-gas data. DWSIM does not simulate them yet: exclude them from
+   `process simulate`, or give the step `unit: conversion_reactor` with the propagated
+   conversions.
    **Liquid-phase reactions** (`phase: liquid`) reach equilibrium on their own
    `equilibrium_constant`, which names its `basis`: `mole_fraction` (ideal solution),
    `activity` (UNIFAC activity coefficients from the components' CAS numbers, extra `props`;
