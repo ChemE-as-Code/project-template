@@ -132,8 +132,28 @@ differ from `cheme process propagate` (ideal gas, the components' `ideal_gas` da
 deviation is the check. A reactor with one outlet must stay all vapour (the run says when
 liquid forms); give it a `liquid` outlet otherwise.
 
-Not simulated (keep these parts assumed and `exclude:` them): kinetic reactors (PFR, CSTR),
-solids, a liquid side draw from the condenser stage. Evaporators and dryers need `unit:` (their heat duty matters; a component
+A fixed bed (`reactor: pfr` with `bed:` and `catalyst:`, rate laws in `reactions.yaml`) is a
+`kinetic_pfr` unit, **coupled as an external unit, not a native DWSIM reactor**. DWSIM 9.0.5's
+kinetic PFR cannot take cheme's rate laws without loss (no `(1 - Q/K)` term, no `(T/T_ref)^n`,
+its own property package for partial pressures and enthalpies), so cheme-as-code solves the bed
+(the same model as `cheme process propagate`: 1D pseudo-homogeneous plug flow, ideal gas,
+effective particle rates, adiabatic, isothermal or cooled, Ergun pressure drop only with the
+bed's diameter, viscosity and particle data) at the inlet DWSIM gives, and DWSIM sees a
+conversion reactor with the bed's conversions, outlet temperature and pressure drop. An outer
+loop repeats the DWSIM solve until the bed at the solved inlet reproduces DWSIM's outlet:
+`specs.<id>.coupling` sets `tolerance` (relative, component flows and pressure; default 1e-4),
+`temperature_tolerance` (K, 0.05) and `max_iterations` (DWSIM solves, 30). Not converged means
+nothing is written. No `mode`, `outlet_temperature` or `pressure_drop` for it (the bed sets
+them); one outlet, vapour-phase reactions only; a reaction whose reactants are all formed in the
+bed (series reactions) cannot be written as an inlet conversion and is refused. The run record
+marks every unit `coupling: native` or `external-unit`, the latter with its `outer_loop`
+(iterations, residuals, the bed at the last inlet). `sim-coupling` (info) says how it converged;
+`sim-coupling-energy` warns when DWSIM's property package needs a duty beyond 5 % of the reaction
+heat to reach an adiabatic bed's outlet temperature (the ideal-gas bed and the package disagree
+on the enthalpies, typical at high pressure).
+
+Not simulated (keep these parts assumed and `exclude:` them): CSTRs and other kinetic reactors
+than a fixed bed, solids, a liquid side draw from the condenser stage. Evaporators and dryers need `unit:` (their heat duty matters; a component
 separator would drop it). A unit simulates one duty: a machine's cooling water or a cooler's pump
 power stays a given or assumed value.
 

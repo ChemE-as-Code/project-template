@@ -92,6 +92,8 @@ each value taken from the evidence cites its observation in `source`.
      `viscosity` in Pa s and a `diameter` for the Ergun pressure drop). Propagate writes the
      outlet's composition, flow, temperature and pressure; the inlet needs its temperature and
      pressure. `examples/process-shift` is an adiabatic high-temperature shift bed.
+     `cheme process simulate` couples the same bed to the DWSIM solve as an external unit
+     (an outer loop, not a native DWSIM reactor; skill `process-simulation`).
    Ideal gas is a limit: at high pressure real equilibria lie further to the fewer moles
    (ammonia at 450 C and 300 atm: 31 % ideal, 35.5 % measured). Give the components their
    `critical:` constants (`cheme chemistry thermo NAME` prints them) and the reactor
