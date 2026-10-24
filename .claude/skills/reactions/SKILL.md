@@ -100,7 +100,12 @@ each value taken from the evidence cites its observation in `source`.
      `cooled` with `coolant_temperature` and `heat_transfer_coefficient` in W/(m2 K); the gas
      `viscosity` in Pa s and a `diameter` for the Ergun pressure drop; `time_on_stream` in h
    solves it at that catalyst age, the rates times the deactivation law's activity: size the
-   bed at the end of run). Propagate writes the
+   bed at the end of run; `diffusivity` in m2/s of the key reactant in the gas). With the
+   catalyst's `particle_density` and `effective_diffusivity` (or `porosity` and `tortuosity`),
+   the bed reports Weisz-Prater and Mears at its inlet and outlet (`process reactors`, bed
+   `transport`) and notes a rate law that diffusion or the film limits. A rate measured on
+   powder or in the kinetic regime is the catalyst's own: give it `scale: intrinsic`, and the
+   bed multiplies it by the effectiveness factor at the plant's particle size. Propagate writes the
      outlet's composition, flow, temperature and pressure; the inlet needs its temperature and
      pressure. `examples/process-shift` is an adiabatic high-temperature shift bed.
      `cheme process simulate` couples the same bed to the DWSIM solve as an external unit
