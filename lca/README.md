@@ -5,9 +5,10 @@ The life cycle assessment of the plant's operation (ISO 14040/44), per functiona
 | file | what | written by |
 |---|---|---|
 | `lca.yaml` | goal and scope: the functional unit (a product of `process/flowsheet.yaml`), the case, the allocation between co-products, the impact categories, and the background of every feed, product and emitted component (`cheme schema lca`) | people; `cheme init` writes none, since the flowsheet has no products yet |
-| `factors.yaml` | the project's characterised factors per kg, t, kWh, MJ, ... of a flow, one value per impact category, each with status, source, year and licence (`cheme schema lca_factors`) | people; the file `cheme init` writes is an **example** (`example: true`) and characterises nothing |
+| `factors.yaml` | the project's characterised factors per kg, t, kWh, MJ, ... of a flow, one value per impact category, each with status, source, year, geography and its `sources:` registry entry (licence, publication policy); `include:` adds packaged open profiles (docs/framework/lca.md of cheme-as-code lists them) | people; the file `cheme init` writes includes the open profile `desnz-ghg-2026` (UK DESNZ 2026, OGL-3.0): a screening carbon footprint |
 | `inventory.csv` | the foreground inventory per functional unit: feeds and products of the flowsheet (kg, energy in kWh), emissions by component, co-products | `cheme assess lca --write` |
 | `results.csv`, `results.md` | impacts per category, with the contribution of each flow | `cheme assess lca --write` |
+| `gaps.csv` | every exchange and category without a burden (unmapped, a factor without the category, an emission the method does not characterise, an unlinked exchange of a referenced dataset): excluded from the totals, never 0 | `cheme assess lca --write` |
 | `dataset.yaml` | the plant's unallocated LCI dataset (`kind: lci_dataset`, per hour of operation): what other studies and a process library reference (`dataset: {path, product, allocation}`) | `cheme assess lca --write` |
 | `datasets/*.yaml` | LCI datasets of other processes, written by hand or copied from a library, used as backgrounds | people |
 
@@ -21,9 +22,9 @@ functional_unit: {product: PROD, amount: 1, unit: t}
 allocation: {method: exergy, coproducts: [PROD, BYPROD], source: "DESIGN.md D-0xx"}  # mass, economic, energy, exergy, shares, substitution, none
 flows:
   - {key: feed:AIR, free: true, source: "ambient air, a resource without burden"}
-  - {key: feed:POWER, factor: electricity, source: "grid supply at the site"}
+  - {key: feed:POWER, factor: desnz-ghg-2026:electricity-gb, source: "grid supply at the site", proxy: "UK grid for a site outside the UK"}
   - {key: product:VENT, emission: true, source: "released to the atmosphere"}
-  - {key: emission:CO2, factor: co2-fossil, source: "fossil CO2 from the reformer"}
+  - {key: emission:CO2, elementary: {compartment: air, origin: fossil}, source: "fossil CO2 from the reformer"}
 ```
 
 The construction phase counts the take-off (`estimate/mto.csv`) and the equipment weights,
@@ -49,8 +50,21 @@ See the skill `lca`.
 Never edit `inventory.csv` or `results.*` by hand: change the flowsheet, `lca.yaml` or
 `factors.yaml`, then rewrite them. Energy streams (`kind: energy`, with `duty`) from an energy
 feed (electric power, steam) or to an energy product (cooling water) are counted in kWh. The
-gate `kind: lca` (`checks/checks.yaml`, require `mapped`, `factors`, `lca-current`) checks the
-mapping is complete, the factors are the project's, and the outputs are current.
+gate `kind: lca` (`checks/checks.yaml`, require `mapped`, `factors`, `no-gaps`, `lca-current`)
+checks the mapping is complete, the factors are the project's, no exchange is a gap, and the
+outputs are current.
 
-Licensed databases (ecoinvent and others) must not be copied into this repository. Record the
-dataset a factor comes from in its `source` and its terms in `licence`.
+`results.md` says what the result is: **complete** within the declared boundary (every exchange
+characterised in every category with published or declared data; not a validation),
+**screening** (example, assumed, proxy or estimated factors, climate categories only, or another
+geography, reference year or characterisation method), **partial** (gaps), or **unavailable**.
+Climate categories alone are a screening carbon footprint, never a full LCA.
+`cheme assess lca --coverage` prints the classification, its reasons, the gaps, the sources
+and what the boundary leaves out. `cheme assess lca --dataset` exports the unallocated
+foreground without factors, a Brightway project or credentials.
+
+Licensed databases (ecoinvent and others) must not be copied into this repository: they
+live in a local Brightway project. Give each factor its registry entry (`source_id` ->
+`sources:` with provider, exact version, licence, attribution and `publication: public |
+restricted | local`). The registry records terms; it does not grant rights: free access alone
+does not make results publishable.

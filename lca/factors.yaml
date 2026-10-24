@@ -1,21 +1,23 @@
-# EXAMPLE FACTORS - THEY CHARACTERISE NOTHING. Schema: `cheme schema lca_factors`.
+# The project's characterised factors. Schema: `cheme schema lca_factors`.
 #
-# This file shows the shape of the project's characterised factors. The numbers are round
-# placeholders, not data: cheme-as-code holds no LCA data. `cheme assess lca` warns while
-# `example: true` stands, and a gate that requires `factors` fails. Replace every factor with
-# the project's own (a published dataset, an EPD, a licensed database's result), each with its
-# status (ASSUMED, PUBLISHED, EPD), source, reference year and licence, then remove
-# `example: true`. Do not copy licensed database content beyond what its licence allows.
+# The default background is the packaged open profile desnz-ghg-2026: the UK Government GHG
+# Conversion Factors 2026 (DESNZ), Open Government Licence v3.0, whose terms permit publishing
+# the results with the attribution. It gives a SCREENING CARBON FOOTPRINT only (climate change,
+# UK geography, GWP100 of AR4/AR5): map a flow with `factor: desnz-ghg-2026:electricity-gb`
+# (docs/framework/lca.md of cheme-as-code lists its factors). A flow it does not
+# cover is a gap in the results, never 0.
 #
-# A factor is per kg or t (material flows and emissions) or per kWh, MWh, MJ or GJ (energy
-# flows), and gives one value per impact category below.
+# Add the project's own factors below (a published dataset, an EPD, a calculation), each with
+# its status (PUBLISHED, EPD, ASSUMED; PROXY or ESTIMATE with basis and validity), source,
+# reference year, geography and its registry entry (source_id -> sources:, with licence and
+# publication policy). Do not copy licensed database content beyond what its licence allows;
+# a licensed database belongs in a local Brightway project (backend: brightway), not here.
 schema: cheme/lca/v1
 kind: lca_factors
-example: true
+include: [desnz-ghg-2026]
 categories:
   # elementary: the packaged method that characterises the plant's own emissions (mapped
   # elementary: {compartment, origin} in lca/lca.yaml) in this category, by CAS number
-  - {id: climate-change, title: Climate change, unit: kg CO2-eq, method: IPCC 2021 GWP100, elementary: ipcc2021-gwp100}
-factors:
-  - {id: electricity, title: "EXAMPLE grid electricity", unit: kWh, values: {climate-change: 0.5}, status: ASSUMED, source: "EXAMPLE placeholder", year: 2026}
-  - {id: co2-fossil, title: "EXAMPLE fossil CO2 to air", unit: kg, values: {climate-change: 1.0}, status: ASSUMED, source: "EXAMPLE: IPCC 2021 GWP100 of CO2 is 1 by definition", year: 2021}
+  - {id: climate-change, title: Climate change, unit: kg CO2-eq, method: "GWP100", elementary: ipcc2021-gwp100}
+sources: []
+factors: []

@@ -26,9 +26,15 @@ gate `lca` fails.
   they are not given; they decide everything after.
 - Backgrounds, with sources. **Never invent a factor** and never present a number from memory
   as data.
-  - Without a database licence: `lca/factors.yaml` with published values (a national grid
-    factor from the agency that publishes it, an EPD, a peer-reviewed dataset), each with
-    status, source, year and licence. The file `cheme init` writes is an **example**.
+  - Without a database licence: `lca/factors.yaml`. The file `cheme init` writes includes the
+    packaged open profile `desnz-ghg-2026` (UK DESNZ 2026, OGL-3.0, results publishable with
+    its attribution): electricity, natural gas, lorry tkm, water, construction materials, as
+    `desnz-ghg-2026:<id>` (docs/framework/lca.md of cheme-as-code lists them). It is climate-only and UK: a
+    screening carbon footprint, and a proxy outside the UK. Add published values of the
+    project (a national grid factor from the agency that publishes it, an EPD, a
+    peer-reviewed dataset), each with status, source, year, `location` and a `sources:`
+    registry entry (provider, exact version, licence, attribution, `publication`). Free
+    access is not permission: record the terms, and ask the user when they are unclear.
   - With a Brightway project (ecoinvent licence, or an open database such as USLCI): `backend:
     brightway`, with `activity:` and `biosphere:` mappings that `cheme assess lca-search`
     finds. The project is the user's; licensed data never goes into the repository.
@@ -55,6 +61,10 @@ gate `lca` fails.
    - a `factor:` or an `activity:` otherwise, or a `dataset:` (another process's unallocated LCI
      dataset, `kind: lci_dataset`) when the input comes from a process modelled in the
      repository or a process library.
+   A published factor used for a related flow (another material, geography or technology)
+   gets `proxy: "<what stands for what, and where that holds>"`; a number the project derives
+   is a factor `ESTIMATE` with `basis` and `validity`. A flow without any background stays
+   unmapped: it is a gap, and the results say so; never map it `free` to make it disappear.
    Choose market activities ("market for electricity, medium voltage") for the right location.
    For energy, mind the unit: the inventory counts kWh, a heat activity is per MJ, and the
    conversion is automatic when the kinds match.
@@ -62,8 +72,11 @@ gate `lca` fails.
    insulation from the take-off, and equipment by material from the equipment list. Read
    `lca-construction-unmapped` and `lca-equipment-weight`. Missing weights count as zero: give
    them as ASSUMED estimates with a source, or state the gap.
-4. **Run and read.** `cheme assess lca` (Markdown): totals per scenario, the split by phase,
-   the contributions. Check the dominant contributor against an independent estimate. Example:
+4. **Run and read.** `cheme assess lca --coverage` first: the classification (complete,
+   screening, partial, unavailable) and why, every gap with its quantity, the sources and
+   the limitations. Then `cheme assess lca` (Markdown): totals per scenario, the split by
+   phase, the contributions. Report the result under its label ("partial screening carbon
+   footprint"), with the gaps beside the totals and without a coverage percentage. Check the dominant contributor against an independent estimate. Example:
    specific power x grid factor for an air separation, or the fuel's carbon for a reformer.
    Investigate any result that disagrees by more than the data's accuracy.
 5. **Uncertainty.** Give `uncertainty:` with defaults by provenance (assumed values wider than
@@ -74,8 +87,17 @@ gate `lca` fails.
    or 2050 (`factors:`), or premise databases (`databases:`, see docs/framework/lca.md). Name
    the model, pathway and year in `source`.
 7. **Write and gate.** `cheme assess lca --write`; commit `lca/*` with the inputs. The gate
-   `kind: lca` requires `mapped`, then `lca-current`, and `factors` once the project's own
-   replace the example.
+   `kind: lca` requires `mapped`, then `lca-current`, `no-gaps` when the result must not be
+   partial, and `factors` once the project's own replace an example.
+8. **Licensed background rerun (optional).** With the user's own licensed database in a
+   local Brightway project, keep the same foreground (`lca/dataset.yaml` does not change) and
+   switch `backend: brightway`, giving each mapping an `activity:` beside its `factor:` (a
+   mapping may hold both, so either backend runs). Record in
+   `DESIGN.md` which mappings changed, so the two results can be compared. Results drawing on
+   a licensed database stay local unless its terms and a reviewed project policy allow more;
+   never commit or publish them by default.
+9. **Foreground only.** `cheme assess lca --dataset` exports the unallocated foreground with
+   no factors, Brightway or credentials: what a process library publishes.
 
 ## Validation and failure handling
 
@@ -88,8 +110,11 @@ gate `lca` fails.
   Fix the input they name; never work around them by mapping a flow `free`.
 - `cheme assess lca --check` exits 1 when the written files are stale: rewrite them, never
   edit them.
-- A flow you cannot map yet stays unmapped (it carries no impact), and the results say so.
-  Record the gap and its likely size in `DESIGN.md`.
+- A flow you cannot map yet stays unmapped: a gap in every category (`lca/gaps.csv`),
+  excluded from the totals, and the result is partial. Record the gap and its likely
+  sensitivity (what it would add at a plausible factor) in `DESIGN.md`.
+- `lca-geography`, `lca-reference-year`, `lca-method-mix` warn that factors do not fit the
+  study's location, year or one characterisation method: the result is screening.
 
 ## Outputs and provenance
 
@@ -98,8 +123,10 @@ gate `lca` fails.
   mapping.
 - `lca/results.csv` and `lca/results.md`: impacts per scenario, category, phase and
   contributor, with the factor's status, source and year, or the Brightway activity.
+- `lca/gaps.csv`: every exchange and category without a burden, with its quantity.
 - `lca/dataset.yaml`: the plant's unallocated LCI dataset (foreground scope, per hour): what
-  a process library keeps and other studies reference.
+  a process library keeps and other studies reference. Give `rights:` (its own data's terms),
+  `location`, `year` and `technology` in `lca/lca.yaml`.
 - `--json` adds the findings and the source revision (git commit, fingerprints of the files
   read).
 
