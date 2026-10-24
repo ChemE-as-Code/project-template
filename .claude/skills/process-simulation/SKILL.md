@@ -23,7 +23,13 @@ pass-through, mixer and splitter balances; simulate covers the energy balance an
   CAS needs its DWSIM name under `components:`.
 - The property package (`property_package:`), from `thermodynamic-model-selection`, never
   chosen silently. Supported: Peng-Robinson (PR), Peng-Robinson 1978 (PR78),
-  Soave-Redlich-Kwong (SRK), NRTL, UNIQUAC, Steam Tables (IAPWS-IF97), CoolProp. Where
+  Soave-Redlich-Kwong (SRK), NRTL, UNIQUAC, Steam Tables (IAPWS-IF97), CoolProp
+  (`cheme process methods`; another name is `sim-property-package`). Record the selection's
+  facts as `method_selection: {facts: {...}}`: the translation re-runs the selection and flags
+  a package it does not recommend. A model the worker does not run has at most an explicit
+  substitute (`methods[...].simulation.substitution`); use it only with approval and record
+  why as `method_selection.substitution`. Electrolytes, solids and petroleum
+  pseudocomponents are not supported by this route. Where
   DWSIM's binary interaction parameter of PR, PR78 or SRK is not fitted to the data that
   matter (argon/oxygen near pure O2, for example), set the pair under
   `interaction_parameters: [{components: [AR, O2], kij: {value: ..., provenance: ...,
@@ -88,6 +94,12 @@ pass-through, mixer and splitter balances; simulate covers the energy balance an
 - `sim-unmapped`: a step's class maps to no unit, a unit has the wrong number of streams, or
   energy streams do not fit; give `unit:` or split the step.
 - `sim-spec`: a spec is missing, contradictory or out of range; the message names it.
+- `sim-property-package` (error): the package is not one the worker runs; choose from the
+  hint. `sim-method-not-recommended` (warning): the recorded `method_selection` does not
+  recommend it; switch to a recommended package or record the approved reason as
+  `method_selection.substitution` (then `sim-method-substituted`, info, stays visible).
+  `sim-method-selection`: the recorded facts are incomplete or invalid; ask for the missing
+  ones.
 - `sim-not-converged` (exit 3): no stream value is written (the run is recorded). Check the specs for feasibility (reflux
   above the minimum, outlet temperatures that the duty can reach, a column spec its stages can
   meet), save the flowsheet with `--save` and open it in DWSIM to look.

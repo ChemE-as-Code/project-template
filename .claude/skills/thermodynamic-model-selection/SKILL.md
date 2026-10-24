@@ -33,23 +33,40 @@ result = select_thermo_model(
     {"pressure_value": 5, "pressure_unit": "bar(a)", "is_polar": True, "is_electrolyte": False}
 )
 result.models, result.reasoning, result.triggered_rules, result.provided_facts, result.source
+result.methods  # per model: .phase / .simulation executable, else .substitution or .reason
+result.executable  # {'phase': [...], 'simulation': [...]}: models each route runs as recommended
+result.notes  # a route that runs none of them: its substitutions, or 'unsupported'
 ```
 
-There is no CLI command. Units go through `chemeascode.foundation.units`; units other than K,
-°C, Pa, kPa, MPa, bar and the `(a)`/`(g)` pressures need the `units` extra.
+Every recommended model is resolved against the supported-method contract
+(`src/chemeascode/domains/process/thermodynamics/methods.yml`; `cheme process methods` prints
+it): whether `phase-calculation` (thermo) and `process-simulation` (DWSIM) run it, and where a
+route does not, the nearest model it runs as a `substitution` with what it `loses`, or no
+substitution (electrolytes, petroleum pseudocomponents: unsupported on both routes).
+
+There is no CLI command for the selection itself. Units go through
+`chemeascode.foundation.units`; units other than K, °C, Pa, kPa, MPa, bar and the `(a)`/`(g)`
+pressures need the `units` extra.
 
 ## Validation and failure handling
 
 - An unknown input, a value outside a fact's possible values, or a pressure without its unit
   raises `ValueError`.
 - No outcome: explain why from the reasoning trace; do not pick a model yourself.
+- A recommended model a route does not run: say so, and offer only the table's substitution,
+  named as a substitution with what it loses; use it only with the engineer's approval. With
+  no substitution (electrolytes, pseudocomponents) the regime is unsupported: say that, do
+  not fall back to another model.
 
 ## Outputs and provenance
 
 Report the recommended models with the reasoning, the rules that fired, the facts used
 (`pressure_band` is derived from the pressure) and `source`, the literature of the knowledge
-base. Use the exact model names in the next step. When the choice becomes the plant's property
-method, record it and its reason in `DESIGN.md`.
+base, and per model whether each route runs it or the substitution. Use the exact model names
+in the next step. When the choice becomes the plant's property method, record it and its
+reason in `DESIGN.md`; for the simulation record the facts in `process/simulation.yaml`
+`method_selection.facts` (and, for an approved substitution, `method_selection.substitution`
+with the reason), so the translation checks the property package against them.
 
 ## Required human judgment
 
@@ -59,4 +76,5 @@ assumption so it can be reviewed. An engineer accepts or overrides the recommend
 ## References
 
 - `src/chemeascode/domains/process/thermodynamics/model_selection_rules.yml`, the decision tree
+- `src/chemeascode/domains/process/thermodynamics/methods.yml`, the supported-method contract
 - `phase-calculation`, `process-design`
