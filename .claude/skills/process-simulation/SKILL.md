@@ -172,8 +172,15 @@ marks every unit `coupling: native` or `external-unit`, the latter with its `out
 heat to reach an adiabatic bed's outlet temperature (the ideal-gas bed and the package disagree
 on the enthalpies, typical at high pressure).
 
-Not simulated (keep these parts assumed and `exclude:` them): CSTRs and other kinetic reactors
-than a fixed bed, solids, a liquid side draw from the condenser stage. Evaporators and dryers need `unit:` (their heat duty matters; a component
+A stirred tank or batch (`reactor: cstr` with `tank:`, `reactor: batch` with `batch:`) is coupled
+the same way: cheme-as-code solves it (`domains/process/stirred_tank.py`) at the inlet DWSIM
+gives, DWSIM sees a conversion reactor with its conversions and outlet temperature (isothermal
+when the tank stays at its inlet's temperature), and the outer loop runs until they agree. A
+liquid tank's reactions are liquid-phase in DWSIM too; a batch's outlet keeps the inlet's
+pressure (its vessel's pressure is not the stream's).
+
+Not simulated (keep these parts assumed and `exclude:` them): kinetic reactors other than a
+fixed bed, a stirred tank or a batch, solids, a liquid side draw from the condenser stage. Evaporators and dryers need `unit:` (their heat duty matters; a component
 separator would drop it). A unit simulates one duty: a machine's cooling water or a cooler's pump
 power stays a given or assumed value.
 

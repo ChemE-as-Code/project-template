@@ -124,9 +124,8 @@ each value taken from the evidence cites its observation in `source`.
    Tanks and batches hold gas-phase or liquid-phase reactions (one phase). A liquid needs
    `liquid_molar_volume` for concentrations and space times, and for an adiabatic tank or a
    liquid duty `liquid_heat_capacity` (kJ/(kmol K)) and each reaction's `heat_of_reaction`. A
-   gas uses the ideal-gas data. DWSIM does not simulate them yet: exclude them from
-   `process simulate`, or give the step `unit: conversion_reactor` with the propagated
-   conversions.
+   gas uses the ideal-gas data. `process simulate` couples them to the DWSIM solve as external
+   units, like a fixed bed (skill `process-simulation`).
    **Liquid-phase reactions** (`phase: liquid`) reach equilibrium on their own
    `equilibrium_constant`, which names its `basis`: `mole_fraction` (ideal solution),
    `activity` (UNIFAC activity coefficients from the components' CAS numbers, extra `props`;
