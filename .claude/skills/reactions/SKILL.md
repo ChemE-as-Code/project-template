@@ -94,6 +94,15 @@ each value taken from the evidence cites its observation in `source`.
      pressure. `examples/process-shift` is an adiabatic high-temperature shift bed.
      `cheme process simulate` couples the same bed to the DWSIM solve as an external unit
      (an outer loop, not a native DWSIM reactor; skill `process-simulation`).
+   **Liquid-phase reactions** (`phase: liquid`) reach equilibrium on their own
+   `equilibrium_constant`, which names its `basis`: `mole_fraction` (ideal solution),
+   `activity` (UNIFAC activity coefficients from the components' CAS numbers, extra `props`;
+   `activity_model: ideal` at the top of `reactions.yaml` sets them to 1) or `concentration`
+   (kmol/m3, from each component's `liquid_molar_volume` in m3/kmol). Ideal-gas formation data
+   give the K of the gas and are not used for a liquid. One equilibrium step holds gas-phase or
+   liquid-phase reactions, not both. Write K on the basis the source reports it, never
+   converted silently (a K on mole fractions is not one on activities). The duty of a liquid
+   reactor is on the ideal-gas basis without the heats of vaporization (`duty_basis` says so).
    Ideal gas is a limit: at high pressure real equilibria lie further to the fewer moles
    (ammonia at 450 C and 300 atm: 31 % ideal, 35.5 % measured). Give the components their
    `critical:` constants (`cheme chemistry thermo NAME` prints them) and the reactor
@@ -105,9 +114,10 @@ each value taken from the evidence cites its observation in `source`.
    (temperature K, pressure kPa(a)), `space_velocity`, `poisons` by component id,
    `deactivation`, `price`, each block with provenance and source) and name it on the step
    (`catalyst: FE_NH3`). Kinetics go on the reaction as `rate:` (power law or LHHW, per kg of
-   catalyst or per m3, on partial pressures in bar or concentrations in kmol/m3, `reverse:
-   equilibrium` for the (1 - Q/K) factor, `catalyst:` it was measured on, and its validity
-   `temperature_range`). For an elementary gas-phase reaction, `cheme chemistry kinetics -r
+   catalyst or per m3, on partial pressures in bar or concentrations in kmol/m3, for a liquid
+   also on `mole_fraction` or `activity`, `reverse: equilibrium` for the (1 - Q/K) factor, Q on
+   the basis of the reaction's K, `catalyst:` it was measured on, and its validity
+   `temperature_range`). A fixed bed (`pfr`) is a gas: it refuses liquid-phase reactions. For an elementary gas-phase reaction, `cheme chemistry kinetics -r
    CH4=methane -r OH=[OH]` (network; RMG with `--rmg-endpoint`) prints a `rate:` from NIST and
    RMG with its confidence.
 5. Where the catalytic mechanism is known, give the reaction a `mechanism:` (mean field): the
@@ -159,6 +169,9 @@ each value taken from the evidence cites its observation in `source`.
   catalyst (warnings). `cheme.catalyst-*`: the catalysts file itself (densities, voidage,
   poisons that are no component). `cheme.reaction-rate`: a rate naming an undeclared
   component.
+- `cheme.reaction-phase-basis` (warning): a K or rate on partial pressures for a liquid, on a
+  liquid's mole fractions or activities for a gas, or on a liquid's basis without
+  `phase: liquid`.
 - `cheme.reaction-mechanism`: an elementary step that does not balance its atoms or its sites,
   or names an undeclared component.
 - `cheme.process-heat-of-reaction` (warning): a given heat of reaction more than 2 % from
