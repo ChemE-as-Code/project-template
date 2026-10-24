@@ -72,7 +72,12 @@ pass-through, mixer and splitter balances; simulate covers the energy balance an
    for electric power (utility balances, LCA). `exclude: [step or block ids]` simulates the rest: the streams from the excluded part
    need their values (given or assumed). Use it to simulate what the units cover while a part
    (a double column with side draws) is still assumed. Adsorbers and membranes are
-   component separators (`recoveries`), a main heat exchanger a multi-stream exchanger
+   component separators (`recoveries`): a specified split (`basis: specified`), not a
+   prediction; give `basis_source` (vendor data, a cited module, a DESIGN.md decision) and
+   `operating_basis` (the conditions it holds for), else `sim-specified-unsourced` (warning).
+   The run record marks such a unit `basis: specified` with a note: report its converged
+   result as the stated split, never as a predicted one (which techniques core predicts:
+   skill `separation-method-selection`). A main heat exchanger is a multi-stream exchanger
    (`outlet_temperatures` for all streams but one). Flash and column outlets are recognised by port ids (`vapour`, `liquid`, `top`,
    `bottom`), exchanger sides by matching ids (`hot_in`/`hot_out`); else give `outlets:` or
    `pairs:`.

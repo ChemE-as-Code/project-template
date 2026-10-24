@@ -109,6 +109,16 @@ What `fill` calculates:
   changed dimensions), residence time against
   `residence_times` in `process/design-basis.yaml`.
 
+What `fill` does **not** calculate (docs/framework/sizing.md, "Coverage";
+`chemeascode.domains.equipment.coverage`): equipment-specific rating, mechanical design to a
+code, material selection and corrosion allowance, relief sizing, dynamics and controls. Every
+filled draft records `sizing_basis: sizing_scope = preliminary`, and the fill adds `rating`
+(pumps: `npsh_required_m`; columns: `flooding_diameter_m`), `mechanical_design`,
+`corrosion_allowance_mm` and `relief_protection` as `TBD: unsupported in cheme-as-code ...`.
+Resolve them with the supplier's or specialist's value and source, `supplier`, or
+`not_applicable` with the reason; never fill them from memory. Report filled sizes as
+preliminary, not as a rated or code-checked design.
+
 ## Validation and failure handling
 
 - `cheme.datasheet-fill-property-unsupported` / `-out-of-range`: a state outside the
