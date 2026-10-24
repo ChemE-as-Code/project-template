@@ -66,7 +66,10 @@ not support, and do not fill the gap with assumed values to make one look better
      out with how it will be checked. Do not fit kinetic parameters to too few points, and
      do not take a rate law outside the range it was fitted in, unless an assumption names
      the gap and `validation` says how it will be tested.
-4. **Hand over to the model.** Write or extend `process/reactions.yaml` and
+4. **Hand over to the model.** A reported per-pass conversion with its selectivities goes
+   onto the reactor step as `selectivity: {key, conversion, products}` (molar, relative to
+   the key converted, the observation in `source`): no per-reaction conversions need to be
+   invented for the side reactions. Write or extend `process/reactions.yaml` and
    `process/catalysts.yaml` (skill `reactions`). Each `conversion`, `heat_of_reaction` and
    `rate` taken from the evidence gets `provenance: given` and a `source` naming the
    observation and the source (`source: "reaction-evidence O1 (S2, Table 2)"`). A working

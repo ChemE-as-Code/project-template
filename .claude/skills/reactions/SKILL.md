@@ -83,7 +83,11 @@ each value taken from the evidence cites its observation in `source`.
 3. Choose the reactor model on the step (`reactor:`):
    - `conversion` (the default when every reaction has a conversion): every reaction converts
      its fraction of the key component's *inlet* flow, all at once (as Aspen's RStoic).
-     Series reactions on the converted stream need two reactor steps.
+     Series reactions on the converted stream need two reactor steps, unless the step gives a
+     `selectivity:` instead: `{key: A, conversion: 0.8, products: {B: 0.7, C: 0.3},
+     provenance, source}`, kmol of each product formed per kmol of the key converted, as
+     papers and patents report it. The extents of parallel and series reactions follow;
+     selectivities the reactions cannot give, or too few to fix every extent, are refused.
    - `equilibrium`: the named reactions reach equilibrium at the outlet stream's temperature
      (give it, `assumed`) and pressure, ideal gas; `approach: 20` takes K 20 K hotter (less
      conversion of an exothermic reaction; negative for an endothermic one). Mark the
