@@ -185,7 +185,10 @@ each value taken from the evidence cites its observation in `source`.
    (ideal, isothermal at the inlet), and the PFR's instantaneous selectivity. A series product
    peaks (the space time of its peak is printed); parallel reactions of a lower desired order
    favour mixing (a CSTR), of a higher order plug flow. It compares ideal reactors only: heat
-   removal, mixing and the rate law's range decide the real choice.
+   removal, mixing and the rate law's range decide the real choice. `--region-svg FILE` adds
+   the candidate attainable region in the plane of the key and the product (PFR, CSTR, CSTR
+   then PFR, and mixing: their convex hull) and names the structure of its highest yield (Van
+   de Vusse kinetics: a CSTR before a PFR). It is a candidate, not a proven region.
 8. For an exothermic reaction, run `cheme process reactor-hazards`: the adiabatic temperature
    rise, the MTSR after a cooling failure (a batch: all its charge; a CSTR: its unconverted
    key), the MTT (the reactor's `hazard.mtt`, else the lowest normal boiling point at about
