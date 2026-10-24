@@ -71,7 +71,10 @@ pass-through, mixer and splitter balances; simulate covers the energy balance an
    Give machines a `drive_efficiency` (motor and gear) when their energy stream stands
    for electric power (utility balances, LCA). `exclude: [step or block ids]` simulates the rest: the streams from the excluded part
    need their values (given or assumed). Use it to simulate what the units cover while a part
-   (a double column with side draws) is still assumed. Adsorbers and membranes are
+   (a double column with side draws) is still assumed. Give each heater, cooler and column an
+   energy stream to a utility terminal (`category: utility`, with `utility: {kind,
+   supply_temperature, return_temperature, min_approach}` where the design basis states
+   them), so the run checks the utility levels and counts every duty once. Adsorbers and membranes are
    component separators (`recoveries`): a specified split (`basis: specified`), not a
    prediction; give `basis_source` (vendor data, a cited module, a DESIGN.md decision) and
    `operating_basis` (the conditions it holds for), else `sim-specified-unsourced` (warning).
@@ -118,6 +121,18 @@ pass-through, mixer and splitter balances; simulate covers the energy balance an
 - `sim-stale`: feeds, specs, package or DWSIM changed since the values were written; fill again.
 - `sim-run-stale` (`--check`): `process/simulation-run.json` records a run from other inputs;
   fill again (`sim-run-missing`, info: no run recorded for the case yet).
+- Energy checks of a converged run (independent of the duty balance DWSIM closes itself; the
+  record keeps them under `energy`, `cheme process energy` prints them):
+  `sim-temperature-cross` (an exchanger's hot and cold composites cross: the duties balance
+  but no counter-current exchanger does it; change the outlet specs or split the duty),
+  `sim-exchanger-approach` (below `min_approach`; declare it in `simulation.yaml`, or per
+  exchanger spec, from the design basis: never chosen silently; `sim-approach-undeclared`,
+  info, until then), `sim-exchanger-zones` (info: a stream changes phase, so the internal
+  approach is not checked; say so in the review or check the zones in a rating tool),
+  `sim-utility-level` (the utility terminal's declared temperatures cannot serve the duty),
+  `sim-energy-unbalanced` (a unit's or the plant's enthalpy closure fails: check convergence
+  and specs) and `sim-energy-unsupported` (info: reactors and units without an established
+  duty sign; report it as unsupported, never estimate a residual).
 
 Double columns (air separation): the HP column with `condenser: partial` (GAN as
 `vapor_flow`, liquid nitrogen as distillate) and `reboiler: false`, LIN as a liquid side draw

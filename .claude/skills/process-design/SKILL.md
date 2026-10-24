@@ -56,7 +56,13 @@ Every stream names a `template`; its composition may only use the template's com
 ### 3. The BFD: feeds, products, blocks, streams
 
 - `feeds` and `products` are the process boundary (DEXPI Source and Sink). Each has `ports`
-  (`{id: out, direction: out}` on a feed, `{id: in, direction: in}` on a product).
+  (`{id: out, direction: out}` on a feed, `{id: in, direction: in}` on a product), and a
+  `category` (`raw_material`, `product`, `by_product`, `utility`, `wastewater`, `off_gas`,
+  `solid_waste`, `emission`): a purge or vent without one is invisible to the TEA and LCA
+  inventories. A utility terminal (steam, cooling water, refrigerant, power) gives `utility:
+  {kind, supply_temperature, return_temperature, min_approach}` from the design basis. Every
+  heater, cooler, machine, column and non-adiabatic reactor needs an energy stream to one.
+  `cheme process energy` reports the gaps (`cheme.boundary-*`) and the energy balances.
 - `blocks` have a DEXPI `class` (`Compressing`, `Cooling`, `Mixing`,
   `SeparatingByThermalProcess`, ...) and `ports`: `{id, direction: in | out, kind: material |
   energy | information}` (material is the default).

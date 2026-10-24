@@ -47,7 +47,12 @@ each value taken from the evidence cites its observation in `source`.
    components (with ideal-gas data and critical constants), reactions and typical catalysts to
    the plant's files without touching what is there (an id the plant has with other data is a
    conflict). The catalyst windows are typical ranges (assumed): confirm them for your licensor
-   or vendor, and add the kinetics you have.
+   or vendor, and add the kinetics you have. Each entry shows its `model basis`: `equilibrium`
+   (an ideal-gas equilibrium limit, no rate law) or `stoichiometry_only` (no conversion,
+   selectivity, equilibrium basis or rate law). Importing an entry is chemistry, not a reactor
+   model: choose and source that separately (a sourced conversion, an equilibrium reactor or a
+   rate law with its source), never by inventing conversions or kinetics. `cheme maturity`
+   reports which basis each reactor of the plant rests on.
 
 1. Write `process/reactions.yaml` (schema: `cheme schema process-reactions`):
 
