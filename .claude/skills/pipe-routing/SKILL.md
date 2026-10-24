@@ -25,8 +25,10 @@ review.
   `lists-sync`).
 - `piping/routing.yaml` (`cheme schema routing`), optional. Without it the defaults apply,
   each ASSUMED: `local_max_m` 15, `local_elevation_m` 3.5 (bottom of pipe), `grade_max_m` 3,
-  `rack_reach_m` 50, `rack_detour_factor` 2.5, `spacing_m` 0.1, `headroom_road_m` 6,
-  `headroom_walkway_m` 2.2, `grid_m` 0.5.
+  `rack_detour_factor` 2.5, `spacing_m` 0.1, `headroom_road_m` 6,
+  `headroom_walkway_m` 2.2, `grid_m` 0.5. How far an end may be from a rack to use it is
+  `rack_reach` in `layout/site-plan.yaml` (default: `max_unsupported_length`, 30 m), the same
+  value `cheme validate` checks line routes with; do not set `rack_reach_m` here (deprecated).
 - Where the utilities come from (cooling water plant, nitrogen header, flare) is design
   information: ask, or record an assumption in `DESIGN.md`, before declaring battery limits.
 
@@ -50,7 +52,7 @@ review.
      PR1, rack_end: start | end | nearest}`. Without a rule: the line's `from_area`/`to_area`,
      else the free end of the nearest rack, else the site edge;
    - `local_elevation_m` (the pipe-way of an area), `local_max_m` (longer goes to the rack),
-     `grade_max_m`, `rack_reach_m`, `spacing_m`, headroom, `gravity_fluids`;
+     `grade_max_m`, `spacing_m`, headroom, `gravity_fluids`;
    - `vent_rise_m` (default 1 m): how far an open vent or relief end rises above its stub;
      `vents: [{lines: [VNT-*], fluids?, rise_m?, radius_m?, max_rise_m: 20}]` raises the
      outlets of the lines it matches until a sphere of `radius_m` around the outlet (default:
@@ -111,7 +113,9 @@ review.
      message gives the outlet height it needs. Also an open end directly under a walking
      surface (within `vent_plan_clearance_m`, 1.5 m, in plan and `vent_overhead_m`, 6 m,
      below it: a relief tailpipe under a stair landing discharges into the only way onto the
-     roof). Add a `vents` rule for the line (or raise the placed silencer or valve), turn the
+     roof), and an open end beside one (within `vent_side_clearance_m`, 1.5 m, of its edge in
+     plan, between its floor and the walkway headroom above it: a vent at head height next to
+     a platform). Add a `vents` rule for the line (or raise the placed silencer or valve), turn the
      tailpipe to the far side of the roof, or move the stair or platform;
    - `layout-operability` on in-line items inside a casing: a valve, relief valve or
      instrument inside a cold box cannot be operated or tested from outside. Route the line so
@@ -125,16 +129,26 @@ review.
      `layout/site-plan.yaml` (a stringer along each tier's edges and a beam across every
      3 m, optionally only on `levels`), or let them ride on a larger line; record which. Off
      the racks the build proposes support steel under each run that spans too far
-     (`support_steel`, `<pipe>/post-<k>`: a T-post from grade or a stub on the steel below,
-     dashed in the plans, named in the finding): check where it stands (roads, walkways,
-     foundations) and `cheme layout pin <pipe>/post-<k>` it into `pipe_supports` of
-     `layout/structures.yaml`, or declare your own posts there. The supports themselves (shoes,
+     (`support_steel`, `<pipe>/SP-<arc>`, the arc its nominal place in m along the pipe, so
+     the id stays the same from build to build and never moves to another post: a T-post from
+     grade, or a stub on the steel below when that is at most `support_stub_max_m` (1.5 m)
+     below and not another line's support steel; dashed in the plans, named in the finding;
+     the finding lists those to place by hand apart, never as `pin` candidates). A post
+     keeps `support_pipe_clearance_m` (0.1 m, ASSUMED) from the pipes it does not carry: it
+     moves along its pipe to the first clear place and its `reason` says so, or says "place it
+     by hand" when none in the span is clear. Check where it stands (roads, walkways,
+     foundations) and `cheme layout pin <pipe>/SP-<arc>` it into `pipe_supports` of
+     `layout/structures.yaml`, or declare your own posts there. Posts pinned under the older
+     `<pipe>/post-<k>` ids keep them (a declared id is the plant's); nothing to migrate.
+     `layout-support-stub` (warning): a declared stub taller than `support_stub_max_m`, or one
+     standing on another line's T-post: carry the pipe from steel close below (a bracket off a
+     column), or give it a post from grade or a frame of its own. The supports themselves (shoes,
      guides) are generated where a pipe rests on a beam or a declared crossbar;
    - `layout-operability`: a manual valve's handwheel or lever more than 1.8 m above the floor
      below it (a transmitter more than 2 m), with no floor within 0.6 m in plan, or no free
      standing space there (a stair flight or steel in front of it). Move the valve on the route
      (a pinned route with the valve near a floor), add a platform (the build proposes a
-     valve access platform `VP-<n>` and names it in the finding; skill `structures-access`),
+     valve access platform `VP-<valve tag>` and names it in the finding; skill `structures-access`),
      or declare its operator under `operators:` in this file: a
      `chainwheel` (a handwheel valve of `use: infrequent`, at most 6 m up), an
      `extension_spindle` or `remote_operator` (at most 6 m long), a transmitter's

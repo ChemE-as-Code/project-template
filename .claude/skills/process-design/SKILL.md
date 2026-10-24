@@ -147,11 +147,21 @@ kij; liquid density COSTALD; enthalpy on ideal gas at 298.15 K, which needs
 `units.enthalpy_reference: {state: ideal_gas, temperature: 298.15}`).
 
 - Anything else (other components such as CO2 or water, solids, a pressure that is not absolute
-  and positive, a given phase the flash contradicts) is refused, nothing is written, and the
-  warning says why (`process-property-out-of-range`, `-unsupported`, `-phase`). A phase
-  refusal is usually a design finding: the stated temperature and pressure do not give that
-  phase. Record it in `DESIGN.md`; do not change the numbers to make it pass. `--fill` exits 3
-  when it refused a stream and names them on the summary line.
+  and positive, a given phase the flash contradicts beyond saturation) is refused, nothing is
+  written, and the warning says why (`process-property-out-of-range`, `-unsupported`, `-phase`,
+  `-metastable`). A phase refusal is usually a design finding: the stated temperature and
+  pressure do not give that phase. Record it in `DESIGN.md`; do not change the numbers to make
+  it pass. `--fill` exits 3 when it refused a stream and names them on the summary line.
+- A stream at its dew or bubble point (a column's vapour product, a saturated liquid) can land a
+  hundredth of a kelvin on the wrong side of the line in Peng-Robinson. Give or assume its phase
+  (`vapor` or `liquid`, with the reason as source): `--fill` then calculates it on that phase's
+  root of the equation of state at T and P (liquid density still COSTALD), marks every value's
+  source `phase-constrained <phase> root (...; flash <phase>, dG/RT ...)`, and reports it
+  (`process-property-phase-constrained`, info). It is refused when the root is metastable by
+  more than 0.01 RT in molar Gibbs energy against the stable flash (about 0.1 K across the
+  saturation line of N2 or O2 near 1.3 bar(a); `process-property-metastable`) or does not exist
+  (beyond the spinodal; `process-property-phase`). Changing the stated phase makes the values
+  stale.
 - After an input changes, `validate` reports `cheme.process-calculated-stale` until `--fill`
   recalculates; a refused recalculation keeps the old values and they stay stale.
 - `cheme process build` exports the calculated values and phase into the BFD/PFD stream

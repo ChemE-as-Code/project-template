@@ -42,7 +42,12 @@ result = phase_determination(
 Models: `{"eos_model": "Peng-Robinson" | "Redlich-Kwong" | "Redlich-Kwong-Soave"}`, or
 `{"liquid_phase_model": "NRTL" | "Wilson" | "UNIFAC", "vapor_phase_model": <an EOS> |
 "ideal_gas"}`. The names are exact and case-sensitive. Needs the `props` extra
-(`pip install 'cheme-as-code[props]'`). There is no CLI command.
+(`pip install 'cheme-as-code[props]'`). There is no CLI command for the flash.
+
+Redlich-Kwong-Soave takes its `kij` from the ChemSep SRK file, which is not shipped (licence
+unconfirmed, core#55). `cheme data status` shows whether it is installed; the user installs it
+with `cheme data fetch chemsep-srk` (downloads ChemSep-LITE; `--zip lite.zip` for a copy
+already downloaded). Ask before running the fetch: it downloads third-party data.
 
 ## Validation and failure handling
 
@@ -51,20 +56,27 @@ Models: `{"eos_model": "Peng-Robinson" | "Redlich-Kwong" | "Redlich-Kwong-Soave"
 - The recommended model is not available: report it; use a similar one only with approval.
 - A gauge pressure is refused, because no ambient pressure is known: give it as absolute.
 - Check `flash_convergence_error` before using the result.
+- `notes` not empty (e.g. "ChemSep SRK interaction parameters are not installed; kij = 0"): the
+  result used `kij = 0` for every pair. Report it with the result, and suggest
+  `cheme data fetch chemsep-srk` or another model where the interaction matters.
 
 ## Outputs and provenance
 
 `FlashCalculationResult`: `temperature_K`, `pressure_Pa`, `gas_count`, `liquid_count`, `betas`,
 `gas_composition`, `liquid_compositions`, `component_cas_numbers`, the inputs
-(`provided_facts`) and `source` (thermo). Report the model and the assumptions with the result.
+(`provided_facts`), `notes` (assumptions such as `kij = 0`) and `source` (thermo). Report the model and the assumptions with the result.
 
 ## Required human judgment
 
 An engineer reviews the model choice and `allow_two_liquids`. A result near a phase boundary
-needs confirmation from data.
+needs confirmation from data. For a stream at its dew or bubble point that the flash puts a
+fraction of a kelvin into the other phase, do not shift its temperature: state its phase, and
+`cheme process props --fill` calculates it on that phase's EOS root, marked phase-constrained,
+within a metastability tolerance (`process-design`).
 
 ## References
 
 - `thermodynamic-model-selection`, `process-design`
-- Interaction parameters: thermo's ChemSep databases and
-  `src/chemeascode/domains/process/thermodynamics/data/chemsep/` (SRK, Artistic License 2.0)
+- Interaction parameters: thermo's ChemSep databases (PR, NRTL, Wilson) and, for SRK, the
+  ChemSep file installed by `cheme data fetch chemsep-srk` (origin and licence status:
+  `src/chemeascode/domains/process/thermodynamics/data/chemsep/SOURCE.md`)

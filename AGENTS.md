@@ -31,7 +31,8 @@ This repository is a process plant design. The files are the design; there is no
   --fill` or `cheme process props --fill` only); `DESIGN.md` keeps the
   decisions, not a second copy of the numbers. P&IDs start from the PFD (skill `pid-draft`).
 - After every change: `cheme fmt <sheet>`, then `cheme validate`. Fix every `error`. Do not
-  commit with errors; the pre-commit hook and CI refuse it anyway.
+  commit with errors; the pre-commit hook and CI refuse it anyway. Never bypass the hook
+  (`git commit --no-verify`, `-c core.hooksPath=...`): fix what it reports, or stop and say so.
 - One logical change per commit. Say what changed on which sheet and why. Append the change to
   `PROGRESS.md`.
 - Keep the lists in step with the P&IDs (skill `lists-sync`), and the 3D layout in `layout/`
@@ -84,7 +85,7 @@ This repository is a process plant design. The files are the design; there is no
 | `cheme git-setup` | once per clone: `git diff` shows P&IDs as review text with their XML ids, pre-commit hook |
 | `cheme copy <id or tag> --prefix NEWID [--tag T] [--offset DX,DY] [--into PARENT] [--rename OLD=NEW] [--renumber A:B] [--set PROP=VALUE] [--connect PIPE=ITEM:NODE] [--sense-at ID[:X,Y]] [--print]` | duplicate an object with its parts and everything that draws it, every id renamed from `NEWID`; `--rename`/`--renumber` give inner valves their own tags, `--set` e.g. the fluid code, `--connect` closes an open pipe end, `--sense-at` re-points an instrument's sensing location; prints the new ids, the lines written, what was not copied and the tags still duplicated |
 | `cheme move <id or tag> --offset DX,DY [--print]` | move an object's drawing (symbol, node positions, labels); attached lines follow, bends that stay are listed |
-| `cheme rename OLD NEW [--children] [--ids] [--tag] [--print]` | an id and every `#OLD` reference (`--children`: also `OLD_*`); given a tag, the tag data and its labels (`--ids`: and the ids that spell it); `--tag`: NEW is the new tag of the object with the id OLD (retag one of two objects sharing a tag; an instrument's sensor and actuator follow) |
+| `cheme rename OLD NEW [--children] [--ids] [--tag] [--print]` | an id and every `#OLD` reference (`--children`: also `OLD_*`); given a tag, the tag data and its labels (`--ids`: and the ids that spell it); `--tag`: NEW is the new tag of the object with the id OLD (retag one of two objects sharing a tag; an instrument's sensor and actuator follow); a valve and its own actuation chain sharing a tag are retagged together |
 | `cheme set <id or tag> PROP=VALUE... [--print]` | data values by DEXPI name, typed (string, number, enumeration, `'50 mm'` quantity, `Stroke.Width`), and the label texts showing them; `PROP=` removes one |
 | `cheme run [--fmt SHEET] SCRIPT [ARGS]` | run a Python script in cheme-as-code's interpreter (pyDEXPI and `chemeascode.domains.piping.authoring` import), cwd the repository root; arguments and exit code pass through; `--fmt` goes before SCRIPT (after it, it goes to the script) |
 | `cheme regen [SHEET...] [--force \| --detach \| --list]` | rebuild generated sheets (frame -> script -> fmt); refuses a sheet edited by hand and names the items; `--detach` makes a sheet hand-maintained |

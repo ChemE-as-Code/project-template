@@ -18,7 +18,9 @@ instrument lists and `DESIGN.md` started (gates `design-basis`, `concept-lists`,
 `assumptions-marked`, `process-concept`, `process-balances`; `process-links-concept` reports
 unresolved links). The plot plan: the site, its areas, roads and pipe racks, every
 equipment-list item placed and the spacing criteria declared as `separations:` (gate
-`layout-plot-plan`, skill `layout-yaml`).
+`layout-plot-plan`, skill `layout-yaml`). Economics: the decision the next stage needs stated,
+an AACE class 5 capital estimate, the prices of the main feeds and products with their sources,
+and a screening TEA showing which premises dominate (`estimate/tea.yaml`, skill `tea`).
 
 ## basic: Basic engineering
 PFD generated with no refinement pending and no stale calculated values (`process-basic`), every
@@ -31,7 +33,9 @@ or headroom finding left unaccepted, zones declared (`layout/zones.yaml`, skill
 `area-classification`), and a layout review (topic `layout`, gate `layout-review`) that cites
 the rendered plot plan and at least two sections (skills `pipe-routing`, `structures-access`,
 `review`). The material take-off (`estimate/mto.csv`, skill `mto-estimate`) is rewritten from
-the committed model (gate `mto`).
+the committed model (gate `mto`). Economics: a class 4 capital estimate (equipment costed from
+datasheet sizes, OSBL and owner's cost stated), every flow priced or listed free, the TEA's
+uncertainty and break-even values reviewed against the decision (gate `tea`, skill `tea`).
 
 ## detail: Detail engineering
 Datasheets (one `equipment/datasheets/<TAG>.yaml` per equipment-list item, format in
@@ -42,4 +46,5 @@ from its room, no tray over its fill, power and instrument trays kept apart
 (`electrical/electrical-list.yaml`, skill `electrical-cabling`; gate `electrical`). Every
 clad building is ventilated: air handling units, rooms with their air changes, ducts routed
 inside the building within their velocity limits, louvres large enough (`layout/hvac.yaml`,
-skill `hvac-ducts`; gate `hvac`).
+skill `hvac-ducts`; gate `hvac`). Economics: a class 3 estimate from quotations and the
+take-off, the TEA current with it, ready for the investment decision.

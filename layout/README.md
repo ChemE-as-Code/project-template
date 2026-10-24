@@ -123,6 +123,7 @@ apart must be carried by racks: each end within `rack_reach` of a rack centrelin
 `max_unsupported_length`, since the run from an end to the rack is unsupported pipe), the racks
 connected (`layout-line-route`). Carried lines get a length estimate along the racks
 (`layout-line-length`, info). The router of `layout build` takes such lines over the racks too,
+with the same `rack_reach`,
 and also lines whose straight run would cross a road or another area or that are longer than
 `local_max_m` (`piping/routing.yaml`, default 15 m); local lines run at the pipe-way elevation
 (`local_elevation_m`, default 3.5 m). Ends at the battery limit (`BL`, `CW`, `CWR`, ... in the

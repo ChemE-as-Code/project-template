@@ -21,8 +21,15 @@ The prompt is built from the repository, not from a plan written in advance:
   ``carry_over`` list (``build/agent-run/<previous>/review.json``).
 
 Everything a run produces goes to ``build/agent-run/<stage>/`` (``--out``): ``prompt.txt``,
-``launch.json`` (command, versions, time), ``result.json`` (Claude Code's JSON output) and
-``stderr.log``. Copy it into the run record (``docs/agent-design-run.md`` in cheme-as-code).
+``launch.json`` (command, versions, time, cost), ``result.json`` (Claude Code's JSON output),
+``stderr.log`` and, last, ``done`` (``exit N``: wait for this file, not for a process). Copy it
+into the run record (``docs/agent-design-run.md`` in cheme-as-code).
+
+``--total-cap USD`` keeps a chain of sessions inside one total: the cap of this session shrinks
+to what is left after the ``total_cost_usd`` of every earlier ``result.json`` under the output
+directory, and the session is skipped when nothing is left. A stage that needs more tools
+(``npm`` for a viewer) lists them as ``extra_tools`` in ``stages.json`` or gets
+``--extra-tool``.
 """
 
 from __future__ import annotations
@@ -122,18 +129,59 @@ def fix_first(stage_id: str, plan: dict[str, dict], data: dict, out_root: Path) 
     return "\n".join(lines) or "nothing"
 
 
+def spent(out_root: Path, skip: Path) -> float:
+    """USD of every ``result.json`` under *out_root* except *skip*: ``total_cost_usd`` is the
+    cumulative cost of a session (``num_turns`` counts only its last segment)."""
+    total = 0.0
+    for result in sorted(out_root.rglob("result.json")) if out_root.is_dir() else []:
+        if result.resolve() == skip.resolve():
+            continue
+        try:
+            total += float(json.loads(result.read_text(encoding="utf-8")).get("total_cost_usd", 0))
+        except (OSError, ValueError, TypeError, AttributeError):
+            continue
+    return total
+
+
+def summary(result: Path) -> dict:
+    """Cost, turns and permission denials of a finished session, for launch.json."""
+    try:
+        data = json.loads(result.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    if not isinstance(data, dict):
+        return {}
+    return {
+        "total_cost_usd": data.get("total_cost_usd"),
+        "num_turns_last_segment": data.get("num_turns"),
+        "permission_denials": len(data.get("permission_denials") or []),
+        "is_error": data.get("is_error"),
+    }
+
+
 def fill(template: Path, values: dict[str, str]) -> str:
     return string.Template(template.read_text(encoding="utf-8")).safe_substitute(values)
 
 
-def launch(args: argparse.Namespace, prompt: str, out: Path, budget: float, max_turns: int) -> int:
+def launch(
+    args: argparse.Namespace,
+    prompt: str,
+    out: Path,
+    budget: float,
+    max_turns: int,
+    extra_tools: list[str],
+) -> int:
     out.mkdir(parents=True, exist_ok=True)
+    done = out / "done"
+    if done.exists():
+        done.unlink()
     (out / "prompt.txt").write_text(prompt, encoding="utf-8")
     tools = [
         line.strip()
         for line in (HERE / "allowed-tools.txt").read_text(encoding="utf-8").splitlines()
         if line.strip() and not line.startswith("#")
     ]
+    tools += [t for t in extra_tools if t not in tools]
     command = [
         tool("CLAUDE_BIN", "claude", required=not args.dry_run),
         "-p",
@@ -169,8 +217,15 @@ def launch(args: argparse.Namespace, prompt: str, out: Path, budget: float, max_
         code = subprocess.run(command, stdout=stdout, stderr=stderr, check=False).returncode
     meta["finished"] = datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds")
     meta["exit_code"] = code
+    meta.update(summary(result))
     (out / "launch.json").write_text(json.dumps(meta, indent=2) + "\n", encoding="utf-8")
-    print(f"{args.stage} {args.mode}: exit {code}; output in {out}")
+    done.write_text(f"exit {code}\n", encoding="utf-8")
+    cost = meta.get("total_cost_usd")
+    print(
+        f"{args.stage} {args.mode}: exit {code} in {out}"
+        + (f"; cost USD {cost}" if cost is not None else "")
+        + "; check the work yourself (tests, cheme validate), do not trust the summary"
+    )
     return code
 
 
@@ -184,6 +239,17 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--spec", type=Path, default=HERE / "spec.md")
     parser.add_argument("--out", type=Path, help="Output directory (default build/agent-run).")
     parser.add_argument("--dry-run", action="store_true", help="Print the prompt, run nothing.")
+    parser.add_argument(
+        "--total-cap",
+        type=float,
+        help="USD for the whole chain: cap this session at what earlier result.json files left.",
+    )
+    parser.add_argument(
+        "--extra-tool",
+        action="append",
+        default=[],
+        help="Another allowed tool for this session (e.g. 'Bash(npm:*)'); repeatable.",
+    )
     args = parser.parse_args(argv)
     if not Path("plant.yaml").is_file():
         sys.exit("run it from the plant repository root (no plant.yaml here)")
@@ -194,6 +260,21 @@ def main(argv: list[str] | None = None) -> int:
     spec = args.spec.read_text(encoding="utf-8").strip()
     out_root = args.out or Path("build") / "agent-run"
     data = status(tool("CHEME", "cheme"))
+    if args.mode == "stage":
+        budget = args.budget or float(stage.get("budget_usd", 5))
+    else:
+        budget = args.budget or float(stage.get("review_budget_usd", 2))
+    out = out_root / args.stage / ("review" if args.mode == "review" else "")
+    if args.total_cap is not None:
+        left = args.total_cap - spent(out_root, out / "result.json")
+        if left <= 0.01:
+            print(
+                f"{args.stage} {args.mode}: skipped, the total cap USD {args.total_cap:g} is spent"
+            )
+            return 3
+        if left < budget:
+            print(f"{args.stage} {args.mode}: cap lowered to USD {left:.2f} (total cap)")
+            budget = round(left, 2)
     values = {
         "STAGE": args.stage,
         "TARGET": stage["target"],
@@ -201,19 +282,17 @@ def main(argv: list[str] | None = None) -> int:
         "TASK": stage["task"].strip(),
         "THIS_STAGE": this_stage(stage, data),
         "FIX_FIRST": fix_first(args.stage, plan, data, out_root),
-        "BUDGET": f"{args.budget or stage.get('budget_usd', 5):g}",
+        "BUDGET": f"{budget:g}",
         "OUT": str(out_root / args.stage),
     }
     if args.mode == "stage":
         prompt = fill(HERE / "stage-prompt.md", values)
-        budget = args.budget or float(stage.get("budget_usd", 5))
     else:
         result = out_root / args.stage / "result.json"
         values["RESULT"] = result.read_text(encoding="utf-8")[-4000:] if result.is_file() else "{}"
         prompt = fill(HERE / "reviewer-prompt.md", values)
-        budget = args.budget or float(stage.get("review_budget_usd", 2))
-    out = out_root / args.stage / ("review" if args.mode == "review" else "")
-    return launch(args, prompt, out, budget, args.max_turns)
+    extra = list(stage.get("extra_tools") or []) + args.extra_tool
+    return launch(args, prompt, out, budget, args.max_turns, extra)
 
 
 if __name__ == "__main__":

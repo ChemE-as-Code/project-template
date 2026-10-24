@@ -1,7 +1,8 @@
 # The root of this plant repository. Schema: `cheme schema plant`.
+schema: cheme/plant/v1
 name: "My plant"
 # The oldest cheme-as-code this repository works with; an older one stops with an upgrade hint.
-requires: cheme-as-code>=0.7
+requires: cheme-as-code>=0.8
 description: ""
 units: SI
 stage: concept

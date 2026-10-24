@@ -23,7 +23,11 @@ pass-through, mixer and splitter balances; simulate covers the energy balance an
   CAS needs its DWSIM name under `components:`.
 - The property package (`property_package:`), from `thermodynamic-model-selection`, never
   chosen silently. Supported: Peng-Robinson (PR), Peng-Robinson 1978 (PR78),
-  Soave-Redlich-Kwong (SRK), NRTL, UNIQUAC, Steam Tables (IAPWS-IF97), CoolProp.
+  Soave-Redlich-Kwong (SRK), NRTL, UNIQUAC, Steam Tables (IAPWS-IF97), CoolProp. Where
+  DWSIM's binary interaction parameter of PR, PR78 or SRK is not fitted to the data that
+  matter (argon/oxygen near pure O2, for example), set the pair under
+  `interaction_parameters: [{components: [AR, O2], kij: {value: ..., provenance: ...,
+  source: ...}}]`, with the data it comes from.
 - The specs of every step (`cheme schema process-simulation` lists them per unit):
   outlet pressure and efficiency of machines, outlet temperature or duty of heaters and
   coolers, the flash temperature or pressure (none: adiabatic), the exchanger's hot or cold
@@ -56,9 +60,12 @@ pass-through, mixer and splitter balances; simulate covers the energy balance an
    ```
 
    Steps map to unit operations by their DEXPI class; give `unit:` where the class does not
-   say. `exclude: [step or block ids]` simulates the rest: the streams from the excluded part
+   say. Wet gas cooled below its dew point needs a drain: give the cooler (or the intercooled
+   compressor) a second outlet port `condensate` to a product, else the water stays in the gas.
+   Give machines a `drive_efficiency` (motor and gear) when their energy stream stands
+   for electric power (utility balances, LCA). `exclude: [step or block ids]` simulates the rest: the streams from the excluded part
    need their values (given or assumed). Use it to simulate what the units cover while a part
-   (a double column with side draws, a reactor) is still assumed. Adsorbers and membranes are
+   (a double column with side draws) is still assumed. Adsorbers and membranes are
    component separators (`recoveries`), a main heat exchanger a multi-stream exchanger
    (`outlet_temperatures` for all streams but one). Flash and column outlets are recognised by port ids (`vapour`, `liquid`, `top`,
    `bottom`), exchanger sides by matching ids (`hot_in`/`hot_out`); else give `outlets:` or
@@ -72,14 +79,16 @@ pass-through, mixer and splitter balances; simulate covers the energy balance an
    `reboiler_spec`) its first numbers. A reflux ratio below the minimum does not converge.
 5. `cheme process simulate --fill [--save process/simulation.dwxmz]`, then
    `cheme process props --fill` for phase, density and enthalpy, `cheme process build`
-   and `cheme validate`. Record the run in `PROGRESS.md`.
+   and `cheme validate`. Record the run in `PROGRESS.md`. `--fill` also writes
+   `process/simulation-run.json` (generated, never edited: convergence, unit results, stream
+   values, input fingerprints), which the viewer shows; commit it with the flowsheet.
 
 ## Validation and failure handling
 
 - `sim-unmapped`: a step's class maps to no unit, a unit has the wrong number of streams, or
   energy streams do not fit; give `unit:` or split the step.
 - `sim-spec`: a spec is missing, contradictory or out of range; the message names it.
-- `sim-not-converged` (exit 3): nothing is written. Check the specs for feasibility (reflux
+- `sim-not-converged` (exit 3): no stream value is written (the run is recorded). Check the specs for feasibility (reflux
   above the minimum, outlet temperatures that the duty can reach, a column spec its stages can
   meet), save the flowsheet with `--save` and open it in DWSIM to look.
 - `sim-recycle` (info): where a loop was torn; give `tear_streams:` to tear elsewhere, and
@@ -90,10 +99,29 @@ pass-through, mixer and splitter balances; simulate covers the energy balance an
   assumption is wrong (change it, with a decision in `DESIGN.md`) or a spec is (change the
   spec); an engineer decides which.
 - `sim-stale`: feeds, specs, package or DWSIM changed since the values were written; fill again.
+- `sim-run-stale` (`--check`): `process/simulation-run.json` records a run from other inputs;
+  fill again (`sim-run-missing`, info: no run recorded for the case yet).
 
-Not simulated (keep these parts assumed and `exclude:` them): rigorous columns with side draws,
-a partial condenser or a heat-integrated condenser-reboiler (an air separation double column),
-reactors, solids. Evaporators and dryers need `unit:` (their heat duty matters; a component
+Double columns (air separation): the HP column with `condenser: partial` (GAN as
+`vapor_flow`, liquid nitrogen as distillate) and `reboiler: false`, LIN as a liquid side draw
+from stage 2 (not the condenser stage); the LP column with `condenser: none`, the liquid
+nitrogen fed to stage 1, GOX as a vapour side draw from the last stage, LOX by
+`reboiler_spec`, and `heat_integration: {condenser_of: <HP column>}`. Read `sim-reboiler-unbalanced`
+as the liquid the columns can (or cannot) make, `sim-approach` as a pressure problem. DWSIM's
+column solver is sensitive: start with few stages (40 HP, about 60 LP) and the feeds placed as
+in the example, then add stages; a column that does not converge is reported, never estimated.
+
+Reactors are simulated from the flowsheet (skill `reactions`): a step with `reactions:` is a
+conversion reactor, `reactor: equilibrium` and `reactor: gibbs` DWSIM's equilibrium and Gibbs
+reactors (each with its own reaction set). Their spec is `mode` (`isothermal`, `adiabatic`, or
+`outlet_temperature` with `outlet_temperature`) and `pressure_drop`. An equilibrium takes ln K
+from the reaction's `equilibrium_constant`, else from DWSIM's own formation data, so it may
+differ from `cheme process propagate` (ideal gas, the components' `ideal_gas` data): that
+deviation is the check. A reactor with one outlet must stay all vapour (the run says when
+liquid forms); give it a `liquid` outlet otherwise.
+
+Not simulated (keep these parts assumed and `exclude:` them): kinetic reactors (PFR, CSTR),
+solids, a liquid side draw from the condenser stage. Evaporators and dryers need `unit:` (their heat duty matters; a component
 separator would drop it). A unit simulates one duty: a machine's cooling water or a cooler's pump
 power stays a given or assumed value.
 

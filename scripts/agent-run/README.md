@@ -22,4 +22,8 @@ cheme-as-code's `docs/agent-design-run.md`.
 The prompt's `THIS STAGE` comes from `cheme status --json` (sheets already drawn are never
 assigned again; failing gates), `FIX FIRST` from the previous review's `carry_over` and the open
 review findings. Outputs go to `build/agent-run/<stage>/`: `prompt.txt`, `launch.json`,
-`result.json`, `stderr.log`, and the reviewer's `review.json`.
+`result.json`, `stderr.log`, the reviewer's `review.json` and, last, `done` (wait for it).
+`--total-cap USD` keeps a chain of sessions inside one total (it sums `total_cost_usd`, never
+`num_turns`); `extra_tools` in `stages.json` or `--extra-tool` allow more for one stage. Check
+each stage's work yourself (`cheme validate`, `check`, the renders) before merging: a
+session's summary is not evidence.

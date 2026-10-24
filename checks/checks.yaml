@@ -1,4 +1,5 @@
 # Engineering-step gates. Schema: `cheme schema checks`. Run: `cheme check`.
+schema: cheme/checks/v1
 checks:
   - id: design-basis
     title: Design basis exists
@@ -64,6 +65,12 @@ checks:
     fail_on: warning
     rules: [cheme.line-through-label, cheme.line-crossing, cheme.label-overlap,
             cheme.label-far-from-owner]
+    # A sheet kept from the DEXPI reference P&ID (pyDEXPI's sample, e.g. as a worked example)
+    # fails this gate by design: the reference has crossings and labels on its lines. Accept
+    # its findings here, naming the sheet:
+    #   accept:
+    #     - {id: "pid/P-01.xml#*", reason: "DEXPI reference sheet, kept as drawn by DEXPI"}
+    # Other findings are accepted one by one, by the id `cheme validate --json` gives them:
     # accept:
     #   - id: "pid/P-03.xml#line-crossing:Line_GOX3001_S1_P1+Line_LOX3001_S1_P1"
     #     reason: "D-023: no route around the GOX riser; J. Smith, design review 2026-10-20"
@@ -123,6 +130,14 @@ checks:
   #   stage: basic
   #   kind: lca
   #   require: [mapped, lca-current]
+  # The techno-economic analysis (estimate/tea.yaml, skill tea): once the project prices its
+  # plant, uncomment; add class-stage (the estimate class the stage expects) and decision (the
+  # baseline meets the decision's threshold) before the stage's investment decision.
+  # - id: tea
+  #   title: TEA priced, of the project's own premises, and current
+  #   stage: basic
+  #   kind: tea
+  #   require: [prices, no-example, tea-current]
   - id: layout-review
     title: A current, independent layout review is recorded
     stage: basic
@@ -153,6 +168,8 @@ checks:
     title: A datasheet for every equipment-list item
     stage: detail
     kind: datasheets               # equipment/datasheets/<TAG>.yaml, see its README
+    # require: [dimensions, weights, nozzle-schedule, drawing-current]  # main dimensions,
+    #   weights, a located nozzle schedule and current outline drawings (<TAG>.svg)
   # Prefer on-sheet over grep for what a P&ID must show: it finds printed tags in the model.
   # - id: relief-on-pid
   #   title: Relief devices drawn and connected

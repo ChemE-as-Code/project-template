@@ -162,9 +162,10 @@ Do not type it, and do not write a templating script for it (a generator script 
     second signal to the same valve joins its actuating system. When several parts go into a
     block the holder lacks, only the first says "create it"; the others say "the ... part above
     creates": paste them into that one block (two blocks of one property lose objects). Signal
-    and measuring lines are routed orthogonally out of the node, clear of the bubbles and of the
-    equipment the nozzle is on; check the render and pass `--points` where a line still crosses
-    something. A signal that repeats an existing instrument-to-valve relation gets a WARNING. `cheme show <valve>` then
+    and measuring lines are routed orthogonally out of the node (one bend, or two round what
+    lies between), clear of the bubbles, equipment and texts drawn on the sheet and crossing as
+    few pipes as they can; check `cheme validate`'s drawing findings and pass `--points` where
+    a line still crosses something. A signal that repeats an existing instrument-to-valve relation gets a WARNING. `cheme show <valve>` then
     lists the instruments acting on it. If the valve's drawing has an actuator symbol already,
     only the attach point is added; remove a dashed PolyLine that drew the signal before.
   - Trip and interlock text goes in a `note` (or a signal line), not into an instrument's or
@@ -187,7 +188,9 @@ Use these before a hand edit: they find every coordinate, reference and label te
   and its sensor/actuator numbers) and the labels showing it; `--ids` also the ids that spell
   it. A tag (`PipingComponentNumber`, a safety valve's `PositionNumber`, ...) addresses the
   object like its id. When two objects share the tag, give the one to retag by its id with
-  `--tag`: `cheme rename Inst_Y FI-150 --tag` (the sensor becomes `FT150`). Unknown ids,
+  `--tag`: `cheme rename Inst_Y FI-150 --tag` (the sensor becomes `FT150`). A valve and its
+  own actuation chain (actuating system, actuating function, an instrument function tagged
+  alike) sharing `XV-104` are retagged together by `cheme rename XV-104 XV-105`. Unknown ids,
   taken names and tags another valve or instrument already has exit 2.
 - `cheme set ID PROP=VALUE...`: data values by their DEXPI name, in the type DEXPI gives
   them: `FluidCode=Nitrogen`, `OnHold=OnHold` (enumeration member),

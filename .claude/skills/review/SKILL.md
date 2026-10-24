@@ -45,7 +45,8 @@ check goes under "Not checked" in the record.
      only fixed). A statement such as "no
      overlaps" is only allowed with these counts at 0.
    - The lint does not see everything (an ambiguous but not overlapping tag, a symbol too small
-     to read, a wrong arrow). Sweep each sheet in tiles: `cheme render pid/<sheet>.xml --png
+     to read, a wrong arrow; `--emphasise-inline` draws valves and actuators larger for reading,
+     not for judging their size). Sweep each sheet in tiles: `cheme render pid/<sheet>.xml --png
      --tiles auto` (or `--tiles 4x3`) writes `build/<sheet>_tile-<row><column>.png` and prints
      each tile's `--crop ... --scale ...` (with `--findings`, accepted findings are grey and
      marked `(accepted)`). Read every tile and name the tiles in the record (`P-04: A1-C3 read`);
@@ -72,9 +73,10 @@ check goes under "Not checked" in the record.
      and the engineering rules `-wall-penetration`, `-tier`, `-vent-outlet`, `-free-span`,
      `-operability`, `-access-enclosed`, `-access-unconnected`, `-escape-ways`,
      `-escape-travel`, `-ladder-clearance`, `-walkway-riser`, `-landing-width`, `-egress-zone`, `-operator-unknown`, `-lifting`,
-     `-laydown`, `-pad-overlap`, `-spacing`, `-building-spacing`, `-zone-source`, and the
+     `-laydown`, `-pad-overlap`, `-spacing`, `-building-spacing`, `-zone-source`, `-support-stub`,
+     `-steel-in-way`, and the
      tray rules `-tray-zone`, `-tray-span`),
-     platforms, stairs, ladders, valve access platforms (`VP-<n>`), support steel
+     platforms, stairs, ladders, valve access platforms (`VP-<valve tag>`), support steel
      (`support_steel`) and penetrations `review_needed`, and every `layout-pipe-disconnected`
      (error: a pipe end that does not meet its connection). For each engineering finding
      say whether it is fixed, accepted (with the reason) or open; their criteria are ASSUMED
