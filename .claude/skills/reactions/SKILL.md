@@ -32,6 +32,11 @@ If the reaction set itself is open (side reactions, by-products, an equilibrium-
 ask: that is the chemist's decision. Never invent a conversion; when none is known yet, leave
 it out and give the reactor's outlet as `assumed`.
 
+Where the route or its conditions still have to be found in the literature, gather the evidence
+first (skill `reaction-evidence-search`, `process/reaction-evidence.yaml`). Choose the model
+from it with skill `route-selection`: the model basis names the reactions written here, and
+each value taken from the evidence cites its observation in `source`.
+
 ## Workflow and tools
 
 0. For a known industrial process, start from the reaction library: `cheme chemistry library`
@@ -175,5 +180,6 @@ reaction, the conversion or the feed changes.
 
 ## References
 
-- `materials` (components and formulas), `property-retrieval`, `process-design` (the flowsheet).
+- `materials` (components and formulas), `property-retrieval`, `process-design` (the flowsheet),
+  `reaction-evidence-search` and `route-selection` (the evidence behind the reactions).
 - `cheme schema process-reactions`, `cheme schema process-flowsheet`.

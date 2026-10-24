@@ -103,6 +103,7 @@ This repository is a process plant design. The files are the design; there is no
 | `cheme process simulate --fill \| --check [--case C] [--save F.dwxmz]` | the flowsheet solved by DWSIM (skill `process-simulation`): property package and step specs from `process/simulation.yaml`; temperatures, pressures, flows, compositions and duties of the streams downstream of the feeds; never overwrites given or assumed values, a deviation from them is a warning; `--check` writes nothing |
 | `cheme process props --fill \| --check [--case C]` | phase, molar mass, density, enthalpy (extra `props`), inside the validated range only; never overwrites given or assumed values; `--check` writes nothing |
 | `cheme process layout [IDS...] [--view bfd\|pfd] [--pin]` | the generated positions; `--pin` writes them into `layout.<view>` of `flowsheet.yaml` |
+| `cheme chemistry evidence [--json]` | the route comparison of `process/reaction-evidence.yaml` (sources, observations, reported ranges with conversion, selectivity and yield kept apart, kinetics, conflicts, unread sources, gaps) and the model basis; gather the evidence before choosing a reaction model (skills `reaction-evidence-search`, `route-selection`) |
 | `cheme fragment KIND --id ID [--sheet F] ...` | ready-to-paste XML, a CONCEPTUAL and a DRAWING part each saying where it goes; KIND `valve`, `tee`, `node`, `pipe`, `segment`, `line`, `label`, `equipment`, `nozzle`, `instrument`, `signal`, `offpage`, `note`, `shape` (`cheme fragment --help`, skill `dexpi-xml`) |
 
 ## YAML files and their schema kind

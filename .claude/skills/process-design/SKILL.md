@@ -25,6 +25,12 @@ Use it at the concept stage before any P&ID, and whenever a stream value, block 
 
 A value nobody knows yet is given as `assumed`, with the reason in `DESIGN.md`.
 
+A process with a reaction starts with its evidence, before a reactor or a conversion is
+chosen. Skill `reaction-evidence-search` gathers what papers and patents report in
+`process/reaction-evidence.yaml`. Skill `route-selection` compares the routes, records the
+model basis and writes `process/reactions.yaml` from it. The reactor itself then follows
+skill `reactions`.
+
 ## Workflow and tools
 
 ### 1. Declare the sheets
@@ -221,5 +227,6 @@ design choices: cheme-as-code checks them but does not make them.
 ## References
 
 - `cheme schema process-materials`, `cheme schema process-flowsheet`
-- skills `lists-sync` and `pid-draft`
+- skills `lists-sync` and `pid-draft`; for reactors `reaction-evidence-search`,
+  `route-selection` and `reactions`
 - `examples/process-nested/` in the cheme-as-code repository
