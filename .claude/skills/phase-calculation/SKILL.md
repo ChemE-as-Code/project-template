@@ -10,8 +10,9 @@ description: Identify the phases of a pure component or mixture with a flash at 
 Runs a flash through thermo and reports the number of phases, their fractions and
 compositions, and per binary pair whether its interaction parameter is sourced, missing (zero
 used) or accepted as zero. Use it to identify the phase of a stream or mixture. It is a
-calculation with no application range claimed (no test benchmarks its values): stream properties written to `process/flowsheet.yaml` come from
-`cheme process props` (see `process-design`), which uses one validated method.
+calculation with no application range claimed (no test benchmarks its values): stream properties
+written to `process/flowsheet.yaml` come from `cheme process props` (see `process-design`), which
+uses benchmarked property packages with validated ranges (`cheme process props --coverage`).
 
 ## Required inputs and missing inputs
 

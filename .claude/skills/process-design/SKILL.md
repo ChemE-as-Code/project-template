@@ -146,14 +146,42 @@ outlets of separators) and reports where an assumed value contradicts the energy
 
 `cheme process props --fill` (cheme-as-code installed with the `props` extra) writes `phase` and
 `calculated: {molar_mass, density, enthalpy}` with provenance `calculated`, a source and an
-input fingerprint, and records the method and package versions in `materials.yaml`. It never
-overwrites given or assumed values. The method is validated for N2/O2/Ar only: 77 to 315 K;
-vapour 100 to 3200 kPa(a); liquid and two-phase 100 to 600 kPa(a) (Peng-Robinson with ChemSep
-kij; liquid density COSTALD; enthalpy on ideal gas at 298.15 K, which needs
-`units.enthalpy_reference: {state: ideal_gas, temperature: 298.15}`).
+input fingerprint, and records the method (its `package`, models, validated range, benchmark
+and package versions) in `materials.yaml` `property_method`. It never overwrites given or
+assumed values. Enthalpy is on ideal gas at 298.15 K, which needs
+`units.enthalpy_reference: {state: ideal_gas, temperature: 298.15}`.
 
-- Anything else (other components such as CO2 or water, solids, a pressure that is not absolute
-  and positive, a given phase the flash contradicts beyond saturation) is refused, nothing is
+**Property packages.** A process uses one benchmarked package; nothing outside its validated
+range is calculated:
+
+| package | components | claimed | benchmark |
+|---|---|---|---|
+| `air-pr-chemsep` | N2, O2, Ar | 77 to 315 K; vapour 100 to 3200 kPa(a); liquid and two-phase 100 to 600 kPa(a) (Peng-Robinson, ChemSep kij, COSTALD liquid density) | NIST WebBook reference EOS values, `tests/test_process_props.py` |
+| `syngas-pr-vapor` | H2, N2, Ar, CH4, CO, CO2 and their mixtures; NH3 pure only | vapour only, 250 to 1000 K, 100 to 30000 kPa(a), in per-component boxes (cold, dense gas excluded; CO to 500 K, CH4 to 625 K, NH3 350 to 725 K away from saturation) | CoolProp 8.0.0 reference EOS and GERG-2008 mixtures, density within 2 % (pure) / 3 % (mixtures), enthalpy differences within 300 kJ/kmol, `tests/test_property_packages.py` |
+
+- Run `cheme process props --coverage` first: it names the package (the one recorded as
+  `property_method.package`, else the one covering the most streams' component sets) and, per
+  stream, whether it is covered or why not, with the nearest package and what it lacks
+  (component, pair, temperature-pressure box). It writes nothing and needs no thermo.
+- To use a package for a process whose streams it does not all cover, set
+  `property_method: {package: <id>}` in `materials.yaml`; an unknown id is an error
+  (`cheme.process-property-package`). Streams outside it are refused, never computed with
+  another method.
+- What no package covers (water, methanol, ammonia in a mixture, liquid synthesis products, hot
+  converter gas with CH4 above 625 K or CO above 500 K) stays refused: give such values with
+  their source (`given`, or `assumed` with the reason), or run the flowsheet in
+  `process simulate` with a method its skill accepts. Do not widen a range in `materials.yaml`
+  to make a stream pass (a recorded range only narrows the package's).
+- **Adding a package** (a cheme-as-code change, not a plant edit): add a `Package` to
+  `domains/process/property_packages.py` (adapter, EOS and models, BIP source, components by
+  CAS, validated phases, per-component boxes and benchmarked pairs) and a test that compares
+  the adapter's own results with an authoritative reference over every claimed box and pair
+  (a reference equation of state evaluated by a pinned package, or published data with the
+  source cited in the test), with the tolerance recorded in `benchmark.tolerances`. A
+  component, phase, pair or region the test does not cover stays out of the claim; a failing
+  point narrows the claim, never the tolerance. Never type in reference values without a source.
+- Anything else (components no package covers, solids, a pressure that is not absolute and
+  positive, a given phase the flash contradicts beyond saturation) is refused, nothing is
   written, and the warning says why (`process-property-out-of-range`, `-unsupported`, `-phase`,
   `-metastable`). A phase refusal is usually a design finding: the stated temperature and
   pressure do not give that phase. Record it in `DESIGN.md`; do not change the numbers to make
