@@ -38,6 +38,9 @@ This repository is a process plant design. The files are the design; there is no
 - Keep the lists in step with the P&IDs (skill `lists-sync`), and the 3D layout in `layout/`
   in step with the equipment list (skill `layout-yaml`; routes `pipe-routing`, steel and access
   `structures-access`, zones `area-classification`).
+- In a HAZOP study (`safety/`), propose and never accept: everything an agent writes stays
+  `status: proposed` until the team accepts it. Never invent equipment, safeguards,
+  frequencies or approvals, and never write a `band:` by hand (`cheme safety hazop rate`).
 - Record decisions and assumptions in `DESIGN.md`, with the reason. Mark assumed values
   `ASSUMED` in the YAML or the decision text, never present a guess as data.
 - **Branches and merges.** Each stage, and any change larger than one fix, goes on its own
@@ -80,6 +83,7 @@ This repository is a process plant design. The files are the design; there is no
 | `cheme diff <old> [new] [--list [--verbose \| --flat] \| --json]` | HTML report in `build/diff.html`; `--list` one line per changed plant item with its added/removed/modified counts, `--verbose` each change under it, `--flat` one line per changed object with the drawing that shows it; `--json` the data |
 | `cheme check [--stage S [--only-stage]] [--write --review R]` | engineering-step gates in `checks/checks.yaml` of every stage up to S; `--write` only at sign-off. For what a P&ID must show write `kind: on-sheet` gates (printed tags and classes in the model), not `grep` over the XML |
 | `cheme cause-effect` | the cause-and-effect matrix of `control/cause-effect.yaml` to `build/cause-effect.html` and `.csv` |
+| `cheme safety hazop init \| check \| rate \| report \| stamp \| review ID` | HAZOP studies in `safety/hazop/<id>/study.yaml` (skills `hazop-study`, `hazop-assessment`, `hazop-review`; `safety/README.md`): start a draft, findings and state (draft / assessed / reviewed), bands looked up in the risk matrix (`--write` records them, `--target` one node or scenario), `build/hazop/<id>.md`/`.html`, the analysed inputs' revisions, a review record to complete |
 | `cheme control report [--json] [-o DIR]` | the loop summary (`build/control-loops.html`, `.csv`) and the sequence report (`build/control-sequences.html`) with each control file's review status (drafted, reviewed, accepted) and the `cheme.control-*` findings (skills `control-loops`, `control-sequences`, `control-narrative`) |
 | `cheme schema [kind]` | JSON Schema of a YAML file kind; no kind lists them |
 | `cheme skills status \| update [NAME...] [--force]` | the bundled skills in `.claude/skills/`: current, outdated, modified (changed here) or missing; `update` installs missing and outdated files and keeps a modified one (reported) unless `--force` |
@@ -143,6 +147,8 @@ This repository is a process plant design. The files are the design; there is no
 | `electrical/tray-rules.yaml` (optional) | `trays` (tray widths, depth, fill, power/instrument separation, rack tray tiers, branch elevation, cable allowances) |
 | `estimate/rates.yaml` | `rates` (the project's unit rates and estimate factors, each with status, source and year; the one `cheme init` writes is an example) |
 | `lca/lca.yaml` | `lca` (goal and scope of the LCA: functional unit, case, allocation, categories, and the background of each feed, product and emitted component) |
+| `safety/risk-matrix.yaml` | `risk-matrix` (bands lowest risk first, likelihood and severity codes, categories, the band of every cell; the one `cheme init` writes is an example) |
+| `safety/hazop/<id>/study.yaml` | `hazop-study` (scope, modes, analysed inputs and their revisions, nodes, deviations, scenarios with ratings, safeguards, actions; `status: proposed` until the team accepts) |
 | `lca/factors.yaml` | `lca_factors` (the project's characterised factors, each with status, source, year, geography and its `sources:` registry entry (licence, publication policy); the one `cheme init` writes includes the packaged open profile `desnz-ghg-2026`: a screening carbon footprint) |
 
 `cheme schema <kind>` prints the full JSON Schema.

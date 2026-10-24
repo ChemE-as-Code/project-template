@@ -13,6 +13,7 @@ checked by [`cheme-as-code`](https://github.com/ChemE-as-Code/core).
 | `equipment/equipment-list.yaml`, `piping/line-list.yaml`, `control/instrument-list.yaml` | lists, consistent with the P&IDs |
 | `control/cause-effect.yaml` | interlocks and trips (cause and effect) |
 | `piping/special-items.yaml` (optional) | tagged piping components: safety valves, silencers, rupture discs (skill `lists-sync`) |
+| `safety/` | HAZOP studies (`safety/hazop/<id>/study.yaml`) and the risk matrix they rate against; `safety/README.md` says how |
 | `checks/checks.yaml` | engineering-step gates; `checks/status.json` their result at the last stage sign-off |
 | `reviews/` | review records |
 | `DESIGN.md`, `PROGRESS.md`, `STAGES.md` | decisions, change log, stage definitions |
