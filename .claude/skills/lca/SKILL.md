@@ -57,7 +57,14 @@ gate `lca` fails.
    - `free: true` for resources without burden (ambient air) and for atmospheric components
      returned unchanged (N2, O2, Ar, water, CO2 taken in with the air);
    - `emission: true` for a product released to the environment, then each component free or
-     `elementary: {compartment: air, origin: fossil}` (characterised by its CAS number);
+     `elementary: {compartment: air, subcompartment: non-urban-high-stack, origin: fossil}`
+     (characterised by its CAS number; the sub-compartment where the release point is known,
+     origin fossil, biogenic or land-use-change);
+   - `resource: true` for a feed taken from nature (river or well water, ambient air), then
+     each component `elementary: {compartment: resource, flow: water-river}` or free. Water
+     withdrawn or evaporated must show as a resource (`cheme.lca-water-resource` warns); read
+     the water balance in `--coverage`. Never invent a flow UUID: the identities come from the
+     packaged crosswalk (`cheme.lca-flow-identity`, `cheme.lca-flow-uuid` name what is open);
    - a `factor:` or an `activity:` otherwise, or a `dataset:` (another process's unallocated LCI
      dataset, `kind: lci_dataset`) when the input comes from a process modelled in the
      repository or a process library.
@@ -68,7 +75,11 @@ gate `lca` fails.
    it `free` or drop the entry to make it disappear.
    Choose market activities ("market for electricity, medium voltage") for the right location.
    For energy, mind the unit: the inventory counts kWh, a heat activity is per MJ, and the
-   conversion is automatic when the kinds match.
+   conversion is automatic when the kinds match. Give every energy terminal its `utility.kind`
+   and supply temperature in the flowsheet: the dataset's exchanges then carry their carrier
+   (steam at its level, heat at its temperature, cold), which decides the background to link
+   (`cheme.lca-carrier` names the ones without). A gas product may be per Nm3 (functional unit),
+   a fuel or hydrogen per MJ LHV (with the product's `energy`), electricity or steam per kWh.
 3. **Construction.** Add `operation` and `construction:` entries: steel, pipe, concrete and
    insulation from the take-off, and equipment by material from the equipment list. Read
    `lca-construction-unmapped` and `lca-equipment-weight`. Missing weights count as zero: give
@@ -80,10 +91,16 @@ gate `lca` fails.
    footprint"), with the gaps beside the totals and without a coverage percentage. Check the dominant contributor against an independent estimate. Example:
    specific power x grid factor for an air separation, or the fuel's carbon for a reformer.
    Investigate any result that disagrees by more than the data's accuracy.
-5. **Uncertainty.** Give `uncertainty:` with defaults by provenance (assumed values wider than
-   given ones), and the known uncertainties of the main flows and factors (gsd2, or pedigree
-   scores for factors from a database). Report the 95 % interval with the result, and read the
-   sensitivity: refine first what ranks highest.
+5. **Uncertainty and data quality.** Every dataset exchange carries a pedigree (the default
+   rule's, from its provenance and origin, the declared location and year, and the design's
+   maturity); the Monte Carlo uses its lognormal where neither the exchange nor
+   `uncertainty.defaults` give one. Override a pedigree only with a `reason` (e.g. a metered
+   value). Give `uncertainty:` with defaults by provenance where the study knows better, and
+   the known uncertainties of the main flows and factors. Report the 95 % interval with the
+   result, read the sensitivity (refine first what ranks highest), and report the DQR from
+   `--coverage` (TfS DQR, PEF-style indicators, primary data share) with its weakest indicator.
+   Declaring a larger geography than the data represent lowers it: never claim a region to
+   look representative.
 6. **Scenarios.** Add `scenarios:` for the questions the goal asks, e.g. a grid factor for 2030
    or 2050 (`factors:`), or premise databases (`databases:`, see docs/framework/lca.md). Name
    the model, pathway and year in `source`. A regional background (another country's grid)
@@ -107,6 +124,16 @@ gate `lca` fails.
    commit or publish them by default, and never write that decision yourself.
 9. **Foreground only.** `cheme assess lca --dataset` exports the unallocated foreground with
    no factors, Brightway or credentials: what a process library publishes.
+10. **Document the dataset** before it is published (`cheme/lci_dataset/v2`). Give what cheme
+   cannot derive under `dataset:` of `lca/lca.yaml`: `version`, `methodology_version`,
+   `geography.description` (what the location code represents; the site apart), `system_model`,
+   `technology_level`, `classification` (ISIC Rev.4, CPC 2.1), `modelling.principle`, `review`
+   (`unreviewed` when none was made: never invent a review), `data_generator`, and
+   `allocation.deviation` when the allocation departs from the library hierarchy. cheme fills
+   the uuid, time period, `valid_until`, production volume and multi-functionality. Read
+   `cheme.lca-dataset-undocumented`; the gate requirement `lci-documented` checks the
+   publication minimum. A v1 dataset (`schema: cheme/lca/v1`) still loads with a warning:
+   `cheme migrate --write` rewrites a hand-written one.
 
 ## Validation and failure handling
 
@@ -138,7 +165,8 @@ gate `lca` fails.
   them makes the gate's `lca-current` fail.
 - `lca/dataset.yaml`: the plant's unallocated LCI dataset (foreground scope, per hour): what
   a process library keeps and other studies reference. Give `rights:` (its own data's terms),
-  `location`, `year` and `technology` in `lca/lca.yaml`.
+  `location`, `year` and `technology` in `lca/lca.yaml`, and its documentation under
+  `dataset:` (step 10).
 - `--json` adds the findings and the source revision (git commit, fingerprints of the files
   read).
 

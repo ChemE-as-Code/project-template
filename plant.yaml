@@ -10,6 +10,11 @@ stages:
   - {id: concept, title: Concept and feasibility}
   - {id: basic, title: Basic engineering}
   - {id: detail, title: Detail engineering}
+# Where the plant's issues are tracked (optional): actions, engineering holds, technical
+# queries and design changes as GitHub issues with the engineering labels of cheme-as-code's
+# docs/framework/issues.md; `cheme issues` lists them, the gates of kind issues use them.
+# issues: {repository: your-org/your-plant, label: "process:your-plant",
+#          forms: {action: 1-action-item.yml, hold: 2-engineering-hold.yml}}
 # Title-block data for `cheme sheet new` (optional):
 # project: {number: "24-017", client: "", site: "", revision: A}
 # P&ID sheets, DEXPI 2.0.1 XML. Empty: every pid/*.xml. A sheet not drawn yet is

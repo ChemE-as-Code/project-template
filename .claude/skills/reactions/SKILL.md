@@ -143,7 +143,8 @@ each value taken from the evidence cites its observation in `source`.
 4. Give the reactor its catalyst: declare it in `process/catalysts.yaml` (schema
    `cheme schema process-catalysts`: active phase, promoters, support, `physical` (form,
    particle diameter in m, particle and bulk density, bed voidage, surface area), `window`
-   (temperature K, pressure kPa(a)), `space_velocity`, `poisons` by component id,
+   (temperature K, pressure kPa(a)), `space_velocity` (`gas: dry` when a GHSV is quoted on
+   dry gas), `poisons` by component id,
    `deactivation` (with `law: first_order | power`, `kd` in 1/h and `order`, the activity
    over time on stream), `price`, each block with provenance and source) and name it on the step
    (`catalyst: FE_NH3`). Kinetics go on the reaction as `rate:` (power law or LHHW, per kg of
@@ -203,8 +204,11 @@ each value taken from the evidence cites its observation in `source`.
    shared model: lognormal `gsd2` or `pedigree`, `normal` `cv`, `triangular`/`uniform` `low`
    and `high`). `cheme process reactor-uncertainty NODE [--samples 200] [--seed 1]` samples
    them through the step's reactor (bed, tank, batch, conversion) and prints the spread of
-   the key's conversion and the outlet and highest temperatures. Nothing is written, and an
-   uncertainty never makes an outlet stale.
+   the key's conversion and the outlet and highest temperatures. Only what the model reads is
+   sampled (a gas's heat of reaction comes from the ideal-gas data, a kinetic reactor ignores
+   `conversion`, K counts only with `reverse: equilibrium`); the others are listed as not used
+   (`not_used` in `--json`) with the reason, and with nothing used left the command exits 2
+   ("nothing to sample"). Nothing is written, and an uncertainty never makes an outlet stale.
 10. Run `cheme process propagate --fill`, then `cheme validate`, then `cheme process reactors`:
    per reactor the extents, the heat of each reaction and ln K at the outlet, `ln(Q/K)`
    (0 at equilibrium, negative short of it), the rate at the outlet where there is a rate law,

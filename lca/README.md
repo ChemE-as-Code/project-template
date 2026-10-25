@@ -28,6 +28,21 @@ flows:
   - {key: emission:CO2, elementary: {compartment: air, origin: fossil}, source: "fossil CO2 from the reformer"}
 ```
 
+Before `lca/dataset.yaml` is published (a process library, the Atlas), document it under
+`dataset:` (`cheme schema lca`; the gate requirement `lci-documented` checks the minimum):
+
+```yaml
+dataset:
+  version: 1.0.0
+  geography: {description: "One design for a generic coastal site; UK grid as a proxy"}
+  system_model: cutoff
+  technology_level: current
+  classification: {isic: "<class>", cpc: "<subclass>"}  # ISIC Rev.4, CPC Ver. 2.1 (UNSD)
+  modelling: {principle: attributional}
+  review: unreviewed
+  data_generator: "<who modelled it>"
+```
+
 The construction phase counts the take-off (`estimate/mto.csv`) and the equipment weights,
 spread over the plant's life:
 

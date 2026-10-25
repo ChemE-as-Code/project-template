@@ -206,6 +206,23 @@ checks:
   #   classes: [SafetyValve]    # at least min_count (1) of each class
   #   connected: true           # piped, on a segment, with a measuring/signal line
 
+  # Open items (plant.yaml issues:): every action, engineering hold, technical query and design
+  # change labelled gate:<stage> (or an earlier stage) is closed out before the stage is signed
+  # off, as an action tracker. n/a until plant.yaml declares issues; without a GitHub token the
+  # gate fails as "not evaluated", it never passes unseen.
+  - id: issues-concept
+    title: No open item to close before the concept gate
+    stage: concept
+    kind: issues
+  - id: issues-basic
+    title: No open item to close before the basic engineering gate
+    stage: basic
+    kind: issues
+  - id: issues-detail
+    title: No open item to close before the detail engineering gate
+    stage: detail
+    kind: issues
+
 # Findings accepted for every gate and for `cheme validate`, which then reports them as info
 # with the reason (an entry that names no finding is reported as cheme.accept-unused).
 # Only warnings and infos can be accepted; an error stays an error (cheme.accept-error).

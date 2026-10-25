@@ -73,8 +73,10 @@ A dimension not known yet may be estimated: mark it `notes: ASSUMED ...` (step 2
      override it: `nozzles: [{id: N1, angle_deg: 90, elevation: 2.5}]` or
      `[{id: N2, face: top, offset: [0.5, 0]}]` (see `layout/README.md`). An override must name a
      nozzle of the P&ID (`layout-nozzle-unknown`).
-3. **Avoiding clashes** (`cheme.layout-clash`): cheme-as-code compares the boxes around each
-   shape after rotation. Leave maintenance and access space - about 1 m around pumps, a
+3. **Avoiding clashes** (`cheme.layout-clash`): cheme-as-code compares each item's outline in
+   plan (a circle for a vertical vessel or tank, else its rectangle turned with it) over its
+   height, and the solid parts standing out of it (a tank's stair, a base plate, a plinth).
+   Leave maintenance and access space - about 1 m around pumps, a
    tube-bundle pull length in front of a shell-and-tube exchanger - even though cheme-as-code only
    flags real intersections. Keep equipment off roads and out of buildings it is not placed
    in. Pumps may stand at grade **under** a pipe rack, the usual arrangement in a rack-type plot

@@ -102,12 +102,17 @@ What `fill` calculates:
   `shaft_power_kw` only with `mechanical_efficiency`.
 - **Columns**: Fenske, Underwood, Gilliland (Molokanov) with volatilities from the adapter at the
   top dew and bottom bubble points; keys `light_key`/`heavy_key` (a binary needs none);
-  `reflux_ratio` or `reflux_ratio_factor`; trays with `tray_efficiency`. A component absent
+  `reflux_ratio` or `reflux_ratio_factor`; trays `ceil((N - 1) / tray_efficiency)` (the
+  reboiler is a stage, not a tray; a total condenser assumed). A component absent
   from a product (a sharp split) takes its infinite-dilution K (fugacity coefficients). The diameter stays
   `TBD`: no flooding correlation is in the package.
-- **Vessels**: volume from the dimensions (an upper bound; an earlier fill's volume follows
-  changed dimensions), residence time against
-  `residence_times` in `process/design-basis.yaml`.
+- **Vessels**: volume `pi/4 D^2 L` from the sheet's `dimensions`: the inside diameter, else
+  the outside; the tangent length, else the overall length (horizontal) or height. Over the
+  tangent length it is the cylindrical shell, heads not included; over an overall length or
+  height (or the older `type_specific` `diameter_m` with `length_m`/`height_m`) an upper
+  bound. The source names the fields used. A draft's volume (from the list's dimensions) and an
+  earlier fill's follow changed dimensions; a volume given by hand is kept. Residence time
+  against `residence_times` in `process/design-basis.yaml`.
 
 What `fill` does **not** calculate (docs/framework/sizing.md, "Coverage";
 `chemeascode.domains.equipment.coverage`): equipment-specific rating, mechanical design to a
@@ -141,8 +146,8 @@ preliminary, not as a rated or code-checked design.
 - `cheme.datasheet-nozzle-pid` / `-nozzle-line`: the schedule against the P&ID nozzles (count,
   DN, lines) and the line list.
 - `cheme.datasheet-drawing-stale`: rerun `cheme datasheets drawing --write`.
-- `cheme.datasheet-stale` (warning): a filled value whose streams changed since (its
-  `fingerprint`); rerun `cheme datasheets fill --tag T` on the draft.
+- `cheme.datasheet-stale` (warning): a filled value whose streams or named `inputs` changed
+  since (its `fingerprint`); rerun `cheme datasheets fill --tag T` on the draft.
 - `cheme validate` checks the datasheets afterwards (schema, list agreement).
 
 ## Outputs and provenance

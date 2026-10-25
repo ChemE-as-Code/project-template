@@ -69,8 +69,9 @@ render --plan | --level ID | --section x=..` draws plans and sections into `buil
 `cheme validate` says when it is outdated (`layout-model-outdated`), edited by hand
 (`layout-model-edited`) or missing (`layout-model-missing`).
 
-Rules (`cheme.layout-*`): `outside-site`, `clash` (equipment boxes intersect, equipment in a
-building it is not placed in, equipment on a road, equipment reaching up into a rack's tiers,
+Rules (`cheme.layout-*`): `outside-site`, `clash` (two items intersect: their plan outlines,
+a circle for a vertical vessel, or the parts standing out of them such as a tank's stair, base
+plate or plinth; equipment in a building it is not placed in, equipment on a road, equipment reaching up into a rack's tiers,
 buildings on roads, under racks or overlapping each other), `unknown-tag`, `not-placed` (info),
 `level` (also items taller than their level), `area-overlap` (warning), `duplicate` (warning),
 `line-route` (warning), `line-length` and `line-unrouted` (info), `separation` (warning),

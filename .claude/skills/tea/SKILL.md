@@ -19,7 +19,16 @@ whose decision depends on the economics.
 
 - `process/flowsheet.yaml` with the flows of the case (`cheme process streams`): every feed
   and product counts at its rate (kg/h, or kWh/h for an energy stream). Utilities must be their
-  own feeds or products (POWER, CW) to be priced.
+  own feeds or products (POWER, CW) to be priced. A step of a checked kind (heater, cooler,
+  compressor, pump, shortcut column, reactor) without an energy stream, or a product without
+  `category`, is a boundary gap (`cheme.boundary-utility-unassigned`, `-unclassified`): the
+  report lists it in `boundary` and in the section Boundary of `estimate/tea.md`, with what
+  the operating cost excludes; it is never priced for you. Close it in the flowsheet (an
+  energy stream to a utility terminal, a category), or, for a step that truly has no duty,
+  declare it adiabatic: `mode: adiabatic` in `process/simulation.yaml` (a reactor) or
+  `heat: adiabatic` on its bed, tank or batch. No gap found is not a complete inventory: the
+  section names what the check does not cover (other unit kinds, where an energy stream
+  ends, duties).
 - A capital estimate: `cheme assess equipment` (skill `mto-estimate`; `estimate/cost-basis.yaml`
   with a cost index) or `cheme assess estimate`, or a given ISBL with its source.
 - `estimate/tea.yaml` (`cheme schema tea`), schema `cheme/tea/v1`. The figures below are
@@ -99,7 +108,8 @@ whose decision depends on the economics.
    `tea-price-year`, `tea-basis-mismatch` (operation differs from `lca/lca.yaml`),
    `tea-lca-price-mismatch` (the products' relative prices differ from the prices of the
    LCA's economic allocation, `allocation.prices` in `lca/lca.yaml`: price them alike),
-   `tea-capex-range` (an uncertainty narrower than the class supports), `tea-confidence`.
+   `tea-capex-range` (an uncertainty narrower than the class supports), `tea-confidence`,
+  and `boundary-*`: an incomplete boundary means the operating cost leaves something out.
 6. **Read what dominates.** The tornado (one input at a time) and the Monte Carlo's Spearman
    ranks name the premises that drive the decision; the break-even table gives the value of
    each at which the decision turns. Those premises are where evidence is worth buying: a
@@ -126,8 +136,9 @@ whose decision depends on the economics.
 ## Outputs and provenance
 
 - `estimate/tea.md`: decision and verdict, basis, capital build-up with the AACE range, flows
-  with rate, price, status, source and year, fixed operating cost, results, scenarios, tornado,
-  Monte Carlo statistics and drivers, break-even values, findings.
+  with rate, price, status, source and year, boundary (what the operating cost excludes),
+  fixed operating cost, results, scenarios, tornado, Monte Carlo statistics and drivers,
+  break-even values, findings.
 - `estimate/tea-cashflow.csv` (year, phase, capacity, capital, working_capital, revenue,
   variable_cost, fixed_cost, depreciation, tax, cash_flow, discounted, cumulative),
   `tea-sensitivity.csv` (input, base, swing, metric at each end, break-even),

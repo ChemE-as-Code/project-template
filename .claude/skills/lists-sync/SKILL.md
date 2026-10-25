@@ -80,7 +80,8 @@ The sheets in `pid/`, `equipment/equipment-list.yaml`, `piping/line-list.yaml`,
         set_pressure_barg: 34, relief_case: blocked outlet}
      - {tag: S-201, type: Silencer, line: VNT-201, sheet: P-04}
    ```
-   The tag is the component's `PipingComponentNumber` (or `PositionNumber`) as printed.
+   The tag is the component's `PipingComponentNumber` (or `PositionNumber`, else
+   `PipingComponentName`) as printed; a segment-local number such as `C1` is no tag.
 8. **Interlocks**: every trip is one entry of `control/cause-effect.yaml`, the one place that
    says what it does (instrument-list notes and sheet labels only refer to it, "see C&E I-07"):
    ```yaml
