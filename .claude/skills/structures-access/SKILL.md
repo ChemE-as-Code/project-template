@@ -50,7 +50,8 @@ review.
    walls are obstacles for lines passing by and passable for a line with an end inside; every
    pipe that meets a wall outside a declared opening is a model `penetration` with the opening
    it would need (finding `layout-wall-penetration`: info for a casing penetration, a warning
-   for a fire wall, a building's cladding, a line passing through or one running in the wall).
+   for a fire wall, a building's cladding or roof, a line passing through or one running in the
+   wall; a roof penetration cannot be pinned: bring the line in through a wall).
    Declare the openings you accept (`enclosure: {..., openings: [{id, side, offset, width,
    height, sill, kind: opening}]}`, offset along the side from its left end seen from outside,
    sill above grade; or `cheme layout pin OWNER/LINE`): the walls are cut around them. A

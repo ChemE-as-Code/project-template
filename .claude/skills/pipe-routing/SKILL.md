@@ -99,13 +99,16 @@ review.
      the tiers): its lane was taken or crossed. Free the tier (widen the rack, move other lines
      with their own rule), give it `tier:`/`via:` intent, or change the rule; never leave a
      line off its tier without saying why;
-   - `layout-wall-penetration`: a pipe through a building's cladding or a fire wall outside the
-     declared openings, passing through a building or enclosure it has no end in, or running in
-     a wall's plane (warning); into a casing outside a declared opening (info, for the casing
-     penetration schedule). The model's `penetrations` hold the opening each would need:
-     `cheme layout pin OWNER/LINE` declares it in `layout/building.yaml` (`openings`) or
-     `layout/structures.yaml` (`enclosure: openings`), and the next build cuts the wall around
-     it. Prefer fewer, grouped openings (route lines through one declared opening with `via`
+   - `layout-wall-penetration`: a pipe through a building's cladding, its roof or a fire wall
+     outside the declared openings, passing through a building or enclosure it has no end in,
+     or running in a wall's plane (warning); into a casing outside a declared opening (info,
+     for the casing penetration schedule). The model's `penetrations` hold the opening each
+     would need: `cheme layout pin OWNER/LINE` declares it in `layout/building.yaml`
+     (`openings`) or `layout/structures.yaml` (`enclosure: openings`), and the next build cuts
+     the wall around it. A roof penetration (`side: roof`, its opening in the building's plan
+     frame: offset and width along its x, sill and height along its y) cannot be declared and
+     the pin refuses it: give the line `via` points that bring it in through a wall (a rack
+     drop into a low building), then pin that wall opening. Prefer fewer, grouped openings (route lines through one declared opening with `via`
      points) and keep pipes out of fire walls where you can: a fire-rated penetration is a
      design decision to record;
    - `layout-vent-outlet`: the zone sphere around a vent or relief outlet reaches a walking
