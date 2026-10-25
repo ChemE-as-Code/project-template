@@ -241,6 +241,13 @@ a new object and loses its pin.
 Run `cheme validate` and fix every `cheme.process-*` error. A failing balance or a refused
 phase is a design finding: record it in `DESIGN.md`; do not change the numbers to make it pass.
 
+`cheme maturity` says which calculation level the evidence supports (docs/framework/maturity.md).
+A `kind: maturity` gate in `checks/checks.yaml` (`require: [balanced]`, optionally
+`max_claim: true` against the `process.yaml` claim) fails below that level and names each failing
+requirement with its file, rule and hint. Add the evidence it names (a source, a closed balance);
+never relabel an assumed value as given to pass it. `require: [engineering]` runs the whole
+validation and is slow on a large plant.
+
 ## Outputs and provenance
 
 ### 8. DESIGN.md and the next stage

@@ -49,7 +49,9 @@ alpha = retriever.mixture("benzene", "toluene", "relative_volatility", temperatu
 
 Each property has a source order: identifiers PubChem first, thermochemistry NIST first, then
 thermo, GRAPPA last. Hazard data come from OSHA (`chemeascode.domains.safety.hazard_data` gives
-them in SI units). For a separation, ask binary properties for adjacent pairs only: sort the
+them in SI units), searched by CAS number: a name is resolved to its CAS number through PubChem
+first. osha.gov refuses non-browser clients (HTTP 403), so these lookups usually fail with that
+message; report the values as missing. For a separation, ask binary properties for adjacent pairs only: sort the
 components by boiling point and pair neighbours.
 
 ## Validation and failure handling
