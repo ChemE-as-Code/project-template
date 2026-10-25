@@ -87,6 +87,37 @@ not support, and do not fill the gap with assumed values to make one look better
    basis's observations). Then continue with the reactor (skill `reactions`: `cheme process
    propagate --fill`, `cheme process reactors`). The reactor calculations remain the existing
    tools'.
+6. **What `cheme maturity` reads from it.** A conversion reactor's specified value (a
+   reaction's `conversion`, or the step's `selectivity:` conversion and each selectivity)
+   counts as sourced at the `balanced` level when the selected route's `model_basis` names
+   its reactions and the basis's cited observations cover it at the reactor's outlet
+   temperature and pressure (only these: residence time, space velocity, feed ratios,
+   catalyst loading, phase and solvent are not compared, and are listed so). No
+   `cheme.evidence-*` error may be on the basis or a route (one route selected). An
+   observation counts when its source was read in `full-text` and is declared once, no
+   error names it or its source, it states its catalyst (`catalyst`, else
+   `catalyst_formulation`; "none (thermal)" for a non-catalytic one) and is the basis's
+   `catalyst` (same id, or a formulation equal to its id or its name in
+   `process/catalysts.yaml`; the basis's catalyst must be the one the reactor step declares
+   in `catalyst:`, and with no basis catalyst the observations must be on the step's), its
+   value is reported or
+   derived (not assumed) and labelled: `basis: per-pass` for a conversion, `basis: molar`
+   and `relative_to` the key for a selectivity. It must report a temperature (a range, or a
+   single value with its `uncertainty`) holding the reactor's outlet temperature, and a
+   pressure holding the outlet pressure where both give one. The value must lie inside the
+   range those observations span, one catalyst's observations at a time (never pooled). The
+   step's `selectivity:` (kmol product per kmol key) is compared as a fraction: divided by
+   the product's coefficient per key in its reactions. So label every observation, record
+   its temperature and catalyst, and give the reactor's outlet temperature in every case of
+   the flowsheet: a case without it leaves nothing sourced. A value outside the range,
+   evidence only from unread or erroneous observations, a conflict on a cited observation
+   (whatever its `resolution`), or a route that is not selected leaves it unsourced, with
+   the reason in the detail and as a limitation. A value's own `given` source (a reaction's
+   conversion, the step's `selectivity:`) stands where the evidence cannot compare it (a
+   route not selected, a conflict, an unknown outlet temperature, ...), but not where usable
+   observations, compared at a known outlet temperature, contradict it. A reaction whose key another reaction of
+   the step also consumes is not compared with a total conversion: give the step a
+   `selectivity:`. It stays a specified basis: never `predictive`.
 
 ## Validation and failure handling
 

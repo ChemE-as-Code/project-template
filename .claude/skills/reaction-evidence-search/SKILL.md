@@ -15,6 +15,19 @@ operating example, the candidate routes, the conflicts between sources and what 
 missing. It is evidence, not the model: choosing the route and the model's inputs is a
 separate step (skill `route-selection`).
 
+What the record is used for later: `cheme chemistry evidence` compares the routes, and once
+a route is selected with a `model_basis` (skill `route-selection`), `cheme maturity` counts a
+conversion reactor's specified conversion or selectivity as sourced only where the basis's
+cited observations cover it at the reactor's temperature and pressure (only these two
+conditions are compared). Only observations from sources read in `full-text`, without an
+error finding, with reported (not assumed) values labelled per pass (conversion) or molar and
+relative to the key (selectivity), and with the temperature and catalyst (`catalyst` id, else
+`catalyst_formulation`; "none (thermal)" when uncatalysed) they were measured at, count; a
+snippet, an abstract, an unlabelled value, an observation without a catalyst, a source with a
+malformed identity or a flagged conflict does not, and observations on different catalysts
+are not pooled. So record ranges, bases, catalysts and conditions as the source gives them,
+and keep conflicts.
+
 Use it at the concept stage, before the first reactor is written; when a route, catalyst or
 operating window is reopened; and whenever someone asks where a conversion, selectivity or
 rate law came from.

@@ -91,6 +91,11 @@ gate `lca` fails.
    footprint"), with the gaps beside the totals and without a coverage percentage. Check the dominant contributor against an independent estimate. Example:
    specific power x grid factor for an air separation, or the fuel's carbon for a reformer.
    Investigate any result that disagrees by more than the data's accuracy.
+   For a product carbon footprint (ISO 14067, TfS, PACT), declare `carbon_accounting:` (the
+   biogenic method, the CCU rule, CCS, each feed's biogenic fraction with its source, and
+   `co2_source` on captured CO2) and report the PCF breakdown: excluding and including biogenic
+   CO2, and the product's biogenic and fossil carbon content. Read `cheme.lca-carbon-*`; never
+   declare a fossil point source biogenic. `--pact FILE` exports it for a customer.
 5. **Uncertainty and data quality.** Every dataset exchange carries a pedigree (the default
    rule's, from its provenance and origin, the declared location and year, and the design's
    maturity); the Monte Carlo uses its lognormal where neither the exchange nor
@@ -134,6 +139,21 @@ gate `lca` fails.
    `cheme.lca-dataset-undocumented`; the gate requirement `lci-documented` checks the
    publication minimum. A v1 dataset (`schema: cheme/lca/v1`) still loads with a warning:
    `cheme migrate --write` rewrites a hand-written one.
+
+11. **Wastes and end of life** (core#180). What goes in also comes out: give every replaced or
+   charged consumable (adsorbent, catalyst) and the construction materials a `disposal:`
+   (`kind: waste | recyclable`, `route`, its treatment background or `missing:`), classify
+   waste outputs of the flowsheet with `treatment:`, and give `end_of_life:` entries `kind`
+   and `route`. `recyclable` is material recycling or re-use only (a positive market value or
+   an accepted scrap grade); burned waste, energy recovery included, is `kind: waste` linked
+   to its incineration (`hazardous: true` for a hazardous one). Never put a recycling credit into a background with a negative factor: give it
+   as `credit:` (any kind, e.g. the heat of an incineration), which counts only with
+   `system_model: substitution` (the default is cutoff: no credits). Record what you leave out
+   in `cutoff:` with its amount and reason; the 1 % criteria are an Atlas choice (ISO 14044
+   gives no number). Never cut a precious- or critical-metal flow or a high-CF flow (N2O, SF6,
+   HFCs, heavy metals). Read
+   `cheme.lca-disposal` and `cheme.lca-cutoff-*`; the gate requirement `cutoff-criteria` checks
+   them.
 
 ## Validation and failure handling
 

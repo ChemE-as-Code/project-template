@@ -56,7 +56,23 @@ construction:
 Supplies the flowsheet and the take-off do not hold: `consumables` (e.g. an adsorbent
 replaced every 5 years), `maintenance` (a yearly fraction of the construction), `transport`
 (t*km of matched exchanges) and `end_of_life` (treatment or recycling of the construction
-mass).
+mass). What goes in also comes out: give a replaced consumable and a construction material a
+`disposal:`, and classify waste outputs of the flowsheet with `treatment:`. Under the default
+`system_model: cutoff` a recyclable (material recycling or re-use; burned waste is a `waste`
+linked to its incineration) leaves burden-free and earns no credit:
+
+```yaml
+consumables:
+  - id: sieve
+    unit: t
+    per_replacement: 36
+    every_years: 6
+    missing: "no open factor for 13X molecular sieve"
+    source: "two beds replaced every 6 years (ASSUMED)"
+    disposal: {kind: waste, route: landfill, missing: "no open landfill factor", source: "spent sieve, inert"}
+cutoff:
+  - {id: packaging, per_year: 500, unit: kg, reason: "pallets and bags, below 0.1 % of the input mass"}
+```
 
 With a Brightway project (ecoinvent or an open database, `pip install 'cheme-as-code[lca]'`), set
 `backend: brightway` and give the flows an `activity:` (`cheme assess lca-search` finds
@@ -66,7 +82,7 @@ See the skill `lca`.
 Never edit `inventory.csv` or `results.*` by hand: change the flowsheet, `lca.yaml` or
 `factors.yaml`, then rewrite them. Energy streams (`kind: energy`, with `duty`) from an energy
 feed (electric power, steam) or to an energy product (cooling water) are counted in kWh. The
-gate `kind: lca` (`checks/checks.yaml`, require `mapped`, `factors`, `no-gaps`, `publishable`, `lca-current`)
+gate `kind: lca` (`checks/checks.yaml`, require `mapped`, `factors`, `no-gaps`, `publishable`, `cutoff-criteria`, `lca-current`)
 checks the mapping is complete, the factors are the project's, no exchange is a gap, the
 results may be published under their sources' terms, and the outputs are current.
 
