@@ -25,8 +25,11 @@ pass-through, mixer and splitter balances; simulate covers the energy balance an
   chosen silently. Supported: Peng-Robinson (PR), Peng-Robinson 1978 (PR78),
   Soave-Redlich-Kwong (SRK), NRTL, UNIQUAC, Steam Tables (IAPWS-IF97), CoolProp
   (`cheme process methods`; another name is `sim-property-package`). Record the selection's
-  facts as `method_selection: {facts: {...}}`: the translation re-runs the selection and flags
-  a package it does not recommend. A model the worker does not run has at most an explicit
+  facts as `method_selection: {facts: {...}}` in every new `simulation.yaml` (a comment per
+  fact with its reason; an uncertain fact stated as such, chosen conservatively): the
+  translation re-runs the selection and flags a package it does not recommend, and
+  `cheme maturity` counts a package without a recorded selection as missing
+  (`predictive.property-package`). A model the worker does not run has at most an explicit
   substitute (`methods[...].simulation.substitution`); use it only with approval and record
   why as `method_selection.substitution`. Electrolytes, solids and petroleum
   pseudocomponents are not supported by this route. Where
@@ -52,6 +55,18 @@ pass-through, mixer and splitter balances; simulate covers the energy balance an
    schema: cheme/simulation/v1
    kind: simulation
    property_package: Peng-Robinson (PR)
+   # always record the selection the package rests on (thermodynamic-model-selection),
+   # with the reason for each fact; `cheme maturity` counts a package without one as missing
+   method_selection:
+     facts:
+       is_polar: false              # C3 to C5 n-alkanes: nonpolar
+       is_electrolyte: false        # no ions
+       has_pseudocomponents: false  # pure compounds with CAS numbers, no assay fractions
+       liquid_liquid_expected: false     # light alkanes are fully miscible
+       vapor_association_expected: false # no carboxylic acids or HF
+       pressure_value: 12           # the highest pressure of the flowsheet (the feed)
+       pressure_unit: bar(a)
+     # substitution: "<why a package the facts do not recommend is used; accepted by whom>"
    specs:
      K1: {outlet_pressure: {value: 8, provenance: given}, efficiency: {value: 0.78, provenance: assumed, source: vendor typical}}
      E1: {outlet_temperature: {value: 35, provenance: given}, pressure_drop: {value: 0.2, unit: bar, provenance: assumed}}

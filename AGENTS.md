@@ -120,7 +120,7 @@ This repository is a process plant design. The files are the design; there is no
 | `plant.yaml` | `plant` (sheets, each optionally with `generator: {script, frame}`) |
 | `process/design-basis.yaml` | `design_basis` |
 | `process/materials.yaml` | `process-materials` (components, templates, the property method `props --fill` records) |
-| `process/simulation.yaml` | `process-simulation` (property package, specs per step, tear streams; optional) |
+| `process/simulation.yaml` | `process-simulation` (property package with its `method_selection` facts, specs per step, tear streams; optional) |
 | `process/flowsheet.yaml` | `process-flowsheet` (units, cases, tolerance, feeds, products, blocks, steps, streams with per-case state and provenance, links, `layout.bfd`/`layout.pfd`) |
 | `equipment/equipment-list.yaml` | `equipment` (tag, type, service, sheet, design data, `dimensions`, notes) |
 | `piping/line-list.yaml` | `lines` (number, from, to, nominal_diameter, ..., notes, `segments` with a DN each) |
