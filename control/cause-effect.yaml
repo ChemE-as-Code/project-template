@@ -9,5 +9,5 @@ interlocks: []
 #      - {tag: P-101A, action: stop}     # trip, stop, start, close, open, depressurize, alarm
 #      - {tag: XV-101, action: close}
 #    sheet: P-01
-#    sil: null                           # from SIL screening
+#    sil: null                           # from SIL screening: 1 to 4, or 0 / a (no SIL)
 #    notes: D-012

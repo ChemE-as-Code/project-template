@@ -42,7 +42,8 @@ detail stage (gate `electrical`).
    datasheet or under `motors: [{driven: P-101A, power_kw: 15, source: ...}]`; `voltage_v`,
    `room` and the motor `tag` only where the defaults (`defaults: {lv_room, mv_room,
    mv_above_kw, ...}`) do not fit. `skip: <reason>` for a motor cabled by its vendor package.
-   Other consumers (an electric heater, a package panel) go under `feeders:`.
+   Other consumers (an electric heater, a package panel) go under `feeders:`, with a
+   `power_factor` for a package with motors (default 1.0, a resistive load, ASSUMED).
 3. **Instruments and junction boxes.** Without `junction_boxes` the build proposes one per area
    at the middle of its instruments (`review_needed`). Declare the boxes you want (`tag`,
    `point` or `area`, `instruments` patterns, `capacity`), an instrument's own `jb`, its

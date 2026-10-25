@@ -30,7 +30,7 @@ The sheets in `pid/`, `equipment/equipment-list.yaml`, `piping/line-list.yaml`,
    | `cheme.line-not-on-pid` with id `<line>/<segment>` | a listed segment whose `SegmentNumber` is not on the line's sheet |
    | `cheme.equipment-duplicate` / `line-duplicate` / `instrument-duplicate` | an entry listed twice; keep one |
    | `cheme.piping-item-not-listed` / `piping-item-not-on-pid` | a tagged safety valve, rupture disc, breather valve, flame arrestor or silencer and `piping/special-items.yaml` disagree |
-   | `cheme.interlock-unknown-tag` / `instrument-no-interlock` | a cause or effect tag of `control/cause-effect.yaml` that is in no list and on no sheet; a trip instrument (HH/LL letters, or notes saying it trips) that causes no interlock |
+   | `cheme.interlock-unknown-tag` / `instrument-no-interlock` | a cause or effect tag of `control/cause-effect.yaml` that is in no list and on no sheet; a trip instrument (HH/LL letters, or notes saying it trips) in no interlock, as its cause or in its logic |
    | `cheme.piping-item-type-mismatch` / `piping-item-line-mismatch` | the list's `type` or `line` differs from the sheet |
 
 2. **Equipment** on a P&ID but not in the list: add an entry with `tag`, `type` (the DEXPI
