@@ -27,6 +27,8 @@ checked by [`cheme-as-code`](https://github.com/ChemE-as-Code/core).
   your computer (`uv tool install git+https://github.com/ChemE-as-Code/core.git`). Every check,
   drawing and generated file is made by the `cheme` command, so you need it to work here. The CI
   in `.github/workflows/` installs it too.
+- **Licences.** The ChemE-as-Code tools are licensed under AGPL-3.0-or-later; the content of this
+  repository (your plant data and models) is yours and can be licensed however you choose.
 - **The skills in `.claude/skills/` are copies** of the ones in cheme-as-code, so that Claude Code
   finds them here. After upgrading (`uv tool upgrade cheme-as-code`), run `cheme skills update` to
   refresh them; `cheme skills status` shows which are out of date. A skill you changed here is
