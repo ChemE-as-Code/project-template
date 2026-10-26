@@ -146,8 +146,25 @@ pass-through, mixer and splitter balances; simulate covers the energy balance an
   approach is not checked; say so in the review or check the zones in a rating tool),
   `sim-utility-level` (the utility terminal's declared temperatures cannot serve the duty),
   `sim-energy-unbalanced` (a unit's or the plant's enthalpy closure fails: check convergence
-  and specs) and `sim-energy-unsupported` (info: reactors and units without an established
-  duty sign; report it as unsupported, never estimate a residual).
+  and specs) and `sim-energy-unsupported` (info: a reactor whose property package's enthalpy
+  reference is not verified, and units without an established duty sign; report it as
+  unsupported, never estimate a residual). Reactors close on a heat-of-formation basis
+  (`basis: formation` in the record): DWSIM's enthalpy flows plus `sum (n_out - n_in)
+  dHf_298` on DWSIM's own formation enthalpies, which its reactor duty takes. What is
+  verified (DWSIM 9.0.5, live tests): the reference state (each component's ideal gas at
+  298.15 K = 0, no formation enthalpies) for Peng-Robinson, PR78 and SRK, not for NRTL; the
+  duty identity for vapour ammonia synthesis at 10 bar, with conversion, equilibrium and
+  Gibbs reactors under Peng-Robinson and the conversion reactor under PR78 and SRK. Other
+  packages leave reactors unsupported. `sim-formation-data` compares the project's formation
+  enthalpies with DWSIM's: a warning (and `predictive.formation-data` fails) where values
+  declared in `materials.yaml` make a reaction heat that differs by more than 1 % of it (the
+  data tolerance, about the spread between compilations: ammonia ATcT -45558 against JANAF
+  -45898 kJ/kmol is 0.74 %); a smaller nonzero difference, chemicals' fallback values or a
+  missing value are info and a recorded limitation: name them in the review. The record
+  gives each component's difference in kJ/kmol. Give every reacting component
+  `ideal_gas.dHf_298` with its source (`cheme chemistry thermo` prints chemicals'); on a
+  warning, check both sources and say which value the design rests on, never edit a value
+  to make a check pass.
 
 Double columns (air separation): the HP column with `condenser: partial` (GAN as
 `vapor_flow`, liquid nitrogen as distillate) and `reboiler: false`, LIN as a liquid side draw

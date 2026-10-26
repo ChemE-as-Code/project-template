@@ -76,7 +76,8 @@ cutoff:
 
 With a Brightway project (ecoinvent or an open database, `pip install 'cheme-as-code[lca]'`), set
 `backend: brightway` and give the flows an `activity:` (`cheme assess lca-search` finds
-them). `scenarios:` compare the baseline with other factors or databases (e.g. premise 2050).
+them; `cheme assess lca-map` lists candidates for every open exchange and `--apply` writes the
+approved ones). `scenarios:` compare the baseline with other factors or databases (e.g. premise 2050).
 See the skill `lca`.
 
 Never edit `inventory.csv` or `results.*` by hand: change the flowsheet, `lca.yaml` or
