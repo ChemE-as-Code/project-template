@@ -118,7 +118,13 @@ gate `lca` fails.
    no background of that region exists: never a zero, never the baseline's relabelled. A
    physical change (a hot climate, another capacity) needs its own computed flowsheet case
    (`case:`); never scale a design. `cheme assess lca-scenarios --write` writes one record per
-   scenario (`lca/scenarios/<id>.json`, docs/framework/lci-scenarios.md).
+   scenario (`lca/scenarios/<id>.json`, docs/framework/lci-scenarios.md). Each record and
+   `results.md` carry a verdict against the baseline (`like-for-like`, `proxy`,
+   `not comparable`), read from the factors' structured `scope` (basis, delivery, gases, gwp,
+   mix, accounting; docs/framework/lci-comparison-basis.md). Give your own factors a `scope`
+   where the source states it; never report a `proxy` or `not comparable` scenario as a
+   like-for-like country comparison. A factor dated by its publication keeps that `year`; give
+   `data_year` (and `publication_year`) only where the source states them, never by guessing.
 7. **Write and gate.** `cheme assess lca --write`; commit `lca/*` with the inputs. The gate
    `kind: lca` requires `mapped`, then `lca-current`, `no-gaps` when the result must not be
    partial, and `factors` once the project's own replace an example.
