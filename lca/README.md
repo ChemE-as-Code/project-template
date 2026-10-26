@@ -83,9 +83,12 @@ See the skill `lca`.
 Never edit `inventory.csv` or `results.*` by hand: change the flowsheet, `lca.yaml` or
 `factors.yaml`, then rewrite them. Energy streams (`kind: energy`, with `duty`) from an energy
 feed (electric power, steam) or to an energy product (cooling water) are counted in kWh. The
-gate `kind: lca` (`checks/checks.yaml`, require `mapped`, `factors`, `no-gaps`, `publishable`, `cutoff-criteria`, `lca-current`)
+gate `kind: lca` (`checks/checks.yaml`, require `mapped`, `factors`, `no-gaps`, `publishable`, `cutoff-criteria`, `lci-emissions-complete`, `lci-mass-balance`, `lci-element-balance`, `lci-carbon-origin`, `lca-current`)
 checks the mapping is complete, the factors are the project's, no exchange is a gap, the
-results may be published under their sources' terms, and the outputs are current.
+results may be published under their sources' terms, every combustion unit, tank and
+untreated wastewater outlet has an emission estimate or a declared exclusion
+(`emission_estimates:`, `emission_exclusions:`), the dataset closes in mass, elements and
+carbon by origin (`cheme assess lca --balance`), and the outputs are current.
 
 `results.md` says what the result is: **complete** within the declared boundary (every exchange
 characterised in every category with published or declared data; not a validation),

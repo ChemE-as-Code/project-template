@@ -165,6 +165,27 @@ gate `lca` fails.
    `cheme.lca-disposal` and `cheme.lca-cutoff-*`; the gate requirement `cutoff-criteria` checks
    them.
 
+12. **Balances** (core#174). Run `cheme assess lca --balance`: the dataset must close in mass,
+   in each element and in carbon by origin (1 % for a simulated flowsheet, 5 % for a sourced
+   screening dataset). An open balance means a missing purge, waste, by-product or free
+   resource, or a wrong composition or origin: fix the flowsheet or the dataset, never widen
+   the tolerance. A material exchange without a composition makes the balance not assessable:
+   give it `composition:` (fractions with formulas, or elements, with the source) or a
+   `balance_exclusion:` with the reason. Read `cheme.lci-mass-balance`,
+   `cheme.lci-element-balance`, `cheme.lci-carbon-origin`; the gate requirements of the same
+   names check them.
+13. **Emissions the flowsheet does not carry** (core#176). A fired heater, a flare, storage
+   tanks, a wastewater outlet and equipment leaks emit what no stream holds (NOx, CO, PM,
+   CH4/N2O, VOC, COD, N, P). Add `emission_estimates:` (method `combustion`,
+   `equipment-leaks`, `storage-tank`, `flare`, `effluent` or `non-routine`; scope `equipment`,
+   `stream` or `exchange`; parameters and factors). Take every factor from its source (a
+   guidebook table, AP-42, the EPA leak protocol, a permit, a BAT-AEL) and record that source
+   on the factor; never write a factor from memory, and never point at a packaged factor set
+   (they are placeholders and refuse to run). Equipment leaks count the P&ID take-off and the
+   equipment list for you; check `counts`. What is negligible goes in `emission_exclusions:`
+   with its reason (inert or cryogenic service). Read `cheme.lci-emissions-incomplete`,
+   `cheme.lci-emission-*`; the gate requirement `lci-emissions-complete` checks them.
+
 ## Validation and failure handling
 
 - `cheme validate` checks `lca/lca.yaml` and `lca/factors.yaml` against their schemas.
@@ -190,7 +211,7 @@ gate `lca` fails.
 ## Outputs and provenance
 
 - `lca/inventory.csv`: each flow with its phase, the plant's amount, the quantity per
-  functional unit, its provenance (given, calculated, assumed: the weakest value used) and its
+  functional unit, its provenance (given, calculated, estimated, assumed: the weakest value used) and its
   mapping.
 - `lca/results.csv` and `lca/results.md`: impacts per scenario, category, phase and
   contributor, with the factor's status, source and year, or the Brightway activity.

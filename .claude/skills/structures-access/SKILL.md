@@ -94,9 +94,12 @@ review.
      down to grade: a stair or ladder counts only when it is outside any casing, its top
      landing reaches the floor (within 0.3 m in plan; a ladder's top within 0.8 m), its foot
      stands on the floor below, and that floor has its own connected way down; proposals count
-     once pinned; an item's platform whose far end is more than `dead_end_m`, 7.5 m, along it
-     from its only ladder), `layout-access-unconnected` (a declared stair or ladder that does
-     not reach the levels it names: a stair tower beside the platforms serves none of them),
+     once pinned; two ways count only when they arrive at least `escape_remote_fraction`, half
+     the floor's diagonal, apart, so two ladders side by side are one; an item's platform
+     whose far end is more than `dead_end_m`, 7.5 m, along it from its only ladder),
+     `layout-access-unconnected` (a declared stair or ladder that does
+     not reach the levels it names: a stair tower beside the platforms serves none of them; an
+     item platform's ladder whose foot stands on no floor or whose top misses its platform),
      `layout-escape-travel` (a floor at 6 m or more, or in regular use, without a connected
      declared stair, or a point of it more than `stair_travel_m`, 25 m, from its nearest
      stair). Where the stair's top landing lands depends on its flights (an odd number ends at
@@ -160,9 +163,11 @@ review.
    stacked on the frame's declared stair where that reaches the level, else on a side the
    level reaches, from the highest floor below its foot lands on; a caged ladder while a floor
    (levels at one elevation within 0.3 m of each other, not across a casing wall) has fewer
-   than two connected ways down (outside the casing); a caged ladder at each free end of a rack, to its top
-   tier; and a step-over where a low pipe (top within 0.75 m) crosses an escape route or a
-   grating. Decide each one like a platform: pin it (`cheme layout pin S-1/stair-to-L2`,
+   than two connected ways down remote from each other (outside the casing; a casing roof's
+   just outside the wall); no stair where no position reaches the level (the finding then
+   says to place one by hand); a caged ladder at each free end of a rack, to its top tier;
+   and a step-over where a low pipe (top within 0.75 m) crosses an escape route or a grating.
+   Decide each one like a platform: pin it (`cheme layout pin S-1/stair-to-L2`,
    `S-1/ladder-to-L2`, `RACK/ladder-start`), declare something else (a stair on another side,
    `ladders: []` on a rack reached from a structure), or move the pipe. Step-overs follow the
    route: raise or reroute the pipe rather than accept many of them. Guard rails are drawn with
