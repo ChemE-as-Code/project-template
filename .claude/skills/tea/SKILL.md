@@ -67,7 +67,7 @@ decision depends on the economics.
     isbl:
       source: equipment     # equipment | mto | given (never both estimates)
       exchange_rate: {value: 0.92, source: "EXAMPLE: the project's exchange rate source", year: 2025}
-      escalation: {value: 1.0, source: "EXAMPLE: cost index of 2025 in cost-basis.yaml"}
+      escalation: {value: 1.08, source: "EXAMPLE: cost index 2023 of cost-basis.yaml to 2025"}  # only when the index year is not cost_year
       location_factor: {value: 1.1, source: "EXAMPLE: the project's location factor"}
       purchased_installation: {value: 3.0, source: "EXAMPLE: the project's installation factor"}
       uncovered_allowance: {value: 0.3, source: "EXAMPLE: items not costed, DESIGN.md D-0xx"}
