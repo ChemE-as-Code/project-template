@@ -38,8 +38,10 @@ gate `lca` fails.
   - With a Brightway project (ecoinvent licence, or an open database such as USLCI): `backend:
     brightway`, with `activity:` and `biosphere:` mappings that `cheme assess lca-search`
     finds; `cheme assess lca-map` lists candidates for every open exchange, and `--apply
-    KEY=N --source S` writes only the candidates you chose (check each before applying). The
-    project is the user's; licensed data never goes into the repository.
+    KEY=N --source S` writes only the candidates you chose (check each before applying); a
+    provider profile (`brightway.mapping_profiles`, kind `lca_mapping_profile`) maps the feeds
+    and products `flows:` leaves without an entry. The project is the user's; licensed data
+    never goes into the repository.
 - Construction: `estimate/mto.csv` (skill `mto-estimate`) and `dimensions.weight` of the
   equipment, plus `operation: {hours_per_year, life_years}` from the design basis.
 
@@ -166,6 +168,9 @@ gate `lca` fails.
   - `lca-factor-unknown`, `lca-factor-unit`, `lca-activity-missing`, `lca-activity-unit`,
     `lca-brightway` (backgrounds).
   Fix the input they name; never work around them by mapping a flow `free`.
+- `lca-link-compat` (warning): a `dataset:` background that may not stand in for its flow
+  (another substance, phase, grade or lower pressure, allocation, or system model).
+  Link a fitting dataset, or keep the link with a `proxy:` that says why.
 - `lca-map-refused`, `lca-map-key` (`cheme assess lca-map --apply`): nothing was written; choose
   another candidate or map the exchange by hand.
 - `cheme assess lca --check` exits 1 when the written files are stale: rewrite them, never

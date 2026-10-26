@@ -151,6 +151,7 @@ This repository is a process plant design. The files are the design; there is no
 | `lca/lca.yaml` | `lca` (goal and scope of the LCA: functional unit, case, allocation, categories, and the background of each feed, product and emitted component) |
 | `safety/risk-matrix.yaml` | `risk-matrix` (bands lowest risk first, likelihood and severity codes, categories, the band of every cell; the one `cheme init` writes is an example) |
 | `safety/hazop/<id>/study.yaml` | `hazop-study` (scope, modes, analysed inputs and their revisions, nodes, deviations, scenarios with ratings, safeguards, actions; `status: proposed` until the team accepts) |
+| `lca/mapping-profiles/*.yaml` (optional) | `lca_mapping_profile` (a background provider's activity names for the study's flows, by key or utility kind; selected with `brightway.mapping_profiles`) |
 | `lca/factors.yaml` | `lca_factors` (the project's characterised factors, each with status, source, year, geography and its `sources:` registry entry (licence, publication policy); the one `cheme init` writes includes the packaged open profile `desnz-ghg-2026`: a screening carbon footprint) |
 
 `cheme schema <kind>` prints the full JSON Schema.
