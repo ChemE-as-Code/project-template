@@ -80,9 +80,10 @@ gate `lca` fails.
    Choose market activities ("market for electricity, medium voltage") for the right location.
    For energy, mind the unit: the inventory counts kWh, a heat activity is per MJ, and the
    conversion is automatic when the kinds match. Give every energy terminal its `utility.kind`
-   and supply temperature in the flowsheet: the dataset's exchanges then carry their carrier
-   (steam at its level, heat at its temperature, cold), which decides the background to link
-   (`cheme.lca-carrier` names the ones without). A gas product may be per Nm3 (functional unit),
+   and supply temperature in the flowsheet, and steam its `pressure` and `level` (LP, MP, HP):
+   the dataset's exchanges then carry their carrier (steam at its level, heat at its
+   temperature, cold), which decides the background to link (`cheme.lca-carrier` names the
+   ones without, `cheme.lca-carrier-level` those without their level). A gas product may be per Nm3 (functional unit),
    a fuel or hydrogen per MJ LHV (with the product's `energy`), electricity or steam per kWh.
 3. **Construction.** Add `operation` and `construction:` entries: steel, pipe, concrete and
    insulation from the take-off, and equipment by material from the equipment list. Read

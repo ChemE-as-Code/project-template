@@ -60,7 +60,8 @@ Every stream names a `template`; its composition may only use the template's com
   `category` (`raw_material`, `product`, `by_product`, `utility`, `wastewater`, `off_gas`,
   `solid_waste`, `emission`): a purge or vent without one is invisible to the TEA and LCA
   inventories. A utility terminal (steam, cooling water, refrigerant, power) gives `utility:
-  {kind, supply_temperature, return_temperature, min_approach}` from the design basis. Every
+  {kind, level, supply_temperature, return_temperature, min_approach}` from the design basis
+  (steam also its `pressure`). Every
   heater, cooler, machine, column and non-adiabatic reactor needs an energy stream to one.
   `cheme process energy` reports the gaps (`cheme.boundary-*`) and the energy balances.
 - `blocks` have a DEXPI `class` (`Compressing`, `Cooling`, `Mixing`,
