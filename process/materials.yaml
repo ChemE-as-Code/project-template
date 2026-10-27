@@ -10,8 +10,8 @@ templates: []
 # property_method is a placeholder until `cheme process props --fill` records the method: its
 # benchmarked property package, package versions and application range. Packages:
 # air-pr-chemsep (N2/O2/Ar, 77-315 K, vapour 100-3200 kPa(a), liquid and two-phase 100-600
-# kPa(a)) and syngas-pr-vapor (H2/N2/Ar/CH4/CO/CO2 mixtures and pure NH3, vapour only, in
-# benchmarked temperature-pressure boxes). `cheme process props --coverage` shows which applies
+# kPa(a)) and syngas-pr-vapor (H2/N2/Ar/CH4/CO/CO2 mixtures, NH3 pure or dilute with H2/N2/Ar/
+# CH4, vapour only, in benchmarked temperature-pressure boxes). `cheme process props --coverage` shows which applies
 # to each stream; `package: <id>` here chooses one.
 property_method:
   adapter: thermo
