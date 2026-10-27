@@ -202,13 +202,18 @@ each value taken from the evidence cites its observation in `source`.
    `rate.uncertainty: {A: {gsd2: 3}, Ea: {distribution: normal, cv: 0.05}}`, and an
    `uncertainty:` on `heat_of_reaction`, `equilibrium_constant` (of K) or `conversion` (the
    shared model: lognormal `gsd2` or `pedigree`, `normal` `cv`, `triangular`/`uniform` `low`
-   and `high`). `cheme process reactor-uncertainty NODE [--samples 200] [--seed 1]` samples
-   them through the step's reactor (bed, tank, batch, conversion) and prints the spread of
-   the key's conversion and the outlet and highest temperatures. Only what the model reads is
-   sampled (a gas's heat of reaction comes from the ideal-gas data, a kinetic reactor ignores
-   `conversion`, K counts only with `reverse: equilibrium`); the others are listed as not used
-   (`not_used` in `--json`) with the reason, and with nothing used left the command exits 2
-   ("nothing to sample"). Nothing is written, and an uncertainty never makes an outlet stale.
+   and `high`); on a step's `selectivity:`, `uncertainty: {conversion: {gsd2: 1.1}, products:
+   {B: {gsd2: 1.2}}}` (each figure its own, none assumed from the provenance; give only the
+   selectivities that fix the extents, as independent draws of more break their balance).
+   `cheme process reactor-uncertainty NODE [--samples 200] [--seed 1]` samples them through
+   the step's reactor (bed, tank, batch, conversion, selectivity as propagate evaluates it)
+   and prints the spread of the key's conversion, each component's outlet flow and the outlet
+   and highest temperatures. Only what the model reads is sampled (a gas's heat of reaction
+   comes from the ideal-gas data, a kinetic reactor ignores `conversion`, a selectivity step
+   reads none of its reactions' figures, K counts only with `reverse: equilibrium`); the
+   others are listed as not used (`not_used` in `--json`) with the reason, and with nothing
+   used left the command exits 2 ("nothing to sample"). Nothing is written, and an
+   uncertainty never makes an outlet stale.
 10. Run `cheme process propagate --fill`, then `cheme validate`, then `cheme process reactors`:
    per reactor the extents, the heat of each reaction and ln K at the outlet, `ln(Q/K)`
    (0 at equilibrium, negative short of it), the rate at the outlet where there is a rate law,

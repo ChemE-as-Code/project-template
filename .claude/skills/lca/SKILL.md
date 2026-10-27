@@ -128,7 +128,12 @@ gate `lca` fails.
    `data_year` (and `publication_year`) only where the source states them, never by guessing.
 7. **Write and gate.** `cheme assess lca --write`; commit `lca/*` with the inputs. The gate
    `kind: lca` requires `mapped`, then `lca-current`, `no-gaps` when the result must not be
-   partial, and `factors` once the project's own replace an example.
+   partial, and `factors` once the project's own replace an example. A result meant for
+   publication also requires `factors-published` and passes `cheme assess lca --strict`: every
+   exchange's factor status (`--json` `factor_status`) is `PUBLISHED`, `EPD`, `database` or
+   `none`; an example, `ASSUMED`, `PROXY` or `ESTIMATE` factor or a gap is named as
+   `cheme.lca-factor-status`. Never relabel a factor's status to pass it: replace the number
+   with a published one, or report the result as screening.
 8. **Licensed background rerun (optional).** With the user's own licensed database in a
    local Brightway project, keep the same foreground (`lca/dataset.yaml` does not change) and
    switch `backend: brightway`, giving each mapping an `activity:` beside its `factor:` (a
