@@ -32,7 +32,10 @@ pass-through, mixer and splitter balances; simulate covers the energy balance an
   (`predictive.property-package`). A model the worker does not run has at most an explicit
   substitute (`methods[...].simulation.substitution`); use it only with approval and record
   why as `method_selection.substitution`. Electrolytes, solids and petroleum
-  pseudocomponents are not supported by this route. Where
+  pseudocomponents are not supported by this route; a salt, acid or base of `electrolytes.yml`
+  (listed, or any compound of an alkali or alkaline-earth metal) together with water is refused (`cheme.process-sim-electrolyte`). Keep such a step as a
+  specified split and take brine properties from `cheme process electrolyte` (aqueous NaCl
+  only). Where
   DWSIM's binary interaction parameter of PR, PR78 or SRK is not fitted to the data that
   matter (argon/oxygen near pure O2, for example), set the pair under
   `interaction_parameters: [{components: [AR, O2], kij: {value: ..., provenance: ...,

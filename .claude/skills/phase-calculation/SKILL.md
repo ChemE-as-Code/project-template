@@ -66,7 +66,12 @@ already downloaded). Ask before running the fetch: it downloads third-party data
   call again.
 - The recommended model is not available: report it; use a similar one only with approval.
 - A gauge pressure is refused, because no ambient pressure is known: give it as absolute.
-- An ion (a component with a charge) is refused: electrolytes are unsupported. A component
+- An ion (a component with a charge), or a salt, acid or base of `electrolytes.yml` together
+  with water (sodium chloride, sulfuric acid, any compound of an alkali or alkaline-earth
+  metal, ...), is refused: electrolytes are unsupported by
+  this route. For aqueous NaCl inside its claimed range use `cheme process electrolyte`
+  (activity and osmotic coefficients, water vapour pressure, heats of dilution); any other
+  electrolyte is unsupported. A component
   thermo does not identify (a petroleum pseudocomponent) is refused. Solids are never formed:
   below a melting point the result is still fluid (`limitations` says so). Report these as
   unsupported; do not work around them.
