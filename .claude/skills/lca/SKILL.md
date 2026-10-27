@@ -91,7 +91,10 @@ gate `lca` fails.
    them as ASSUMED estimates with a source, or state the gap.
 4. **Run and read.** `cheme assess lca --coverage` first: the classification (complete,
    screening, partial, unavailable) and why, every gap with its quantity, the sources and
-   the limitations. Then `cheme assess lca` (Markdown): totals per scenario, the split by
+   the limitations, and the `boundary check:` line: a step without an energy stream or a
+   product without `category` (`cheme.boundary-*`) is left out of the inventory, never added
+   for you; close it in the flowsheet (see the process-design skill) or state it beside the
+   result. Then `cheme assess lca` (Markdown): totals per scenario, the split by
    phase, the contributions. Report the result under its label ("partial screening carbon
    footprint"), with the gaps beside the totals and without a coverage percentage. Check the dominant contributor against an independent estimate. Example:
    specific power x grid factor for an air separation, or the fuel's carbon for a reformer.
