@@ -95,7 +95,10 @@ pass-through, mixer and splitter balances; simulate covers the energy balance an
    `operating_basis` (the conditions it holds for), else `sim-specified-unsourced` (warning).
    The run record marks such a unit `basis: specified` with a note: report its converged
    result as the stated split, never as a predicted one (which techniques core predicts:
-   skill `separation-method-selection`). A main heat exchanger is a multi-stream exchanger
+   skill `separation-method-selection`). An adsorber's recoveries can follow from
+   `process/adsorption.yaml` (`cheme process adsorption`, skill `unit-ops-adsorption-and-drying`):
+   when they agree, the model basis reports it `adsorption-equilibrium`, calculated but not
+   simulated. A main heat exchanger is a multi-stream exchanger
    (`outlet_temperatures` for all streams but one). Flash and column outlets are recognised by port ids (`vapour`, `liquid`, `top`,
    `bottom`), exchanger sides by matching ids (`hot_in`/`hot_out`); else give `outlets:` or
    `pairs:`.

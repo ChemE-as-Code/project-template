@@ -19,9 +19,24 @@ anything missing.
 
 ## Workflow and tools
 
-Engineering guidance only; core has no calculation for this. Adsorption can be represented as a
-`component_separator` with specified recoveries (see `separation-method-selection`); isotherms,
-breakthrough and cycles are not modelled.
+For a concept, BFD or sourced inventory, represent adsorption as a `component_separator` with
+specified recoveries and their `basis_source` (see `separation-method-selection`): a sourced
+split, labelled as stated, not predicted. When a predicted basis is needed, write
+`process/adsorption.yaml` (`cheme schema process-adsorption`) and run `cheme process adsorption`:
+
+- a TSA with `performance: calculated`: core's equilibrium cycle from sourced isotherms (each
+  with the temperature and partial-pressure range it was measured over; outside it the
+  calculation is refused, never extrapolated), a measured mass transfer zone, the bed, the cycle
+  and the purge. It reports breakthrough time against the adsorption step, recoveries, product
+  impurity, the regeneration heat and the purge it needs, and adsorbent replacement. Copy the
+  recoveries it reports into the `component_separator`: the model basis then shows the split as
+  calculated (`adsorption-equilibrium`), still outside the simulation;
+- a PSA (or a vendor TSA) with `performance: external`: the cited model's recoveries and
+  utilities with its operating range. Core checks the range, the balance and the
+  specification, not the performance. Core has no PSA cycle model.
+
+Not modelled: the thermal front, heat losses, water on alumina (keep that layer a sourced split)
+and, without a co-adsorbed component's isotherm, its loss and competition.
 
 A bed regenerated on line needs a partner (two minimum, more if regeneration is longer than
 adsorption), because a bed being regenerated is not adsorbing. A non-regenerative guard bed

@@ -42,7 +42,8 @@ Every recommended model is resolved against the supported-method contract
 (`src/chemeascode/domains/process/thermodynamics/methods.yml`; `cheme process methods` prints
 it): whether `phase-calculation` (thermo) and `process-simulation` (DWSIM) run it, and where a
 route does not, the nearest model it runs as a `substitution` with what it `loses`, or no
-substitution (electrolytes, petroleum pseudocomponents: unsupported on both routes).
+substitution (electrolytes, petroleum pseudocomponents: unsupported on both routes; a sourced
+petroleum assay has its own limited Peng-Robinson flash, `cheme process assay`).
 
 There is no CLI command for the selection itself. Units go through
 `chemeascode.foundation.units`; units other than K, °C, Pa, kPa, MPa, bar and the `(a)`/`(g)`

@@ -119,7 +119,10 @@ with units, fallback, notes and the test that solves each arrangement):
 
 - **predictive**: the split follows from the property package (a `flash` or a rigorous
   `distillation_column` in `process/simulation.yaml`); only as good as the package (an
-  azeotrope the package misses is predicted wrong: check with `phase-calculation`);
+  azeotrope the package misses is predicted wrong: check with `phase-calculation`), or, for
+  crystallization, a `crystallizer:` with `basis: solubility` on the flowsheet step (sourced
+  solubility data, one solute in one solvent; `cheme process propagate` fills its outlets and
+  `cheme process crystallizers` reports yield, recovery, balances and duty);
 - **shortcut**: Fenske-Underwood-Gilliland (`shortcut_column`, `separations.shortcut`);
 - **specified split**: a `component_separator` with given recoveries (`basis: specified`, a
   `basis_source` and an `operating_basis`); its convergence closes balances, it predicts
@@ -161,9 +164,9 @@ established capability: say so when reporting it, and do not claim it as validat
 | Liquid-liquid extraction | predictive | tested | `extraction` (`cheme process extract`) |  | solvent regeneration (a separate unit); in the flowsheet still a `component_separator` (specified split) citing the extraction result; qualified only for a benchmarked LLE system (`--systems`) |
 | Membrane separation | specified split | untested | `component_separator` |  | permeance, selectivity, area |
 | Adsorption | specified split | tested | `component_separator` |  | isotherms, breakthrough, PSA/TSA cycle |
-| Crystallization | specified split | untested | `component_separator` |  | solid-liquid equilibrium, crystallizer |
+| Crystallization | predictive | tested | `crystallizer` (flowsheet) |  | population balance, kinetics, several solutes or impurities |
 | Drying | specified split | untested | `component_separator` |  | dryer, solids |
-| Solid-fluid separation | specified split | untested | `component_separator` |  | solids (filtration, centrifuges, cyclones) |
+| Solid-fluid separation | specified split | tested | `solid_separation` (flowsheet) |  | filtration, centrifuge, cyclone and settling models |
 
 Report the representation of the selected method beside the ranking; when it is a specified
 split or none, say so in `DESIGN.md` and name the source of the split.
