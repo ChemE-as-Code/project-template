@@ -183,7 +183,11 @@ gate `lca` fails.
    guidebook table, AP-42, the EPA leak protocol, a permit, a BAT-AEL) and record that source
    on the factor; never write a factor from memory, and never point at a packaged factor set
    (they are placeholders and refuse to run). Equipment leaks count the P&ID take-off and the
-   equipment list for you; check `counts`. What is negligible goes in `emission_exclusions:`
+   equipment list for you; check `counts`, and give two leak estimates their own components.
+   Give `lhv` and `density` with their unit, on the heating-value basis (net or gross) the
+   factors' source uses. A flare lists its combustibles in `components:`. A fired reformer
+   (the primary reformer of a steam-reforming route) is a combustion unit: estimate NOx, CO,
+   CH4, N2O and PM from its fuel. What is negligible goes in `emission_exclusions:`
    with its reason (inert or cryogenic service). Read `cheme.lci-emissions-incomplete`,
    `cheme.lci-emission-*`; the gate requirement `lci-emissions-complete` checks them.
 
