@@ -16,6 +16,7 @@ checked by [`cheme-as-code`](https://github.com/ChemE-as-Code/core).
 | `safety/` | HAZOP studies (`safety/hazop/<id>/study.yaml`) and the risk matrix they rate against; `safety/README.md` says how |
 | `checks/checks.yaml` | engineering-step gates; `checks/status.json` their result at the last stage sign-off |
 | `reviews/` | review records |
+| `runs/` | one record per design session, written by `cheme runs record` (`runs/README.md`); never edited |
 | `DESIGN.md`, `PROGRESS.md`, `STAGES.md` | decisions, change log, stage definitions |
 | `scripts/` | generator scripts: the source of generated sheets (`generator:` in `plant.yaml`), provenance for the others |
 | `.claude/skills/` | how an agent works here |
@@ -49,6 +50,7 @@ cheme render --png --tiles auto # build/<sheet>_tile-A1.png ... to read the whol
 cheme show <id or tag>          # where an object and its drawing are in the file
 cheme diff main [--list]        # build/diff.html, or one line per changed plant item
 cheme check                     # engineering-step gates (--write only at sign-off)
+cheme runs list                 # the record of each design session in runs/
 cheme process build             # BFD and PFD from process/*.yaml
 cheme process streams           # stream table with provenance, block balances
 ```

@@ -51,6 +51,10 @@ This repository is a process plant design. The files are the design; there is no
   its branch and counts only once it is merged: a stage is reached when its sign-off is on the
   default branch. End your summary by saying whether a merge is pending.
 - Do not edit `checks/status.json` or `build/` by hand; they are generated. `build/` is ignored.
+- `runs/<run-id>/` holds one record per design session (`run.yaml`, `task.md`, `report.md`,
+  `session.jsonl.gz`), written by `cheme runs record` (the Claude Code hooks in
+  `.claude/settings.json` do it at the end of a session). Never edit or delete an existing run
+  record; a correction is a new run.
 - `checks/status.json` records stage sign-offs: `cheme check` only prints the gates;
   `cheme check --stage <stage> --write --review reviews/<record>.md` adds that stage's entry
   (commit, date, signer, branch, review record, the gates of every stage up to it). It refuses
@@ -87,6 +91,8 @@ This repository is a process plant design. The files are the design; there is no
 | `cheme safety hazop init \| check \| rate \| report \| stamp \| review ID` | HAZOP studies in `safety/hazop/<id>/study.yaml` (skills `hazop-study`, `hazop-assessment`, `hazop-review`; `safety/README.md`): start a draft, findings and state (draft / assessed / reviewed), bands looked up in the risk matrix (`--write` records them, `--target` one node or scenario), `build/hazop/<id>.md`/`.html`, the analysed inputs' revisions, a review record to complete |
 | `cheme control report [--json] [-o DIR]` | the loop summary (`build/control-loops.html`, `.csv`) and the sequence report (`build/control-sequences.html`) with each control file's review status (drafted, reviewed, accepted) and the `cheme.control-*` findings (skills `control-loops`, `control-sequences`, `control-narrative`) |
 | `cheme schema [kind]` | JSON Schema of a YAML file kind; no kind lists them |
+| `cheme runs list [--json]` | the run records in `runs/`: run id, kind, cost, wall time, complete, turns |
+| `cheme runs record [--session-id ID] [--kind K] [--slug S] [--task-file F] [--cost USD] [--checks] [--commit]` | write `runs/<run-id>/` for a session (the hooks do it for interactive sessions, a runner for its own); a record that exists is never rewritten |
 | `cheme skills status \| update [NAME...] [--force]` | the bundled skills in `.claude/skills/`: current, outdated, modified (changed here) or missing; `update` installs missing and outdated files and keeps a modified one (reported) unless `--force` |
 | `cheme git-setup` | once per clone: `git diff` shows P&IDs as review text with their XML ids, pre-commit hook |
 | `cheme copy <id or tag> --prefix NEWID [--tag T] [--offset DX,DY] [--into PARENT] [--rename OLD=NEW] [--renumber A:B] [--set PROP=VALUE] [--connect PIPE=ITEM:NODE] [--sense-at ID[:X,Y]] [--print]` | duplicate an object with its parts and everything that draws it, every id renamed from `NEWID`; `--rename`/`--renumber` give inner valves their own tags, `--set` e.g. the fluid code, `--connect` closes an open pipe end, `--sense-at` re-points an instrument's sensing location; prints the new ids, the lines written, what was not copied and the tags still duplicated |
@@ -140,6 +146,7 @@ This repository is a process plant design. The files are the design; there is no
 | `equipment/datasheets/<TAG>.yaml` | `datasheet` (one per equipment item: conditions, materials, sizing basis, `assumed` values) |
 | `reviews/<date>-<topic>.md` front matter | `review` (topic, reviewed_commit, scope, reviewer, reviewer_kind) |
 | `checks/status.json` (generated) | `status` |
+| `runs/<run-id>/run.yaml` (written by `cheme runs record`) | `process-run` (one design session: commits, times, cost, model, turns, tokens, cheme commands, checks after the run) |
 | `layout/site-plan.yaml` | `site_plan` (site box, areas, roads, pipe racks, `separations`, `max_unsupported_length`) |
 | `layout/building.yaml` | `building` (buildings, levels, column grid) |
 | `layout/equipment-placement.yaml` | `placement` (tag, position, rotation, `mount` building/structure level, nozzle overrides, `access` platforms; size only without dimensions) |

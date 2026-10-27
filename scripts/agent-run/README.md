@@ -23,6 +23,9 @@ The prompt's `THIS STAGE` comes from `cheme status --json` (sheets already drawn
 assigned again; failing gates), `FIX FIRST` from the previous review's `carry_over` and the open
 review findings. Outputs go to `build/agent-run/<stage>/`: `prompt.txt`, `launch.json`,
 `result.json`, `stderr.log`, the reviewer's `review.json` and, last, `done` (wait for it).
+After each session the runner writes a run record with `cheme runs record ... --checks --commit`
+(`runs/<run-id>/`, committed alone; see `runs/README.md`), and starts the session with
+`CHEME_RUN_RECORD=off` so that the session's own hooks do not record it a second time.
 `--total-cap USD` keeps a chain of sessions inside one total (it sums `total_cost_usd`, never
 `num_turns`); `extra_tools` in `stages.json` or `--extra-tool` allow more for one stage. Check
 each stage's work yourself (`cheme validate`, `check`, the renders) before merging: a

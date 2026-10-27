@@ -22,8 +22,14 @@ The prompt is built from the repository, not from a plan written in advance:
 
 Everything a run produces goes to ``build/agent-run/<stage>/`` (``--out``): ``prompt.txt``,
 ``launch.json`` (command, versions, time, cost), ``result.json`` (Claude Code's JSON output),
-``stderr.log`` and, last, ``done`` (``exit N``: wait for this file, not for a process). Copy it
-into the run record (``docs/agent-design-run.md`` in cheme-as-code).
+``stderr.log`` and, last, ``done`` (``exit N``: wait for this file, not for a process).
+
+Each session leaves a run record in ``runs/<run-id>/`` (``docs/agent-design-run.md`` in
+cheme-as-code): the runner notes HEAD before the session, starts Claude Code with
+``CHEME_RUN_RECORD=off`` (so the session's own hooks record nothing) and afterwards calls
+``cheme runs record --kind agent --slug <stage> --task-file prompt.txt --cost <total_cost_usd>
+--budget <cap> --start-commit <sha> --checks --commit``, which commits the run folder alone.
+A failed record is reported and does not change the exit code.
 
 ``--total-cap USD`` keeps a chain of sessions inside one total: the cap of this session shrinks
 to what is left after the ``total_cost_usd`` of every earlier ``result.json`` under the output
@@ -42,6 +48,7 @@ import shutil
 import string
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -159,6 +166,60 @@ def summary(result: Path) -> dict:
     }
 
 
+def record_run(args: argparse.Namespace, out: Path, budget: float, start_commit: str) -> str | None:
+    """``cheme runs record`` for the finished session: the run folder, or None (reported)."""
+    try:
+        data = json.loads((out / "result.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        data = None
+    if not isinstance(data, dict) or not data.get("session_id"):
+        print(f"{args.stage} {args.mode}: no session_id in result.json, no run record written")
+        return None
+    slug = args.stage if args.mode == "stage" else f"review-{args.stage}"
+    command = [
+        tool("CHEME", "cheme"),
+        "runs",
+        "record",
+        "--session-id",
+        str(data["session_id"]),
+        "--kind",
+        "agent",
+        "--slug",
+        slug,
+        "--task-file",
+        str(out / "prompt.txt"),
+        "--budget",
+        f"{budget:g}",
+        "--checks",
+        "--commit",
+    ]
+    if data.get("total_cost_usd") is not None:
+        command += ["--cost", str(data["total_cost_usd"])]
+    if start_commit:
+        command += ["--start-commit", start_commit]
+    if isinstance(data.get("subtype"), str):
+        command += ["--result", data["subtype"]]
+    report = None
+    if isinstance(data.get("result"), str) and data["result"].strip():
+        with tempfile.NamedTemporaryFile(
+            "w", suffix=".md", delete=False, encoding="utf-8"
+        ) as handle:
+            handle.write(data["result"].strip() + "\n")
+            report = handle.name
+        command += ["--report-file", report]
+    try:
+        done = run(command)
+    finally:
+        if report:
+            os.unlink(report)
+    if done.returncode != 0:
+        print(f"{args.stage} {args.mode}: run record failed: {done.stderr.strip()}")
+        return None
+    folder = (done.stdout.strip().splitlines() or [""])[0]
+    print(f"{args.stage} {args.mode}: run record {folder}")
+    return folder
+
+
 def fill(template: Path, values: dict[str, str]) -> str:
     return string.Template(template.read_text(encoding="utf-8")).safe_substitute(values)
 
@@ -213,11 +274,16 @@ def launch(
         print(f"\n(dry run: would run {' '.join(shown)}; prompt in {out / 'prompt.txt'})")
         return 0
     result, log = out / "result.json", out / "stderr.log"
+    # the session's own SessionStart/SessionEnd hooks record nothing: the runner records it
+    env = dict(os.environ, CHEME_RUN_RECORD="off")
     with result.open("w", encoding="utf-8") as stdout, log.open("w", encoding="utf-8") as stderr:
-        code = subprocess.run(command, stdout=stdout, stderr=stderr, check=False).returncode
+        code = subprocess.run(
+            command, stdout=stdout, stderr=stderr, env=env, check=False
+        ).returncode
     meta["finished"] = datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds")
     meta["exit_code"] = code
     meta.update(summary(result))
+    meta["run_record"] = record_run(args, out, budget, meta["head"])
     (out / "launch.json").write_text(json.dumps(meta, indent=2) + "\n", encoding="utf-8")
     done.write_text(f"exit {code}\n", encoding="utf-8")
     cost = meta.get("total_cost_usd")
