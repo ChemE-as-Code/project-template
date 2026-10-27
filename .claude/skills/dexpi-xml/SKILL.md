@@ -216,14 +216,17 @@ there), and `fragment equipment` adds a SHAPE part by itself.
 Scales that stay legible on A3: equipment 1.0 (pumps 15 mm, vessels 20 x 25 mm; columns ScaleX
 1.0, ScaleY for the height), valves 0.4 (`--scale 0.5` for check valves and crowded areas, never
 below 0.4), actuators 0.4-0.45, nozzles 0.8 x 0.4, instrument bubbles 1.0, off-page arrows 0.7,
-tees 0.0001 (invisible). `shapes.md` gives each added shape's scale.
+tees 0.0001 (invisible). `shapes.md` gives each added shape's scale, its ISO 10628-2
+registration number and its ports (where nozzles and pipe ends go, at scale 1). Most added
+shapes are not in `empty-sheet.xml`: `cheme fragment shape NAME --sheet ...` (or the SHAPE part
+of an equipment/valve fragment) adds one to the sheet's catalogue on first use.
 
 When a symbol is truly missing: use the nearest catalogue shape that means the same thing
 (ISO 10628-2 meaning, not looks: a cooler is an exchanger shape, not a pump), and say what it
 stands for in a `note` or the review. Only if none fits, add a Shape named after its ISO
-meaning (`STEAM_TRAP_SHAPE`), with the name as its `SymbolRegistrationNumber` as the reference
-does: never invent a registration number, and never use one shape for things of different
-meaning.
+meaning (`VORTEX_BREAKER_SHAPE`), with the name as its `SymbolRegistrationNumber` as the
+reference does: never invent a registration number, and never use one shape for things of
+different meaning.
 
 ### Recipes
 
