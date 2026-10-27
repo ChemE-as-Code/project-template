@@ -154,7 +154,13 @@ pass-through, mixer and splitter balances; simulate covers the energy balance an
   verified (DWSIM 9.0.5, live tests): the reference state (each component's ideal gas at
   298.15 K = 0, no formation enthalpies) for Peng-Robinson, PR78 and SRK, not for NRTL; the
   duty identity for vapour ammonia synthesis at 10 bar, with conversion, equilibrium and
-  Gibbs reactors under Peng-Robinson and the conversion reactor under PR78 and SRK. Other
+  Gibbs reactors under Peng-Robinson and the conversion reactor under PR78 and SRK; and a
+  liquid-phase conversion reactor (MTBE synthesis, 298.15 K, 2000 kPa) under all three: a
+  liquid's enthalpy is the package's departure from the ideal gas (about minus its heat of
+  vaporization), so liquid streams need no correction. The liquid reaction heat under
+  Peng-Robinson is within 2 % of a calorimetric value (10 % asserted) but about 17 % from a
+  second one (published values span -33.8 to -39.8 kJ/mol); that accuracy is shown for this
+  one reaction only, and the closure checks conservation, not accuracy. Other
   packages leave reactors unsupported. `sim-formation-data` compares the project's formation
   enthalpies with DWSIM's: a warning (and `predictive.formation-data` fails) where values
   declared in `materials.yaml` make a reaction heat that differs by more than 1 % of it (the
@@ -182,7 +188,13 @@ reactors (each with its own reaction set). Their spec is `mode` (`isothermal`, `
 from the reaction's `equilibrium_constant`, else from DWSIM's own formation data, so it may
 differ from `cheme process propagate` (ideal gas, the components' `ideal_gas` data): that
 deviation is the check. A reactor with one outlet must stay all vapour (the run says when
-liquid forms); give it a `liquid` outlet otherwise.
+liquid forms); give it a `liquid` outlet otherwise (a liquid-phase reactor: `vapor` and
+`liquid` outlets). DWSIM converts a liquid-phase reaction's key component in the inlet's
+liquid phase only: an inlet the package splits (Peng-Robinson and SRK can split a polar and a
+hydrocarbon liquid into a spurious "vapour" far above their vapour pressures) reaches less
+than the declared conversion, and nothing reports it (core#371). Check the reactor inlet's
+vapour fraction in the record and compare the outlet with the conversion; bring the inlet to
+one liquid (temperature) first.
 
 A fixed bed (`reactor: pfr` with `bed:` and `catalyst:`, rate laws in `reactions.yaml`) is a
 `kinetic_pfr` unit, **coupled as an external unit, not a native DWSIM reactor**. DWSIM 9.0.5's

@@ -95,8 +95,12 @@ review.
      landing reaches the floor (within 0.3 m in plan; a ladder's top within 0.8 m), its foot
      stands on the floor below, and that floor has its own connected way down; proposals count
      once pinned; two ways count only when they arrive at least `escape_remote_fraction`, half
-     the floor's diagonal, apart, so two ladders side by side are one; an item's platform
-     whose far end is more than `dead_end_m`, 7.5 m, along it from its only ladder),
+     the floor's diagonal, apart, so two ladders side by side are one; a dead end longer than
+     `dead_end_m`, 7.5 m, on any floor or platform: the walk in plan from a point of it in one
+     direction only, to its only way down or to where two of its ways lie 45 degrees or more
+     apart, so a long platform with both ways at one end fails until a way stands at its far
+     end; an item's platform whose far end is more than `dead_end_m` along it from its only
+     ladder),
      `layout-access-unconnected` (a declared stair or ladder that does
      not reach the levels it names: a stair tower beside the platforms serves none of them; an
      item platform's ladder whose foot stands on no floor or whose top misses its platform),

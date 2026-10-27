@@ -103,7 +103,10 @@ What `fill` calculates:
 - **Columns**: Fenske, Underwood, Gilliland (Molokanov) with volatilities from the adapter at the
   top dew and bottom bubble points; keys `light_key`/`heavy_key` (a binary needs none);
   `reflux_ratio` or `reflux_ratio_factor`; trays `ceil((N - 1) / tray_efficiency)` (the
-  reboiler is a stage, not a tray; a total condenser assumed). A component absent
+  reboiler is a stage, not a tray), `ceil((N - 2) / tray_efficiency)` with a partial
+  condenser (a stage too). The condenser type is `condenser_type` (`total`, `partial`, `none`),
+  else the linked step's `condenser` in `process/simulation.yaml`; without either a total
+  condenser is ASSUMED and the source says so. A component absent
   from a product (a sharp split) takes its infinite-dilution K (fugacity coefficients). The diameter stays
   `TBD`: no flooding correlation is in the package.
 - **Vessels**: volume `pi/4 D^2 L` from the sheet's `dimensions`: the inside diameter, else
