@@ -36,7 +36,8 @@ items assigned to it; do not create empty frames to silence it.
 
 ## Workflow and tools
 
-1. **Plan on paper first.** Write the sheet's content as a short list in `DESIGN.md`: equipment
+1. **Plan on paper first.** For what belongs around a pump, compressor, vessel, exchanger, control
+   valve, relief device or instrument, see the hub skill `pid-design`. Write the sheet's content as a short list in `DESIGN.md`: equipment
    (tag, class, the PFD step it implements), lines (number, from, to, DN, the PFD stream it
    carries), valves per line, instruments. Decide a rough
    layout: process flow left to right, equipment in a row at mid height, the equipment-data
@@ -163,5 +164,6 @@ The layout and sheet split (step 1); approver and checker go in only after sign-
 
 ## References
 
-Skills `dexpi-xml`, `pid-edit`, `lists-sync`, `process-design`; `scripts/README.md`,
+Skills `dexpi-xml`, `pid-edit`, `lists-sync`, `process-design`, `pid-design` (engineering content),
+`pid-review-design-review` (review before issue); `scripts/README.md`,
 `scripts/example_draft.py`.

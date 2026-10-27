@@ -55,6 +55,31 @@ record.
    actions-closed, no-example, reviewed]` as the stage needs, and `kind: review, topic: hazop,
    require_kind: [human]`. `cheme check` evaluates them.
 
+## Comparing a drawing with a study
+
+Engineering guidance only; core has no calculation for this. Two documents, each with real
+authority and real limits; most poor comparisons borrow one's authority for the other's question.
+This split is assembled from CCPS, *Guidelines for Engineering Design for Process Safety* (AIChE),
+chapter 10, and Moran, *An Applied Guide to Process and Plant Design* (2015), chapters 3, 15 and
+16, rather than stated by them: treat it as a considered argument.
+
+- The P&ID is the study's master document (Moran 3): it shows what exists, what connects to what
+  and what is missing from an arrangement. It is one input beside the control philosophy (including
+  failure states), design calculations, equipment specifications, the general arrangement and the
+  team.
+- A drawing cannot settle: independence of a layer from its cause (see `safeguard-crediting`);
+  whether a device is sized for the governing case (`relief-scenarios`); whether a valve reaches its
+  drawn fail position; whether a function meets an integrity target; whether a detector detects the
+  deviation; spatial escalation; phases where protection is absent (start-up, shutdown,
+  maintenance); whether the team considered a scenario at all.
+- A study does not ensure that all hazards were found (CCPS 10.1.5). "The study found no hazard"
+  is not "there is no hazard", and "adequate because the study said so" is unsupported. Hazard
+  evaluation recurs across design, construction and operation.
+- A study is bound to the revision it analysed (`analysed:`). Before saying a drawing contradicts
+  it, confirm both describe the same revision; otherwise report a possible version gap.
+- Report three groups: what the drawing confirms, what it contradicts (offered as a question for the
+  team unless the drawing alone settles it), and what it cannot speak to, usually the largest.
+
 ## Validation and failure handling
 
 - Every finding of `cheme validate` names the study file, the line, the rule and a hint; the
@@ -81,3 +106,4 @@ review itself are the team's and the reviewer's. Never write a reviewer's name, 
 
 - `safety/README.md`, `reviews/README.md`; skills `review`, `hazop-study`, `hazop-assessment`.
 - IEC 61882:2016, clause on recording and follow-up.
+- CCPS, *Guidelines for Engineering Design for Process Safety*, chapter 10 (10.1.4, 10.1.5); Moran 2015, chapters 3, 15, 16 (the drawing-versus-study split is the skill's own assembly; needs review before operational use). Skills `safeguard-crediting`, `relief-scenarios`, `process-safety`.

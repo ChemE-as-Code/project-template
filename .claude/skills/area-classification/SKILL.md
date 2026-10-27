@@ -75,6 +75,74 @@ oxygen, inert gases or flammables; when `cheme validate` or `layout build` repor
    (Layout 3D: zones as transparent volumes). Check that every vent and relief outlet of the
    P&IDs has a zone or a reason why not.
 
+### Reading the P&IDs for release sources (engineering guidance only; core has no calculation for this)
+
+Use this before choosing `release_grade` and `source_kind` for the sources in step 2. A zone follows
+from how often a source releases and how well the release is diluted (Bottrill, Cheyne and
+Vijayaraghavan, *Practical Electrical Equipment and Installations in Hazardous Areas*, Newnes 2005,
+3.5, 3.8). That book describes a method since superseded: only its principles are used here, no
+extents; extents come from the site's adopted standard.
+
+- Grade: continuous (present always or for long periods, e.g. the vapour space of a vented
+  fixed-roof tank), primary (expected in normal operation, e.g. a seal expected to weep, a routinely
+  opened sample point), secondary (only on failure, e.g. a gasketed joint). The same item can be
+  primary or secondary; that is a property of design and service, not of the symbol. As a starting
+  point only, continuous tends toward zone 0, primary toward 1, secondary toward 2 (dusts 20, 21,
+  22), then ventilation and release character move it (3.6, 3.8.2). The zone decision is the
+  classification's. Non-routine maintenance under permit is not a source; anything opened routinely
+  (filters, strainers, pig traps) is (3.2, 3.8.1).
+- Ventilation dilutes a release and, if good and reliable enough, changes the zone type. Reliability
+  shows on drawings as standby fans starting automatically, ventilation-failure detection or a
+  process trip on loss of ventilation (3.8.10).
+- Design to have fewer and smaller releases: prefer equipment whose releases are only secondary, keep
+  unavoidable primary releases small (3.10).
+- Walk items in flammable or combustible service only (gas or vapour, liquid at or above flash point or
+  as mist, combustible dust); joints on cooling water, plant air or steam are not sources (3.4.1,
+  3.8.1). An all-welded line is not counted as a source; flanges and screwed joints, instrument
+  connections, pump and compressor seals (with seal-oil pots, breathers, distance-piece vents), valve
+  stems, sample points, drains (water draw-offs from hydrocarbon vessels), vents, breathers, relief
+  outlets and anything opened in normal operation are (3.13, 3.14).
+- Things that make a release smaller or rarer: discharge of vents and reliefs to flare or recovery
+  rather than atmosphere (a light gas may be released high enough to disperse; a heavy gas needs
+  enough release velocity to self-dilute at low flow too, else flare; 3.14.3); closed or cooled
+  sampling, with liquefied flammable gas sampled only into a closed system vented to a safe place; a
+  tundish to a sealed drain keeps liquid off the ground but still gives off vapour; closed drains with
+  double block valves in liquefied-gas service; restricted bore on sample points and drains; mechanical
+  seals rather than packing on hot flammable liquids and liquefied gases; excess-flow valves and
+  self-sealing couplings on loading connections; vacuum operation of dust systems. Ask why each
+  atmospheric discharge goes to atmosphere and where (Toghraei, *P&ID Development*, Wiley 2019,
+  12.16.2, 16.11; Karre, *P&ID: A Stepwise Approach*, De Gruyter 2023, 11.4).
+- Things that protect equipment or report a release but shrink nothing: flame arresters (the vent is
+  still a source), explosion vents (ask where they point) and fast isolation on dust equipment, and
+  fixed gas detection (ask what each alarm does and whether that action is credited; detector
+  positions are on the plot plan, so a missing detector is not a P&ID defect).
+- An open liquefied-gas sample point or drain is worth raising whatever the classification says: the
+  operator stands in a flashing vapour cloud with cold burns as well as fire. A combustible vent
+  or relief to atmosphere (other than tank breathing), or an open sample of a volatile
+  hydrocarbon with no cooler or closed connection, is a question about the classification it implies.
+
+Pressurised and purged enclosures (analyser house, control room) are kept safe by pressurisation
+above the surroundings or by a purge flow that dilutes an internal release (Bottrill 9.1, 9.2).
+Check them as a drawn system (9.4 to 9.7): supply from a safe area, uncontaminated and reliable,
+with standby where needed (air for rooms, since inert gas asphyxiates; inert for small enclosures
+with an internal release); proof the inside is gas-free before energising (usually several volume
+changes, flow-proven and timed; some designs use a gas test; an enclosure with zone-rated contents
+needs neither; the certificate says which); monitoring that proves the protection (differential
+pressure or outlet flow; fan-rotation and supply-pressure signals can read healthy after the
+protection has failed, so they suit alarm duty only); the action on loss (alarm or disconnection)
+depends on the zone and on whether contents spark in normal operation, and disconnection that
+creates a dangerous process condition needs a specific answer; an outlet that cannot recirculate to
+the inlet and whose discharge does not change the classification where it lands; for an analyser,
+the sample containment inside (a limited leak can be diluted if air flow is sized for that leak,
+a restriction alone proves nothing; an unlimited leak usually needs inert gas, only where the sample
+has no oxidant of its own, the release is gas and the exhaust leaves occupied space). The monitoring
+devices, controller and purge valve sit in the hazardous area until the purge completes, so their own
+protection is a datasheet matter. Equipment gas group and temperature class are unrelated (hydrogen is
+hardest for sparks yet has a high ignition temperature; Bottrill 4.5, 4.6): take them from the current
+standard's tables and the hazardous-materials schedule. First rule: keep electrical equipment out of
+the hazardous area where practical (4.1). All of this guides questions; zones, gas groups, Ex ratings
+and the purge design belong to the classification and datasheets.
+
 ## Validation and failure handling
 
 - `cheme validate` checks the file against `cheme schema zones` (a zone needs a shape or
@@ -108,4 +176,8 @@ consequence modelling are out of scope here; their results come in as explicit v
 - `cheme schema zones`, `layout/README.md`, `docs/framework/layout-model.md` (zones)
 - the radius table `domains/safety/data/release-radii.yaml` (bundled with cheme-as-code),
   `domains/safety/area_classification.py`
-- skills `layout-yaml`, `structures-access`, `review`
+- Bottrill, Cheyne and Vijayaraghavan 2005, chapters 3, 4, 9; Toghraei 2019, 12.16.2 and 16.11;
+  Karre 2023, 11.4. The principles in "Reading the P&IDs for release sources" are re-expressed general
+  method; the superseded zone-extent figures were not carried over; operational use needs review by a
+  competent person.
+- skills `layout-yaml`, `structures-access`, `review`, `process-safety`, `relief-scenarios`

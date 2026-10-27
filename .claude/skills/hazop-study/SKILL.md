@@ -105,4 +105,5 @@ plant behaves.
 - `safety/README.md` (file format, workflow, commands); `cheme schema hazop-study`.
 - IEC 61882:2016, Hazard and operability studies (HAZOP studies) - Application guide.
 - Skills `hazop-assessment` (ratings and bands), `hazop-review` (review and revisions),
-  `review` (review records).
+  `review` (review records), `hazop-equipment-causes` (deviations by equipment),
+  `safeguard-crediting` (what may be credited), `relief-scenarios`, `process-safety` (hub).
