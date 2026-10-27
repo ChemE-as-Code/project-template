@@ -26,7 +26,9 @@ approved_by: <name>                # optional: a human who approved a self revie
 branch, where the stage's sign-off takes effect.
 
 A review gate fails when a file of `scope` changed after `reviewed_commit`, so a review always
-covers the drawings as they are.
+covers the drawings as they are. A change of nothing but digests (full sha256 fingerprints or
+commit ids, such as the model fingerprint in a regenerated `layout/lifting-study.md`) is not a
+change: the review stays current.
 
 Optionally, `basis:` lists other files the review rests on without reviewing them, each with the
 revision used (a commit sha, or `sha256:<hex>` of the file) and how the review relates to it

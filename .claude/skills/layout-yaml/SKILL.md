@@ -140,7 +140,9 @@ A dimension not known yet may be estimated: mark it `notes: ASSUMED ...` (step 2
    operator, remote mount): skill `structures-access`.
 7f. **Crane charts** (`layout/crane-chart.yaml`, kind `crane_chart`, optional): the load chart
    of a crane the project has chosen (radius against capacity, with its source), so
-   `cheme layout lifting` checks each heavy lift's capacity; skill `structures-access`. A
+   `cheme layout lifting` checks each heavy lift's capacity; skill `structures-access`. Once
+   the study is written (`--write`, commit it), `cheme validate` reports
+   `layout-lifting-study-outdated` until it is rewritten after a rebuild. A
    machine train whose heaviest maintenance lift is one part (the motor that sets a building
    crane) gives it as `dimensions.lift_weight` in the equipment list (ASSUMED with its basis
    until the vendor's).

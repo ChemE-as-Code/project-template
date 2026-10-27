@@ -158,7 +158,7 @@ established capability: say so when reporting it, and do not claim it as validat
 | Evaporation | predictive | tested | `heater`, `flash` |  | evaporator rating |
 | (Steam) stripping | predictive | untested | `distillation_column` |  |  |
 | Absorption | predictive | untested | `distillation_column` |  | rate-based and reactive absorption |
-| Liquid-liquid extraction | specified split | untested | `component_separator` |  | liquid-liquid equilibrium |
+| Liquid-liquid extraction | predictive | tested | `extraction` (`cheme process extract`) |  | solvent regeneration (a separate unit); in the flowsheet still a `component_separator` (specified split) citing the extraction result; qualified only for a benchmarked LLE system (`--systems`) |
 | Membrane separation | specified split | untested | `component_separator` |  | permeance, selectivity, area |
 | Adsorption | specified split | tested | `component_separator` |  | isotherms, breakthrough, PSA/TSA cycle |
 | Crystallization | specified split | untested | `component_separator` |  | solid-liquid equilibrium, crystallizer |
@@ -167,6 +167,14 @@ established capability: say so when reporting it, and do not claim it as validat
 
 Report the representation of the selected method beside the ranking; when it is a specified
 split or none, say so in `DESIGN.md` and name the source of the split.
+
+For liquid-liquid extraction, write the extractor into `process/extraction.yaml` and run
+`cheme process extract` (feed, solvent feed, stages, temperature, carrier/solute/solvent, a
+bundled LLE system or `model:` with sourced NRTL parameters for every pair). Report its
+`qualification`: `qualified` only for a bundled system inside its benchmarked range; with
+your own parameters it is a predictive calculation, not a validated one. A refusal for one
+liquid means the feed and solvent have no two-phase region: change the solvent or ratio, do
+not fall back to an invented split. Model the solvent regeneration as its own unit.
 
 ## Required human judgment
 
