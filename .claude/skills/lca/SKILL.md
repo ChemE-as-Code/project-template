@@ -105,8 +105,8 @@ gate `lca` fails.
    CO2, and the product's biogenic and fossil carbon content. Read `cheme.lca-carbon-*`; never
    declare a fossil point source biogenic. `--pact FILE` exports it for a customer.
 5. **Uncertainty and data quality.** Every dataset exchange carries a pedigree (the default
-   rule's, from its provenance and origin, the declared location and year, and the design's
-   maturity); the Monte Carlo uses its lognormal where neither the exchange nor
+   rule's, from its provenance and origin, the declared location and year, and the design
+   maturity of `process.yaml`); the Monte Carlo uses its lognormal where neither the exchange nor
    `uncertainty.defaults` give one. Override a pedigree only with a `reason` (e.g. a metered
    value). Give `uncertainty:` with defaults by provenance where the study knows better, and
    the known uncertainties of the main flows and factors. Report the 95 % interval with the

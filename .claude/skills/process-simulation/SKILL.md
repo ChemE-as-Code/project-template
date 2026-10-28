@@ -198,9 +198,13 @@ liquid forms); give it a `liquid` outlet otherwise (a liquid-phase reactor: `vap
 `liquid` outlets). DWSIM converts a liquid-phase reaction's key component in the inlet's
 liquid phase only: an inlet the package splits (Peng-Robinson and SRK can split a polar and a
 hydrocarbon liquid into a spurious "vapour" far above their vapour pressures) reaches less
-than the declared conversion, and nothing reports it (core#371). Check the reactor inlet's
-vapour fraction in the record and compare the outlet with the conversion; bring the inlet to
-one liquid (temperature) first.
+than the declared conversion (a `vapor` reaction likewise converts only the inlet's vapour,
+`mixed` the whole inlet). simulate reports each conversion reactor's `extents` and
+`conversions` from DWSIM's stream flows (summary and record) and raises
+`sim-conversion-mismatch` (error) when a key component's conversion is more than 0.001 off the
+declared one; with several reactions on one key the declared conversions add up on its inlet
+flow. Bring the inlet to one phase (temperature or pressure ahead of the reactor) or declare
+the reaction `phase: mixed`; a co-reactant that runs out before the key also falls short.
 
 A fixed bed (`reactor: pfr` with `bed:` and `catalyst:`, rate laws in `reactions.yaml`) is a
 `kinetic_pfr` unit, **coupled as an external unit, not a native DWSIM reactor**. DWSIM 9.0.5's
