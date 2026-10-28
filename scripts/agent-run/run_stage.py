@@ -28,7 +28,8 @@ Each session leaves a run record in ``runs/<run-id>/`` (``docs/agent-design-run.
 cheme-as-code): the runner notes HEAD before the session, starts Claude Code with
 ``CHEME_RUN_RECORD=off`` (so the session's own hooks record nothing) and afterwards calls
 ``cheme runs record --kind agent --slug <stage> --task-file prompt.txt --cost <total_cost_usd>
---budget <cap> --start-commit <sha> --checks --commit``, which commits the run folder alone.
+--budget <cap> --start-commit <sha> --checks --commit --runner-name run_stage.py``, which
+commits the run folder alone (the runner's commit is the plant repository's, the start commit).
 A failed record is reported and does not change the exit code.
 
 ``--total-cap USD`` keeps a chain of sessions inside one total: the cap of this session shrinks
@@ -192,6 +193,8 @@ def record_run(args: argparse.Namespace, out: Path, budget: float, start_commit:
         f"{budget:g}",
         "--checks",
         "--commit",
+        "--runner-name",
+        "run_stage.py",
     ]
     if data.get("total_cost_usd") is not None:
         command += ["--cost", str(data["total_cost_usd"])]
