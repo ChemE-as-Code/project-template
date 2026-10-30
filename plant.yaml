@@ -2,7 +2,7 @@
 schema: cheme/plant/v1
 name: "My plant"
 # The oldest cheme-as-code this repository works with; an older one stops with an upgrade hint.
-requires: cheme-as-code>=1.0
+requires: cheme-as-code>=1.1
 description: ""
 units: SI
 stage: concept
